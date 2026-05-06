@@ -2526,16 +2526,45 @@
   }
 
   let homeSearchQuery = '';
+  let _searchBound = false;
 
   function renderHomeScreen() {
     const container = document.getElementById('recent-projects');
     const allIndex = getProjectIndex().sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
     if (allIndex.length === 0) {
+      _searchBound = false;
       container.innerHTML = '<div class="home-empty">还没有项目，导入歌词开始吧</div>';
       return;
     }
 
-    // Filter by search
+    // Ensure search bar exists (only create once)
+    if (!document.getElementById('project-search')) {
+      _searchBound = false;
+      container.innerHTML = `<div class="recent-header">我的项目 <span class="project-group-count" id="project-count">${allIndex.length}</span></div>
+        <input class="project-search" id="project-search" placeholder="搜索歌曲、学生…">
+        <div id="project-list"></div>`;
+    }
+    // Update count
+    const countEl = document.getElementById('project-count');
+    if (countEl) countEl.textContent = allIndex.length;
+
+    // Bind search events once
+    if (!_searchBound) {
+      _searchBound = true;
+      const searchEl = document.getElementById('project-search');
+      let composing = false;
+      searchEl.addEventListener('compositionstart', () => { composing = true; });
+      searchEl.addEventListener('compositionend', () => { composing = false; homeSearchQuery = searchEl.value; renderProjectList(); });
+      searchEl.addEventListener('input', () => { if (!composing) { homeSearchQuery = searchEl.value; renderProjectList(); } });
+    }
+
+    renderProjectList();
+  }
+
+  function renderProjectList() {
+    const listEl = document.getElementById('project-list');
+    if (!listEl) return;
+    const allIndex = getProjectIndex().sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
     const q = homeSearchQuery.toLowerCase();
     const index = q ? allIndex.filter(p =>
       (p.name||'').toLowerCase().includes(q) ||
@@ -2543,15 +2572,8 @@
       (p.lessonDate||'').toLowerCase().includes(q)
     ) : allIndex;
 
-    // Search bar
-    let html = `<div class="recent-header">我的项目 <span class="project-group-count">${allIndex.length}</span></div>`;
-    html += `<input class="project-search" id="project-search" placeholder="搜索歌曲、学生…" value="${escHtml(homeSearchQuery)}">`;
-
     if (index.length === 0) {
-      html += '<div class="home-empty">没有匹配的项目</div>';
-      container.innerHTML = html;
-      // Restore focus to search
-      setTimeout(() => { const s = document.getElementById('project-search'); if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }, 0);
+      listEl.innerHTML = '<div class="home-empty">没有匹配的项目</div>';
       return;
     }
 
@@ -2562,27 +2584,26 @@
       if (!groups[key]) groups[key] = [];
       groups[key].push(p);
     });
-
-    // Sort groups: named students first (alphabetically), then unnamed
     const groupKeys = Object.keys(groups).sort((a, b) => {
       if (!a && b) return 1;
       if (a && !b) return -1;
       return a.localeCompare(b, 'zh');
     });
-
-    // If only one group or searching, render flat list
     const useGroups = !q && groupKeys.length > 1;
 
+    let html = '';
     groupKeys.forEach(key => {
       if (useGroups) {
         html += `<div class="project-group"><div class="project-group-title">${key ? escHtml(key) : '未分组'} <span class="project-group-count">${groups[key].length}</span></div>`;
       }
       html += '<div class="recent-list">';
       groups[key].forEach(p => {
-        const date = new Date(p.updatedAt || p.createdAt);
-        const dateStr = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
-        const metaParts = [p.lessonDate, dateStr].filter(Boolean);
-        if (!useGroups && p.studentName) metaParts.unshift(p.studentName);
+        const fmtDate = (ts) => { if (!ts) return ''; const d = new Date(ts); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+        const metaParts = [];
+        if (!useGroups && p.studentName) metaParts.push(p.studentName);
+        if (p.lessonDate) metaParts.push(p.lessonDate);
+        if (p.createdAt) metaParts.push('创建 ' + fmtDate(p.createdAt));
+        if (p.updatedAt && p.updatedAt !== p.createdAt) metaParts.push('修改 ' + fmtDate(p.updatedAt));
         html += `<div class="recent-item" onclick="loadProject('${p.id}')">
           <div class="recent-item-icon">🎵</div>
           <div class="recent-item-info">
@@ -2595,20 +2616,7 @@
       html += '</div>';
       if (useGroups) html += '</div>';
     });
-
-    container.innerHTML = html;
-    // Bind search events with IME support
-    const searchEl = document.getElementById('project-search');
-    if (searchEl) {
-      let composing = false;
-      searchEl.addEventListener('compositionstart', () => { composing = true; });
-      searchEl.addEventListener('compositionend', () => { composing = false; homeSearchQuery = searchEl.value; renderHomeScreen(); });
-      searchEl.addEventListener('input', () => { if (!composing) { homeSearchQuery = searchEl.value; renderHomeScreen(); } });
-      if (q) {
-        searchEl.focus();
-        searchEl.setSelectionRange(searchEl.value.length, searchEl.value.length);
-      }
-    }
+    listEl.innerHTML = html;
   }
 
   function deleteProjectConfirm(id) {
@@ -3135,6 +3143,74 @@
   }
   function deleteAnnotation(id) { annotations=annotations.filter(a=>a.id!==id); closeAnnRemoveMenu(); renderLyrics(); saveState(); }
 
+  // Remap annotations when lyrics are edited — preserve marks on surviving text
+  function remapAnnotations(oldText, newText) {
+    if (!oldText || !newText) { annotations=[]; sections=[]; lineNotes=[]; return; }
+
+    // Character-level LCS to build oldIndex → newIndex mapping
+    const m = oldText.length, n = newText.length;
+    // Use space-optimized LCS backtrack via Hirschberg-lite (row-by-row)
+    // For typical lyrics (<3000 chars), full table is fine
+    const dp = [];
+    for (let i = 0; i <= m; i++) { dp[i] = new Uint16Array(n + 1); }
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        if (oldText[i-1] === newText[j-1]) dp[i][j] = dp[i-1][j-1] + 1;
+        else dp[i][j] = dp[i-1][j] > dp[i][j-1] ? dp[i-1][j] : dp[i][j-1];
+      }
+    }
+    const oldToNew = {};
+    let i = m, j = n;
+    while (i > 0 && j > 0) {
+      if (oldText[i-1] === newText[j-1]) { oldToNew[i-1] = j-1; i--; j--; }
+      else if (dp[i-1][j] >= dp[i][j-1]) i--;
+      else j--;
+    }
+
+    // Remap char-based annotations
+    annotations = annotations.map(a => {
+      const oldStart = a.charIndex;
+      const len = a.length || 1;
+      const surviving = [];
+      for (let k = 0; k < len; k++) {
+        const nIdx = oldToNew[oldStart + k];
+        if (nIdx !== undefined) surviving.push(nIdx);
+      }
+      if (surviving.length === 0) return null;
+      a.charIndex = surviving[0];
+      a.length = surviving[surviving.length - 1] - surviving[0] + 1;
+      return a;
+    }).filter(Boolean);
+
+    // Line-level LCS for sections and lineNotes
+    const oldLines = oldText.split('\n');
+    const newLines = newText.split('\n');
+    const lm = oldLines.length, ln = newLines.length;
+    const ldp = [];
+    for (let li = 0; li <= lm; li++) { ldp[li] = new Uint16Array(ln + 1); }
+    for (let li = 1; li <= lm; li++) {
+      for (let lj = 1; lj <= ln; lj++) {
+        if (oldLines[li-1] === newLines[lj-1]) ldp[li][lj] = ldp[li-1][lj-1] + 1;
+        else ldp[li][lj] = ldp[li-1][lj] > ldp[li][lj-1] ? ldp[li-1][lj] : ldp[li][lj-1];
+      }
+    }
+    const lineMap = {};
+    let li = lm, lj = ln;
+    while (li > 0 && lj > 0) {
+      if (oldLines[li-1] === newLines[lj-1]) { lineMap[li-1] = lj-1; li--; lj--; }
+      else if (ldp[li-1][lj] >= ldp[li][lj-1]) li--;
+      else lj--;
+    }
+    sections = sections.map(s => {
+      const nl = lineMap[s.lineIndex];
+      return nl !== undefined ? { ...s, lineIndex: nl } : null;
+    }).filter(Boolean);
+    lineNotes = lineNotes.map(note => {
+      const nl = lineMap[note.lineIndex];
+      return nl !== undefined ? { ...note, lineIndex: nl } : null;
+    }).filter(Boolean);
+  }
+
   function showAnnRemoveMenu(e, removables) {
     const menu = document.getElementById('ann-remove-menu');
     menu.innerHTML = '';
@@ -3317,14 +3393,33 @@
       processed = autoSplitLyrics(raw);
     }
     if (!processed) return;
-    songTitle=rawTitle; lyrics=processed;
+    songTitle=rawTitle;
     studentName=rawStudent; lessonDate=rawDate;
-    annotations=[]; sections=[]; selRange=null;
-    if (!isEditMode) {
-      lineNotes=[];
-      const ta=document.getElementById('notes-textarea');
-      if (ta) { ta.value=''; updateNotesCount(); }
-      createProject(songTitle);
+    selRange=null;
+    if (isEditMode) {
+      if (lyrics !== processed) remapAnnotations(lyrics, processed);
+      lyrics=processed;
+    } else {
+      lyrics=processed;
+      annotations=[]; sections=[];
+      // Check for existing project with same title + student
+      const existingIdx = getProjectIndex().find(p => p.name === songTitle && (p.studentName || '') === studentName);
+      if (existingIdx) {
+        if (confirm('已存在「' + songTitle + '」' + (studentName ? '（' + studentName + '）' : '') + '，是否覆盖？\n\n选"取消"将创建新副本。')) {
+          // Overwrite existing
+          currentProjectId = existingIdx.id;
+        } else {
+          lineNotes=[];
+          const ta=document.getElementById('notes-textarea');
+          if (ta) { ta.value=''; updateNotesCount(); }
+          createProject(songTitle);
+        }
+      } else {
+        lineNotes=[];
+        const ta=document.getElementById('notes-textarea');
+        if (ta) { ta.value=''; updateNotesCount(); }
+        createProject(songTitle);
+      }
     }
     hideToolbar(); closeModal(); renderLyrics(); renderSongTitleDisplay();
     document.getElementById('edit-lyrics-btn').style.display='';
@@ -3827,13 +3922,18 @@
     document.getElementById('login-screen').style.display = '';
     document.getElementById('home-screen').style.display = 'none';
     document.getElementById('editor-view').style.display = 'none';
+    document.getElementById('login-username').value = '';
+    document.getElementById('login-password').value = '';
     document.getElementById('login-error').textContent = '';
+    resetRegisterMode();
   }
 
   async function doLogin() {
+    if (registerMode) { resetRegisterMode(); return; }
     const username = document.getElementById('login-username').value.trim();
     const password = document.getElementById('login-password').value;
     const errEl = document.getElementById('login-error');
+    errEl.style.color = '';
     if (!username || !password) { errEl.textContent = '请输入用户名和密码'; return; }
     errEl.textContent = '';
     try {
@@ -3902,6 +4002,8 @@
     if (confirmInput) { confirmInput.style.display = 'none'; confirmInput.value = ''; }
     const btn = document.getElementById('register-btn');
     if (btn) btn.textContent = '注册';
+    const errEl = document.getElementById('login-error');
+    if (errEl) { errEl.textContent = ''; errEl.style.color = ''; }
   }
 
   function doLogout() {
@@ -3946,7 +4048,7 @@
               existing.lessonDate = data.lessonDate;
               existing.updatedAt = data.updatedAt;
             } else {
-              index.unshift({ id, name: data.name || data.songTitle || '未命名', createdAt: data.createdAt || data.updatedAt, updatedAt: data.updatedAt });
+              index.unshift({ id, name: data.name || data.songTitle || '未命名', studentName: data.studentName || '', lessonDate: data.lessonDate || '', createdAt: data.createdAt || data.updatedAt, updatedAt: data.updatedAt });
             }
             saveProjectIndex(index);
             if (currentProjectId === id) loadProject(id);
