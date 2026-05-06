@@ -7,10 +7,8 @@
   <link rel="icon" href="data:,">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <!-- Firebase SDK for cloud sync -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Supabase SDK for cloud sync -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600&family=ZCOOL+KuaiLe&family=ZCOOL+QingKe+HuangYou&family=Ma+Shan+Zheng&family=Liu+Jian+Mao+Cao&family=Long+Cang&family=Zhi+Mang+Xing&display=swap');
 
@@ -783,9 +781,23 @@
     .project-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.08); }
     .project-group { margin-bottom: 16px; }
     .project-group-title {
-      font-size: 12px; font-weight: 600; color: var(--text); padding: 4px 2px;
+      font-size: 12px; font-weight: 600; color: var(--text); padding: 6px 2px;
       margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+      cursor: pointer; user-select: none; transition: color 0.12s;
     }
+    .project-group-title:hover { color: var(--primary); }
+    .project-group-arrow {
+      font-size: 10px; transition: transform 0.2s; display: inline-block;
+    }
+    .project-group.collapsed .project-group-arrow { transform: rotate(-90deg); }
+    .project-group.collapsed .recent-list { display: none; }
+    .show-more-btn {
+      display: block; width: 100%; padding: 10px; margin-top: 8px;
+      border: 1px dashed var(--border); border-radius: 10px; background: none;
+      color: var(--muted); font-size: 12px; font-weight: 500; cursor: pointer;
+      font-family: inherit; transition: all 0.15s; text-align: center;
+    }
+    .show-more-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
     .project-group-count {
       font-size: 10px; font-weight: 500; color: var(--muted);
       background: #F1F0F9; padding: 1px 7px; border-radius: 10px;
@@ -1700,7 +1712,7 @@
     if (localStorage.getItem('lyricnote_state')) {
       migrateOldState();
     }
-    // Firebase auth will decide whether to show login or home screen
+    // Auth will decide whether to show login or home screen
     initCloudSync();
     document.addEventListener('click', onDocClick);
   }
@@ -2554,12 +2566,16 @@
       const searchEl = document.getElementById('project-search');
       let composing = false;
       searchEl.addEventListener('compositionstart', () => { composing = true; });
-      searchEl.addEventListener('compositionend', () => { composing = false; homeSearchQuery = searchEl.value; renderProjectList(); });
-      searchEl.addEventListener('input', () => { if (!composing) { homeSearchQuery = searchEl.value; renderProjectList(); } });
+      searchEl.addEventListener('compositionend', () => { composing = false; homeSearchQuery = searchEl.value; visibleCount = PAGE_SIZE; renderProjectList(); });
+      searchEl.addEventListener('input', () => { if (!composing) { homeSearchQuery = searchEl.value; visibleCount = PAGE_SIZE; renderProjectList(); } });
     }
 
     renderProjectList();
   }
+
+  const PAGE_SIZE = 20;
+  let visibleCount = PAGE_SIZE;
+  let collapsedGroups = {};
 
   function renderProjectList() {
     const listEl = document.getElementById('project-list');
@@ -2577,9 +2593,15 @@
       return;
     }
 
+    // When searching, show all results; otherwise paginate
+    const showAll = !!q;
+    const displayCount = showAll ? index.length : Math.min(visibleCount, index.length);
+    const displayIndex = index.slice(0, displayCount);
+    const hasMore = !showAll && index.length > displayCount;
+
     // Group by student
     const groups = {};
-    index.forEach(p => {
+    displayIndex.forEach(p => {
       const key = p.studentName || '';
       if (!groups[key]) groups[key] = [];
       groups[key].push(p);
@@ -2591,14 +2613,22 @@
     });
     const useGroups = !q && groupKeys.length > 1;
 
+    const fmtDate = (ts) => { if (!ts) return ''; const d = new Date(ts); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
+
     let html = '';
     groupKeys.forEach(key => {
+      const gid = key || '__ungrouped__';
+      const collapsed = collapsedGroups[gid];
       if (useGroups) {
-        html += `<div class="project-group"><div class="project-group-title">${key ? escHtml(key) : '未分组'} <span class="project-group-count">${groups[key].length}</span></div>`;
+        html += `<div class="project-group${collapsed ? ' collapsed' : ''}">
+          <div class="project-group-title" onclick="toggleGroup('${escHtml(gid)}')">
+            <span class="project-group-arrow">▼</span>
+            ${key ? escHtml(key) : '未分组'}
+            <span class="project-group-count">${groups[key].length}</span>
+          </div>`;
       }
       html += '<div class="recent-list">';
       groups[key].forEach(p => {
-        const fmtDate = (ts) => { if (!ts) return ''; const d = new Date(ts); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
         const metaParts = [];
         if (!useGroups && p.studentName) metaParts.push(p.studentName);
         if (p.lessonDate) metaParts.push(p.lessonDate);
@@ -2616,7 +2646,23 @@
       html += '</div>';
       if (useGroups) html += '</div>';
     });
+
+    if (hasMore) {
+      const remaining = index.length - displayCount;
+      html += `<button class="show-more-btn" onclick="showMoreProjects()">显示更多（还有 ${remaining} 个项目）</button>`;
+    }
+
     listEl.innerHTML = html;
+  }
+
+  function showMoreProjects() {
+    visibleCount += PAGE_SIZE;
+    renderProjectList();
+  }
+
+  function toggleGroup(gid) {
+    collapsedGroups[gid] = !collapsedGroups[gid];
+    renderProjectList();
   }
 
   function deleteProjectConfirm(id) {
@@ -3860,62 +3906,72 @@
   function afterLyricsUpdate() { /* margin notes now inline in renderLyrics */ }
 
   // ═══════════════════════════════════════════════════════
-  // ─── Auth & Cloud Sync (Firebase) ─────────────────────
+  // ─── Auth & Cloud Sync (Supabase) ─────────────────────
   // ═══════════════════════════════════════════════════════
-  let cloudDb = null;
-  let cloudAuth = null;
-  let cloudUser = null;       // Current Firebase user
+  const SUPABASE_URL = 'https://rxancjphwarqxjobxfxp.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ4YW5janBod2FycXhqb2J4ZnhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY5NzU3MzcsImV4cCI6MjA5MjU1MTczN30.g3-Uv1ChuPttCTV3uid6QLZZR8FMD3-mAXjeqarFb5o';
+
+  let supabaseClient = null;
+  let cloudUser = null;
   let cloudConnected = false;
-  let cloudListener = null;
   let cloudSyncing = false;
   let lastCloudWrite = 0;
+  let cloudPollTimer = null;
 
-  const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyD2f5TH3_I19chr5l5wpyJ8rcL0PtrlFx0",
-    authDomain: "lyric-note-b9152.firebaseapp.com",
-    projectId: "lyric-note-b9152",
-    storageBucket: "lyric-note-b9152.firebasestorage.app",
-    messagingSenderId: "802065241905",
-    appId: "1:802065241905:web:e3c29e190a8ec458998210"
-  };
-
-  function cloudCol() {
-    return cloudDb.collection('users').doc(cloudUser.uid).collection('projects');
+  function clearLocalProjectData() {
+    const index = getProjectIndex();
+    index.forEach(p => localStorage.removeItem('lyricnote_project_' + p.id));
+    localStorage.removeItem('lyricnote_projects_index');
+    currentProjectId = null;
+    _searchBound = false;
+    homeSearchQuery = '';
   }
 
   function toEmail(username) {
-    return username.toLowerCase().trim() + '@lyricnote.local';
+    return username.toLowerCase().trim() + '@lyricnote.app';
   }
 
   function initCloudSync() {
     try {
-      if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
-      cloudDb = firebase.firestore();
-      cloudAuth = firebase.auth();
-      // Listen for auth state changes
-      cloudAuth.onAuthStateChanged((user) => {
-        if (user) {
-          cloudUser = user;
-          cloudConnected = true;
-          startCloudListener();
-          updateCloudDot();
-          pushLocalToCloud();
-          // Hide login, show home
-          document.getElementById('login-screen').style.display = 'none';
-          showHomeScreen();
+      supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      supabaseClient.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          onAuthSuccess(session.user);
         } else {
+          showLoginScreen();
+        }
+      });
+      supabaseClient.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_OUT') {
           cloudUser = null;
           cloudConnected = false;
-          if (cloudListener) { cloudListener(); cloudListener = null; }
+          stopCloudPoll();
           updateCloudDot();
           showLoginScreen();
         }
       });
     } catch(e) {
       console.error('Cloud sync init failed:', e);
-      cloudConnected = false;
       showLoginScreen();
     }
+  }
+
+  function onAuthSuccess(user) {
+    const prevUid = localStorage.getItem('lyricnote_current_uid');
+    if (prevUid && prevUid !== user.id) {
+      clearLocalProjectData();
+    }
+    localStorage.setItem('lyricnote_current_uid', user.id);
+    cloudUser = user;
+    cloudConnected = true;
+    updateCloudDot();
+    pullFromCloud().then(() => {
+      if (prevUid === user.id) pushLocalToCloud();
+      if (document.getElementById('home-screen').style.display !== 'none') renderHomeScreen();
+    });
+    startCloudPoll();
+    document.getElementById('login-screen').style.display = 'none';
+    showHomeScreen();
   }
 
   function showLoginScreen() {
@@ -3937,17 +3993,14 @@
     if (!username || !password) { errEl.textContent = '请输入用户名和密码'; return; }
     errEl.textContent = '';
     try {
-      await cloudAuth.signInWithEmailAndPassword(toEmail(username), password);
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email: toEmail(username), password
+      });
+      if (error) throw error;
+      onAuthSuccess(data.user);
     } catch(e) {
-      if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
-        errEl.textContent = '用户名或密码错误';
-      } else if (e.code === 'auth/wrong-password') {
-        errEl.textContent = '密码错误';
-      } else if (e.code === 'auth/too-many-requests') {
-        errEl.textContent = '尝试次数过多，请稍后再试';
-      } else {
-        errEl.textContent = '登录失败: ' + e.message;
-      }
+      errEl.textContent = e.message === 'Invalid login credentials'
+        ? '用户名或密码错误' : '登录失败: ' + e.message;
     }
   }
 
@@ -3957,7 +4010,6 @@
     const confirmInput = document.getElementById('login-password-confirm');
     const errEl = document.getElementById('login-error');
     if (!registerMode) {
-      // First click: show confirm password field
       registerMode = true;
       confirmInput.style.display = '';
       confirmInput.focus();
@@ -3966,7 +4018,6 @@
       errEl.style.color = 'var(--muted)';
       return;
     }
-    // Second click: do register
     doRegister();
   }
 
@@ -3982,14 +4033,18 @@
     if (password !== password2) { errEl.textContent = '两次输入的密码不一致'; return; }
     errEl.textContent = '';
     try {
-      await cloudAuth.createUserWithEmailAndPassword(toEmail(username), password);
-      await cloudAuth.currentUser.updateProfile({ displayName: username });
-      resetRegisterMode();
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: toEmail(username), password,
+        options: { data: { display_name: username } }
+      });
+      if (error) throw error;
+      if (data.user) {
+        resetRegisterMode();
+        onAuthSuccess(data.user);
+      }
     } catch(e) {
-      if (e.code === 'auth/email-already-in-use') {
+      if (e.message.includes('already registered')) {
         errEl.textContent = '该用户名已被注册';
-      } else if (e.code === 'auth/weak-password') {
-        errEl.textContent = '密码太简单，至少 6 位';
       } else {
         errEl.textContent = '注册失败: ' + e.message;
       }
@@ -4006,11 +4061,10 @@
     if (errEl) { errEl.textContent = ''; errEl.style.color = ''; }
   }
 
-  function doLogout() {
+  async function doLogout() {
     if (!confirm('确定退出登录？')) return;
-    cloudAuth.signOut();
+    await supabaseClient.auth.signOut();
   }
-
 
   function setupLoginKeyboard() {
     ['login-username', 'login-password'].forEach(id => {
@@ -4021,51 +4075,62 @@
     if (confirmEl) confirmEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doRegister(); });
   }
 
-  function startCloudListener() {
-    if (cloudListener) cloudListener();
-    if (!cloudDb || !cloudUser) return;
-    cloudListener = cloudCol().onSnapshot((snapshot) => {
-      if (cloudSyncing) return;
-      cloudSyncing = true;
-      snapshot.docChanges().forEach(change => {
-        const data = change.doc.data();
-        const id = change.doc.id;
-        if (change.type === 'removed') {
-          localStorage.removeItem('lyricnote_project_' + id);
-          const index = getProjectIndex().filter(e => e.id !== id);
-          saveProjectIndex(index);
-          if (currentProjectId === id) { currentProjectId = null; resetEditorState(); showHomeScreen(); }
-        } else {
-          const localRaw = localStorage.getItem('lyricnote_project_' + id);
-          const localData = localRaw ? JSON.parse(localRaw) : null;
-          if (!localData || (data.updatedAt || 0) > (localData.updatedAt || 0)) {
-            localStorage.setItem('lyricnote_project_' + id, JSON.stringify(data));
-            const index = getProjectIndex();
-            const existing = index.find(e => e.id === id);
-            if (existing) {
-              existing.name = data.name || data.songTitle || '未命名';
-              existing.studentName = data.studentName;
-              existing.lessonDate = data.lessonDate;
-              existing.updatedAt = data.updatedAt;
-            } else {
-              index.unshift({ id, name: data.name || data.songTitle || '未命名', studentName: data.studentName || '', lessonDate: data.lessonDate || '', createdAt: data.createdAt || data.updatedAt, updatedAt: data.updatedAt });
-            }
-            saveProjectIndex(index);
-            if (currentProjectId === id) loadProject(id);
+  async function pullFromCloud() {
+    if (!supabaseClient || !cloudUser) return;
+    try {
+      const { data, error } = await supabaseClient.from('projects')
+        .select('id, data, updated_at')
+        .eq('user_id', cloudUser.id);
+      if (error) throw error;
+      if (!data) return;
+      data.forEach(row => {
+        const projData = row.data;
+        const id = row.id;
+        const localRaw = localStorage.getItem('lyricnote_project_' + id);
+        const localData = localRaw ? JSON.parse(localRaw) : null;
+        if (!localData || (projData.updatedAt || 0) > (localData.updatedAt || 0)) {
+          localStorage.setItem('lyricnote_project_' + id, JSON.stringify(projData));
+          const index = getProjectIndex();
+          const existing = index.find(e => e.id === id);
+          if (existing) {
+            existing.name = projData.name || projData.songTitle || '未命名';
+            existing.studentName = projData.studentName || '';
+            existing.lessonDate = projData.lessonDate || '';
+            existing.updatedAt = projData.updatedAt;
+          } else {
+            index.unshift({ id, name: projData.name || projData.songTitle || '未命名', studentName: projData.studentName || '', lessonDate: projData.lessonDate || '', createdAt: projData.createdAt || projData.updatedAt, updatedAt: projData.updatedAt });
           }
+          saveProjectIndex(index);
+          if (currentProjectId === id) loadProject(id);
         }
       });
+      // Remove local projects deleted from cloud
+      const cloudIds = new Set(data.map(r => r.id));
+      const localIndex = getProjectIndex();
+      const toRemove = localIndex.filter(p => !cloudIds.has(p.id));
+      if (toRemove.length) {
+        toRemove.forEach(p => localStorage.removeItem('lyricnote_project_' + p.id));
+        saveProjectIndex(localIndex.filter(p => cloudIds.has(p.id)));
+        if (currentProjectId && !cloudIds.has(currentProjectId)) {
+          currentProjectId = null; resetEditorState(); showHomeScreen();
+        }
+      }
       if (document.getElementById('home-screen').style.display !== 'none') renderHomeScreen();
-      cloudSyncing = false;
-    }, (err) => {
-      console.error('Cloud listener error:', err);
-      cloudConnected = false;
-      updateCloudDot();
-    });
+    } catch(e) {
+      console.error('Pull from cloud error:', e);
+    }
   }
 
-  function cloudSaveProject(projectId) {
-    if (!cloudDb || !cloudUser || cloudSyncing) return;
+  function startCloudPoll() {
+    stopCloudPoll();
+    cloudPollTimer = setInterval(() => { if (!cloudSyncing) pullFromCloud(); }, 30000);
+  }
+  function stopCloudPoll() {
+    if (cloudPollTimer) { clearInterval(cloudPollTimer); cloudPollTimer = null; }
+  }
+
+  async function cloudSaveProject(projectId) {
+    if (!supabaseClient || !cloudUser || cloudSyncing) return;
     const raw = localStorage.getItem('lyricnote_project_' + projectId);
     if (!raw) return;
     const data = JSON.parse(raw);
@@ -4078,35 +4143,53 @@
     lastCloudWrite = now;
     cloudSyncing = true;
     showCloudSyncing();
-    cloudCol().doc(projectId).set(data, { merge: true })
-      .then(() => { cloudSyncing = false; showCloudSynced(); })
-      .catch(e => { console.error('Cloud save error:', e); cloudSyncing = false; });
+    try {
+      const { error } = await supabaseClient.from('projects').upsert({
+        id: projectId,
+        user_id: cloudUser.id,
+        data: data,
+        updated_at: data.updatedAt || now
+      });
+      if (error) throw error;
+      showCloudSynced();
+    } catch(e) {
+      console.error('Cloud save error:', e);
+    }
+    cloudSyncing = false;
   }
 
-  function cloudDeleteProject(projectId) {
-    if (!cloudDb || !cloudUser) return;
-    cloudSyncing = true;
-    cloudCol().doc(projectId).delete()
-      .then(() => { cloudSyncing = false; })
-      .catch(e => { console.error('Cloud delete error:', e); cloudSyncing = false; });
+  async function cloudDeleteProject(projectId) {
+    if (!supabaseClient || !cloudUser) return;
+    try {
+      await supabaseClient.from('projects').delete().eq('id', projectId).eq('user_id', cloudUser.id);
+    } catch(e) {
+      console.error('Cloud delete error:', e);
+    }
   }
 
-  function pushLocalToCloud() {
-    if (!cloudDb || !cloudUser) return;
+  async function pushLocalToCloud() {
+    if (!supabaseClient || !cloudUser) return;
     const index = getProjectIndex();
-    index.forEach(entry => {
+    for (const entry of index) {
       const raw = localStorage.getItem('lyricnote_project_' + entry.id);
       if (raw) {
         const data = JSON.parse(raw);
-        cloudCol().doc(entry.id).set(data, { merge: true }).catch(e => console.error('Push error:', e));
+        try {
+          await supabaseClient.from('projects').upsert({
+            id: entry.id,
+            user_id: cloudUser.id,
+            data: data,
+            updated_at: data.updatedAt || Date.now()
+          });
+        } catch(e) { console.error('Push error:', e); }
       }
-    });
+    }
   }
 
   function updateCloudDot() {
     const homeStatus = document.getElementById('home-cloud-status');
     if (homeStatus) {
-      const name = cloudUser ? (cloudUser.displayName || cloudUser.email.split('@')[0]) : '';
+      const name = cloudUser ? (cloudUser.user_metadata?.display_name || cloudUser.email.split('@')[0]) : '';
       if (cloudConnected) {
         homeStatus.className = 'home-cloud-status';
         homeStatus.innerHTML = '<span class="cloud-dot"></span> ' + (name ? name + ' · 已连接云端' : '已连接云端') +
@@ -4133,7 +4216,6 @@
     el.className = 'cloud-status syncing show';
     el.innerHTML = '<span class="cloud-dot"></span> 同步中…';
   }
-
 
   init();
 </script>
