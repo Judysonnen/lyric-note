@@ -7,6 +7,10 @@
   <link rel="icon" href="data:,">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- Firebase SDK for cloud sync -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600&family=ZCOOL+KuaiLe&family=ZCOOL+QingKe+HuangYou&family=Ma+Shan+Zheng&family=Liu+Jian+Mao+Cao&family=Long+Cang&family=Zhi+Mang+Xing&display=swap');
 
@@ -224,7 +228,7 @@
     .char-wrap { position: relative; display: inline-block; overflow: visible; }
 
     .lyric-char {
-      font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+      font-family: 'Noto Serif SC', serif;
       font-size: calc(30px * var(--font-scale));
       line-height: 2.1;
       padding: 6px 4px;
@@ -291,6 +295,12 @@
       -webkit-text-stroke: calc(0.3px * var(--font-scale)) #D97706;
     }
     .sym-breath::before { content: '∨'; }
+    .sym-breath-before {
+      top: calc(8px * var(--font-scale)); left: calc(-3px * var(--font-scale));
+      font-size: calc(12px * var(--font-scale)); font-weight: 700; color: #D97706;
+      -webkit-text-stroke: calc(0.3px * var(--font-scale)) #D97706;
+    }
+    .sym-breath-before::before { content: '∨'; }
 
     /* Delete × */
     .char-wrap .del-x {
@@ -306,6 +316,25 @@
     .char-wrap .del-x:hover { background: var(--danger); }
     @media (hover: none) {
       .char-wrap .del-x.active { opacity: 1; transform: scale(1); pointer-events: auto; }
+    }
+
+    /* Annotation removal menu */
+    #ann-remove-menu {
+      position: fixed; z-index: 400; display: none;
+      background: white; border: 1px solid var(--border); border-radius: 10px;
+      box-shadow: var(--shadow-float); padding: 4px; min-width: 120px;
+    }
+    #ann-remove-menu.visible { display: block; }
+    .ann-rm-item {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px; border-radius: 7px; cursor: pointer;
+      font-size: 12px; font-weight: 500; color: var(--text);
+      border: none; background: none; width: 100%; text-align: left;
+      font-family: inherit; transition: background 0.1s;
+    }
+    .ann-rm-item:hover { background: #FEF2F2; color: var(--danger); }
+    .ann-rm-dot {
+      width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0;
     }
 
     /* Note tag */
@@ -574,7 +603,7 @@
     .modal textarea {
       width: 100%; min-height: 280px; flex: 1; border: 1px solid var(--border); border-radius: 12px;
       padding: 16px 18px; font-size: 16px;
-      font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+      font-family: 'Noto Serif SC', serif;
       line-height: 2; resize: vertical; outline: none; color: var(--text);
     }
     .modal textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
@@ -622,7 +651,7 @@
       background: var(--export-paper);
       width: 560px; max-width: 100%;
       padding: 64px 60px 54px 60px;
-      font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+      font-family: 'Noto Serif SC', serif;
       position: relative; overflow: hidden; flex-shrink: 0;
     }
     .export-sheet.export-image { width: 860px; padding: 84px 80px 72px; }
@@ -637,7 +666,7 @@
     .export-brand::before,.export-brand::after { content:''; width:30px; height:1px; background:rgba(140,106,67,0.35); }
     .export-title {
       font-size: 32px; font-weight: 600; color: var(--export-ink); margin-bottom: 10px;
-      font-family: 'ZCOOL XiaoWei','Noto Serif SC',serif; word-break: break-word; line-height: 1.45; letter-spacing: 0.03em;
+      font-family: 'Noto Serif SC',serif; word-break: break-word; line-height: 1.45; letter-spacing: 0.03em;
     }
     .export-sheet.export-image .export-title { font-size: 38px; }
     .export-date { font-family: 'Noto Sans SC',sans-serif; font-size: 11px; color: var(--export-muted); letter-spacing: 0.18em; }
@@ -645,7 +674,7 @@
     .export-lyrics .lyric-line { margin-bottom: 0; break-inside: avoid; page-break-inside: avoid; padding: 0; }
     .export-lyrics .lyric-char {
       font-size: 22px; line-height: 2.1; cursor: default; color: var(--export-ink);
-      padding: 1px 2px; font-family: 'ZCOOL XiaoWei','Noto Serif SC',serif;
+      padding: 1px 2px; font-family: 'Noto Serif SC',serif;
     }
     .export-lyrics .lyric-char:hover { background: inherit; }
     .export-lyrics .lyric-char.mark { box-shadow: inset 0 -0.55em 0 var(--mark-color,transparent); background: transparent; }
@@ -743,8 +772,24 @@
     .home-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 32px; }
     .home-btn { font-size: 14px !important; padding: 10px 22px !important; border-radius: 12px !important; }
 
-    .recent-section { width: 100%; max-width: 420px; text-align: left; }
+    .recent-section { width: 100%; max-width: 460px; text-align: left; }
     .recent-header { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .project-search {
+      width: 100%; padding: 9px 14px 9px 32px; border: 1px solid var(--border);
+      border-radius: 10px; font-size: 13px; font-family: inherit; outline: none;
+      color: var(--text); background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238078A8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 10px center no-repeat;
+      margin-bottom: 14px; transition: border-color 0.15s;
+    }
+    .project-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.08); }
+    .project-group { margin-bottom: 16px; }
+    .project-group-title {
+      font-size: 12px; font-weight: 600; color: var(--text); padding: 4px 2px;
+      margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+    }
+    .project-group-count {
+      font-size: 10px; font-weight: 500; color: var(--muted);
+      background: #F1F0F9; padding: 1px 7px; border-radius: 10px;
+    }
     .recent-list { display: flex; flex-direction: column; gap: 4px; }
     .recent-item {
       display: flex; align-items: center; gap: 12px;
@@ -1126,25 +1171,100 @@
       .margin-cell { display: none; }
       .bottom-notes { height: 140px !important; }
     }
+
+    /* ── Login screen ── */
+    .login-screen {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      flex: 1; padding: 36px 24px; text-align: center;
+    }
+    .login-form {
+      width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 10px;
+      margin-top: 20px;
+    }
+    .login-input {
+      padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px;
+      font-size: 14px; font-family: inherit; outline: none; color: var(--text);
+      transition: border-color 0.15s;
+    }
+    .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .login-actions { display: flex; gap: 8px; margin-top: 6px; }
+    .login-actions .btn { flex: 1; justify-content: center; padding: 10px 16px; font-size: 14px; }
+    .login-error {
+      font-size: 12px; color: var(--danger); margin-top: 6px;
+      min-height: 18px;
+    }
+    .login-hint { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+    .user-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; color: var(--muted); font-weight: 400;
+      padding: 0; border: none; background: none; cursor: pointer;
+      font-family: inherit; transition: color 0.15s;
+    }
+    .user-badge:hover { color: var(--primary); }
+    .user-badge .user-logout {
+      font-size: 10px; color: #C4B8E8; margin-left: 2px; transition: color 0.15s;
+    }
+    .user-badge:hover .user-logout { color: var(--danger); }
+
+    /* ── Cloud Sync indicator ── */
+    .cloud-status {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 500; color: #10B981;
+      opacity: 0; transition: opacity 0.4s; pointer-events: none;
+    }
+    .cloud-status.show { opacity: 1; }
+    .cloud-status .cloud-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #22C55E;
+    }
+    .cloud-status.syncing .cloud-dot { background: #F59E0B; animation: sync-pulse 0.8s infinite; }
+    .cloud-status.error { color: #EF4444; }
+    .cloud-status.error .cloud-dot { background: #EF4444; }
+    @keyframes sync-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .home-cloud-status {
+      font-size: 12px; color: #10B981; font-weight: 500;
+      margin-bottom: 16px; display: flex; align-items: center; gap: 5px; justify-content: center;
+    }
+    .home-cloud-status .cloud-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #22C55E; display: inline-block;
+    }
+    .home-cloud-status.offline { color: var(--muted); }
+    .home-cloud-status.offline .cloud-dot { background: #D1D5DB; }
   </style>
 </head>
 <body>
 
 <div class="app">
   <div class="card">
+    <!-- Login screen -->
+    <div id="login-screen" class="login-screen" style="display:none">
+      <div class="home-logo">🎵</div>
+      <div class="home-title">标唱 <span>LyricNote</span></div>
+      <div class="home-subtitle">登录以同步你的歌词笔记</div>
+      <div class="login-form">
+        <input class="login-input" id="login-username" type="text" placeholder="用户名" autocomplete="username" autofocus>
+        <input class="login-input" id="login-password" type="password" placeholder="密码" autocomplete="current-password">
+        <input class="login-input" id="login-password-confirm" type="password" placeholder="确认密码（仅注册时需要）" autocomplete="new-password" style="display:none">
+        <div class="login-error" id="login-error"></div>
+        <div class="login-actions">
+          <button class="btn btn-primary" onclick="doLogin()">登录</button>
+          <button class="btn btn-outline" id="register-btn" onclick="handleRegister()">注册</button>
+        </div>
+        <div class="login-hint">首次使用请先注册，之后在任何设备登录即可访问你的笔记。</div>
+      </div>
+    </div>
+
     <!-- Home screen (shown when no project is open) -->
     <div id="home-screen" class="home-screen" style="display:none">
       <div class="home-logo">🎵</div>
       <div class="home-title">标唱 <span>LyricNote</span></div>
       <div class="home-subtitle">歌词标注练唱工具</div>
+      <div class="home-cloud-status" id="home-cloud-status">
+        <span class="cloud-dot"></span> <span id="home-cloud-text">已连接云端</span>
+      </div>
       <div class="home-actions">
         <button class="btn btn-primary home-btn" onclick="openModal(false)">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
           导入新歌词
-        </button>
-        <button class="btn btn-outline home-btn" onclick="openFileFromDisk()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          打开文件
         </button>
       </div>
       <div id="recent-projects" class="recent-section"></div>
@@ -1167,6 +1287,7 @@
         </div>
       </div>
       <div class="header-right">
+        <span class="cloud-status" id="cloud-indicator"><span class="cloud-dot"></span> 已同步</span>
         <button class="btn btn-outline" onclick="closeProject()" title="返回主页">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h4v-6h4v6h4a1 1 0 001-1V10"/></svg>
           主页
@@ -1197,10 +1318,6 @@
         <button class="btn btn-outline" id="edit-lyrics-btn" onclick="openModal(true)" style="display:none" title="编辑当前歌词">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
           编辑
-        </button>
-        <button class="btn btn-outline" onclick="saveProjectToFile()" title="保存到文件">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          保存
         </button>
         <button class="btn btn-outline" onclick="showPreview('pdf')" title="导出 PDF">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -1325,9 +1442,13 @@
       <div class="sym-tooltip">重音&gt;</div>
     </button>
     <!-- breath -->
-    <button class="sym-btn" onclick="addUnderlineMark('breath')" title="换气符">
-      <span style="font-size:14px;color:#64748B;">'</span>
-      <div class="sym-tooltip">换气'</div>
+    <button class="sym-btn" onclick="addUnderlineMark('breath-before')" title="换气符（前）">
+      <span style="font-size:12px;color:#64748B;">&#x2228;字</span>
+      <div class="sym-tooltip">换气(前)</div>
+    </button>
+    <button class="sym-btn" onclick="addUnderlineMark('breath')" title="换气符（后）">
+      <span style="font-size:12px;color:#64748B;">字&#x2228;</span>
+      <div class="sym-tooltip">换气(后)</div>
     </button>
   </div>
   <!-- Row 3: Text color + Font -->
@@ -1384,6 +1505,10 @@
   <div class="sp-title">选择段落</div>
   <div id="section-picker-options"></div>
 </div>
+
+<!-- Annotation removal menu -->
+<div id="ann-remove-menu"></div>
+
 
 <!-- Custom Color Picker Panel -->
 <div id="color-picker-panel" class="color-picker-panel">
@@ -1570,13 +1695,13 @@
     renderFontBar();
     initNotesPanel();
     updateZoomUI();
+    setupLoginKeyboard();
     // Migrate old single-state format if exists
     if (localStorage.getItem('lyricnote_state')) {
       migrateOldState();
-    } else {
-      // Show home screen
-      showHomeScreen();
     }
+    // Firebase auth will decide whether to show login or home screen
+    initCloudSync();
     document.addEventListener('click', onDocClick);
   }
 
@@ -2309,6 +2434,8 @@
       const entry = index.find(e => e.id === currentProjectId);
       if (entry) { entry.name = project.name; entry.studentName = studentName; entry.lessonDate = lessonDate; entry.updatedAt = project.updatedAt; }
       saveProjectIndex(index);
+      // Cloud sync
+      cloudSaveProject(currentProjectId);
     } catch(e) {}
   }
 
@@ -2358,6 +2485,7 @@
     localStorage.removeItem('lyricnote_project_' + id);
     const index = getProjectIndex().filter(e => e.id !== id);
     saveProjectIndex(index);
+    cloudDeleteProject(id);
     if (currentProjectId === id) {
       currentProjectId = null;
       resetEditorState();
@@ -2397,30 +2525,90 @@
     ev.style.display = 'flex';
   }
 
+  let homeSearchQuery = '';
+
   function renderHomeScreen() {
     const container = document.getElementById('recent-projects');
-    const index = getProjectIndex().sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
-    const recent = index.slice(0, 8);
-    if (recent.length === 0) {
+    const allIndex = getProjectIndex().sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
+    if (allIndex.length === 0) {
       container.innerHTML = '<div class="home-empty">还没有项目，导入歌词开始吧</div>';
       return;
     }
-    let html = '<div class="recent-header">最近项目</div><div class="recent-list">';
-    recent.forEach(p => {
-      const date = new Date(p.updatedAt || p.createdAt);
-      const dateStr = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
-      const metaParts = [p.studentName, p.lessonDate, dateStr].filter(Boolean);
-      html += `<div class="recent-item" onclick="loadProject('${p.id}')">
-        <div class="recent-item-icon">🎵</div>
-        <div class="recent-item-info">
-          <div class="recent-item-name">${escHtml(p.name || '未命名歌词')}</div>
-          <div class="recent-item-meta">${escHtml(metaParts.join(' · '))}</div>
-        </div>
-        <button class="recent-item-del" onclick="event.stopPropagation();deleteProjectConfirm('${p.id}')" title="删除">×</button>
-      </div>`;
+
+    // Filter by search
+    const q = homeSearchQuery.toLowerCase();
+    const index = q ? allIndex.filter(p =>
+      (p.name||'').toLowerCase().includes(q) ||
+      (p.studentName||'').toLowerCase().includes(q) ||
+      (p.lessonDate||'').toLowerCase().includes(q)
+    ) : allIndex;
+
+    // Search bar
+    let html = `<div class="recent-header">我的项目 <span class="project-group-count">${allIndex.length}</span></div>`;
+    html += `<input class="project-search" id="project-search" placeholder="搜索歌曲、学生…" value="${escHtml(homeSearchQuery)}">`;
+
+    if (index.length === 0) {
+      html += '<div class="home-empty">没有匹配的项目</div>';
+      container.innerHTML = html;
+      // Restore focus to search
+      setTimeout(() => { const s = document.getElementById('project-search'); if (s) { s.focus(); s.setSelectionRange(s.value.length, s.value.length); } }, 0);
+      return;
+    }
+
+    // Group by student
+    const groups = {};
+    index.forEach(p => {
+      const key = p.studentName || '';
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(p);
     });
-    html += '</div>';
+
+    // Sort groups: named students first (alphabetically), then unnamed
+    const groupKeys = Object.keys(groups).sort((a, b) => {
+      if (!a && b) return 1;
+      if (a && !b) return -1;
+      return a.localeCompare(b, 'zh');
+    });
+
+    // If only one group or searching, render flat list
+    const useGroups = !q && groupKeys.length > 1;
+
+    groupKeys.forEach(key => {
+      if (useGroups) {
+        html += `<div class="project-group"><div class="project-group-title">${key ? escHtml(key) : '未分组'} <span class="project-group-count">${groups[key].length}</span></div>`;
+      }
+      html += '<div class="recent-list">';
+      groups[key].forEach(p => {
+        const date = new Date(p.updatedAt || p.createdAt);
+        const dateStr = `${date.getMonth()+1}/${date.getDate()} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+        const metaParts = [p.lessonDate, dateStr].filter(Boolean);
+        if (!useGroups && p.studentName) metaParts.unshift(p.studentName);
+        html += `<div class="recent-item" onclick="loadProject('${p.id}')">
+          <div class="recent-item-icon">🎵</div>
+          <div class="recent-item-info">
+            <div class="recent-item-name">${escHtml(p.name || '未命名歌词')}</div>
+            <div class="recent-item-meta">${escHtml(metaParts.join(' · '))}</div>
+          </div>
+          <button class="recent-item-del" onclick="event.stopPropagation();deleteProjectConfirm('${p.id}')" title="删除">×</button>
+        </div>`;
+      });
+      html += '</div>';
+      if (useGroups) html += '</div>';
+    });
+
     container.innerHTML = html;
+    // Bind search events with IME support
+    const searchEl = document.getElementById('project-search');
+    if (searchEl) {
+      let composing = false;
+      searchEl.addEventListener('compositionstart', () => { composing = true; });
+      searchEl.addEventListener('compositionend', () => { composing = false; homeSearchQuery = searchEl.value; renderHomeScreen(); });
+      searchEl.addEventListener('input', () => { if (!composing) { homeSearchQuery = searchEl.value; renderHomeScreen(); } });
+      if (q) {
+        searchEl.focus();
+        searchEl.setSelectionRange(searchEl.value.length, searchEl.value.length);
+      }
+    }
   }
 
   function deleteProjectConfirm(id) {
@@ -2680,14 +2868,6 @@
         const tcAnn = getCharTextColorAnn(absIdx);
         if (tcAnn) {
           span.style.color = tcAnn.color;
-          const nextTc = ci<chars.length-1 ? getCharTextColorAnn(absIdx+1) : null;
-          if (!nextTc || nextTc.id !== tcAnn.id) {
-            const delTc = document.createElement('div');
-            delTc.className = 'del-x tc-del active'; delTc.textContent = '×'; delTc.title = '删除文字颜色';
-            delTc.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); });
-            delTc.addEventListener('click', (e) => { e.stopPropagation(); deleteAnnotation(tcAnn.id); });
-            wrap.appendChild(delTc);
-          }
         }
 
         // Font family
@@ -2706,19 +2886,6 @@
         span.addEventListener('touchstart', (e) => { e.preventDefault(); startSel(absIdx); }, {passive:false});
 
         wrap.appendChild(span);
-
-        // Color del ×
-        if (myAnn) {
-          const nextA2 = ci<chars.length-1 ? getCharColorAnn(absIdx+1) : null;
-          if (!nextA2||nextA2.id!==myAnn.id) {
-            const delX = document.createElement('div');
-            delX.className = 'del-x active'; delX.textContent = '×'; delX.title = '删除色块';
-            delX.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); });
-            delX.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); deleteAnnotation(myAnn.id); }, {passive:false});
-            delX.addEventListener('click', (e) => { e.stopPropagation(); deleteAnnotation(myAnn.id); });
-            wrap.appendChild(delX);
-          }
-        }
 
         // Note tag
         if (noteAnn) {
@@ -2745,16 +2912,45 @@
           });
         }
 
-        // Underline del × (on last char of group)
-        if (ulAnn) {
-          const nxtUl = ci<chars.length-1 ? getCharUlAnn(absIdx+1) : null;
-          if (!nxtUl||nxtUl.id!==ulAnn.id) {
+        // Unified del × — collect all removable annotations on this char
+        {
+          const removables = [];
+          if (myAnn) {
+            const nextA2 = ci<chars.length-1 ? getCharColorAnn(absIdx+1) : null;
+            if (!nextA2||nextA2.id!==myAnn.id) removables.push({id:myAnn.id, label:'高亮色块', color:myAnn.color});
+          }
+          if (tcAnn) {
+            const nextTc = ci<chars.length-1 ? getCharTextColorAnn(absIdx+1) : null;
+            if (!nextTc||nextTc.id!==tcAnn.id) removables.push({id:tcAnn.id, label:'文字颜色', color:tcAnn.color});
+          }
+          if (fontAnn) {
+            const nextFa = ci<chars.length-1 ? getCharFontAnn(absIdx+1) : null;
+            if (!nextFa||nextFa.id!==fontAnn.id) { const fo=FONT_OPTIONS.find(f=>f.key===fontAnn.fontKey); removables.push({id:fontAnn.id, label:'字体: '+(fo?fo.label:fontAnn.fontKey), color:'#94A3B8'}); }
+          }
+          const boldAnn = getCharBoldAnn(absIdx);
+          if (boldAnn) removables.push({id:boldAnn.id, label:'加粗', color:'#1F2937'});
+          const italicAnn = getCharItalicAnn(absIdx);
+          if (italicAnn) removables.push({id:italicAnn.id, label:'斜体', color:'#64748B'});
+          ulAnns.forEach(ua => {
+            const nxtUl2 = ci<chars.length-1 ? getCharUlAnns(absIdx+1).find(a=>a.id===ua.id) : null;
+            if (!nxtUl2) {
+              const STYLE_LABELS = {wavy:'波浪线',solid:'连字符',dashed:'虚线',dotted:'点线',double:'双线',triangle:'三角',dotbelow:'圆点',accent:'重音',slur:'连音弧',breath:'换气(后)','breath-before':'换气(前)'};
+              removables.push({id:ua.id, label:STYLE_LABELS[ua.style]||ua.style, color:'#475569'});
+            }
+          });
+          if (removables.length === 1) {
             const delX = document.createElement('div');
-            delX.className = 'del-x active'; delX.textContent = '×'; delX.title = '删除记号';
-            delX.style.background = '#475569';
+            delX.className = 'del-x active'; delX.textContent = '×'; delX.title = '删除 ' + removables[0].label;
             delX.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); });
-            delX.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); deleteAnnotation(ulAnn.id); }, {passive:false});
-            delX.addEventListener('click', (e) => { e.stopPropagation(); deleteAnnotation(ulAnn.id); });
+            delX.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); deleteAnnotation(removables[0].id); }, {passive:false});
+            delX.addEventListener('click', (e) => { e.stopPropagation(); deleteAnnotation(removables[0].id); });
+            wrap.appendChild(delX);
+          } else if (removables.length > 1) {
+            const delX = document.createElement('div');
+            delX.className = 'del-x active'; delX.textContent = '×'; delX.title = '删除标注…';
+            delX.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); });
+            delX.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); showAnnRemoveMenu(e, removables); }, {passive:false});
+            delX.addEventListener('click', (e) => { e.stopPropagation(); showAnnRemoveMenu(e, removables); });
             wrap.appendChild(delX);
           }
         }
@@ -2831,19 +3027,21 @@
   }, {passive:false});
 
   document.addEventListener('mousedown', (e) => {
+    if (!e.target.closest('#ann-remove-menu,.del-x')) closeAnnRemoveMenu();
     if (paletteEditMode && !e.target.closest('#palette,#palette-edit-btn')) { paletteEditMode=false; renderPalette(); if (selRange) showToolbarAtSelection(); }
     if (tcPaletteEditMode && !e.target.closest('#tc-palette,#tc-edit-btn')) { tcPaletteEditMode=false; renderTcPalette(); if (selRange) showToolbarAtSelection(); }
     if (!e.target.closest('#color-picker-panel,#hl-add-btn,#tc-add-btn')) closeColorPicker();
     if (!e.target.closest('#font-picker-panel,#font-add-btn')) closeFontPicker();
     if (!e.target.closest('#cal-panel,.date-trigger,#lesson-date-display')) closeCalendar();
-    const inI = e.target.closest('.lyric-char,.note-tag,#float-toolbar,#note-editor,#popover-box,.modal,.preview-modal,.btn,.del-x,.song-title-display,.song-title-input,.section-trigger-btn,.section-label,#color-picker-panel,#font-picker-panel,#cal-panel,.palette-add-btn');
+    const inI = e.target.closest('.lyric-char,.note-tag,#float-toolbar,#note-editor,#popover-box,.modal,.preview-modal,.btn,.del-x,.song-title-display,.song-title-input,.section-trigger-btn,.section-label,#color-picker-panel,#font-picker-panel,#cal-panel,.palette-add-btn,.margin-cell,#ann-remove-menu');
     if (!inI && selRange) clearSelection();
   });
   document.addEventListener('touchstart', (e) => {
+    if (!e.target.closest('#ann-remove-menu,.del-x')) closeAnnRemoveMenu();
     if (!e.target.closest('#color-picker-panel,#hl-add-btn,#tc-add-btn')) closeColorPicker();
     if (!e.target.closest('#font-picker-panel,#font-add-btn')) closeFontPicker();
     if (!e.target.closest('#cal-panel,.date-trigger,#lesson-date-display')) closeCalendar();
-    const inI = e.target.closest('.lyric-char,.note-tag,#float-toolbar,#note-editor,#popover-box,.modal,.preview-modal,.btn,.del-x,.song-title-display,.song-title-input,.swatch-del,.color-swatch,.section-trigger-btn,.section-label,#color-picker-panel,#font-picker-panel,#cal-panel,.palette-add-btn');
+    const inI = e.target.closest('.lyric-char,.note-tag,#float-toolbar,#note-editor,#popover-box,.modal,.preview-modal,.btn,.del-x,.song-title-display,.song-title-input,.swatch-del,.color-swatch,.section-trigger-btn,.section-label,#color-picker-panel,#font-picker-panel,#cal-panel,.palette-add-btn,.margin-cell,#ann-remove-menu');
     if (!inI) { if (paletteEditMode){paletteEditMode=false;renderPalette();} if (selRange) clearSelection(); }
   }, {passive:true});
 
@@ -2935,7 +3133,34 @@
   function rangesOverlap(ann, start, len) {
     return ann.charIndex < start+len && ann.charIndex+(ann.length||1) > start;
   }
-  function deleteAnnotation(id) { annotations=annotations.filter(a=>a.id!==id); renderLyrics(); saveState(); }
+  function deleteAnnotation(id) { annotations=annotations.filter(a=>a.id!==id); closeAnnRemoveMenu(); renderLyrics(); saveState(); }
+
+  function showAnnRemoveMenu(e, removables) {
+    const menu = document.getElementById('ann-remove-menu');
+    menu.innerHTML = '';
+    removables.forEach(r => {
+      const btn = document.createElement('button');
+      btn.className = 'ann-rm-item';
+      const dot = document.createElement('span');
+      dot.className = 'ann-rm-dot';
+      dot.style.background = r.color || '#94A3B8';
+      btn.appendChild(dot);
+      btn.appendChild(document.createTextNode(r.label));
+      btn.addEventListener('mousedown', (ev) => { ev.stopPropagation(); ev.preventDefault(); });
+      btn.addEventListener('click', (ev) => { ev.stopPropagation(); deleteAnnotation(r.id); });
+      menu.appendChild(btn);
+    });
+    const x = e.clientX, y = e.clientY;
+    menu.style.left = x + 'px'; menu.style.top = y + 'px';
+    menu.classList.add('visible');
+    // Adjust if off-screen
+    requestAnimationFrame(() => {
+      const rect = menu.getBoundingClientRect();
+      if (rect.right > window.innerWidth) menu.style.left = (window.innerWidth - rect.width - 8) + 'px';
+      if (rect.bottom > window.innerHeight) menu.style.top = (y - rect.height) + 'px';
+    });
+  }
+  function closeAnnRemoveMenu() { document.getElementById('ann-remove-menu').classList.remove('visible'); }
 
   // ─── Note Editor ──────────────────────────────────────
   function openNoteEditor() {
@@ -3389,11 +3614,13 @@
     marginNotesVisible = !marginNotesVisible;
     document.getElementById('margin-notes-btn').classList.toggle('active', marginNotesVisible);
     renderLyrics();
+    saveState();
   }
   function toggleBottomNotesPanel() {
     bottomNotesVisible = !bottomNotesVisible;
     document.getElementById('bottom-notes-btn').classList.toggle('active', bottomNotesVisible);
     document.getElementById('bottom-notes').classList.toggle('hidden', !bottomNotesVisible);
+    saveState();
   }
   // Legacy alias used by margin-col header close button
   function toggleMarginNotes() { toggleMarginNotesPanel(); }
@@ -3536,6 +3763,275 @@
 
   // Re-render margin notes after lyrics update
   function afterLyricsUpdate() { /* margin notes now inline in renderLyrics */ }
+
+  // ═══════════════════════════════════════════════════════
+  // ─── Auth & Cloud Sync (Firebase) ─────────────────────
+  // ═══════════════════════════════════════════════════════
+  let cloudDb = null;
+  let cloudAuth = null;
+  let cloudUser = null;       // Current Firebase user
+  let cloudConnected = false;
+  let cloudListener = null;
+  let cloudSyncing = false;
+  let lastCloudWrite = 0;
+
+  const FIREBASE_CONFIG = {
+    apiKey: "AIzaSyD2f5TH3_I19chr5l5wpyJ8rcL0PtrlFx0",
+    authDomain: "lyric-note-b9152.firebaseapp.com",
+    projectId: "lyric-note-b9152",
+    storageBucket: "lyric-note-b9152.firebasestorage.app",
+    messagingSenderId: "802065241905",
+    appId: "1:802065241905:web:e3c29e190a8ec458998210"
+  };
+
+  function cloudCol() {
+    return cloudDb.collection('users').doc(cloudUser.uid).collection('projects');
+  }
+
+  function toEmail(username) {
+    return username.toLowerCase().trim() + '@lyricnote.local';
+  }
+
+  function initCloudSync() {
+    try {
+      if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+      cloudDb = firebase.firestore();
+      cloudAuth = firebase.auth();
+      // Listen for auth state changes
+      cloudAuth.onAuthStateChanged((user) => {
+        if (user) {
+          cloudUser = user;
+          cloudConnected = true;
+          startCloudListener();
+          updateCloudDot();
+          pushLocalToCloud();
+          // Hide login, show home
+          document.getElementById('login-screen').style.display = 'none';
+          showHomeScreen();
+        } else {
+          cloudUser = null;
+          cloudConnected = false;
+          if (cloudListener) { cloudListener(); cloudListener = null; }
+          updateCloudDot();
+          showLoginScreen();
+        }
+      });
+    } catch(e) {
+      console.error('Cloud sync init failed:', e);
+      cloudConnected = false;
+      showLoginScreen();
+    }
+  }
+
+  function showLoginScreen() {
+    document.getElementById('login-screen').style.display = '';
+    document.getElementById('home-screen').style.display = 'none';
+    document.getElementById('editor-view').style.display = 'none';
+    document.getElementById('login-error').textContent = '';
+  }
+
+  async function doLogin() {
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errEl = document.getElementById('login-error');
+    if (!username || !password) { errEl.textContent = '请输入用户名和密码'; return; }
+    errEl.textContent = '';
+    try {
+      await cloudAuth.signInWithEmailAndPassword(toEmail(username), password);
+    } catch(e) {
+      if (e.code === 'auth/user-not-found' || e.code === 'auth/invalid-credential') {
+        errEl.textContent = '用户名或密码错误';
+      } else if (e.code === 'auth/wrong-password') {
+        errEl.textContent = '密码错误';
+      } else if (e.code === 'auth/too-many-requests') {
+        errEl.textContent = '尝试次数过多，请稍后再试';
+      } else {
+        errEl.textContent = '登录失败: ' + e.message;
+      }
+    }
+  }
+
+  let registerMode = false;
+
+  function handleRegister() {
+    const confirmInput = document.getElementById('login-password-confirm');
+    const errEl = document.getElementById('login-error');
+    if (!registerMode) {
+      // First click: show confirm password field
+      registerMode = true;
+      confirmInput.style.display = '';
+      confirmInput.focus();
+      document.getElementById('register-btn').textContent = '确认注册';
+      errEl.textContent = '请再次输入密码确认';
+      errEl.style.color = 'var(--muted)';
+      return;
+    }
+    // Second click: do register
+    doRegister();
+  }
+
+  async function doRegister() {
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    const password2 = document.getElementById('login-password-confirm').value;
+    const errEl = document.getElementById('login-error');
+    errEl.style.color = '';
+    if (!username || !password) { errEl.textContent = '请输入用户名和密码'; return; }
+    if (username.length < 2) { errEl.textContent = '用户名至少 2 个字符'; return; }
+    if (password.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
+    if (password !== password2) { errEl.textContent = '两次输入的密码不一致'; return; }
+    errEl.textContent = '';
+    try {
+      await cloudAuth.createUserWithEmailAndPassword(toEmail(username), password);
+      await cloudAuth.currentUser.updateProfile({ displayName: username });
+      resetRegisterMode();
+    } catch(e) {
+      if (e.code === 'auth/email-already-in-use') {
+        errEl.textContent = '该用户名已被注册';
+      } else if (e.code === 'auth/weak-password') {
+        errEl.textContent = '密码太简单，至少 6 位';
+      } else {
+        errEl.textContent = '注册失败: ' + e.message;
+      }
+    }
+  }
+
+  function resetRegisterMode() {
+    registerMode = false;
+    const confirmInput = document.getElementById('login-password-confirm');
+    if (confirmInput) { confirmInput.style.display = 'none'; confirmInput.value = ''; }
+    const btn = document.getElementById('register-btn');
+    if (btn) btn.textContent = '注册';
+  }
+
+  function doLogout() {
+    if (!confirm('确定退出登录？')) return;
+    cloudAuth.signOut();
+  }
+
+
+  function setupLoginKeyboard() {
+    ['login-username', 'login-password'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { resetRegisterMode(); doLogin(); } });
+    });
+    const confirmEl = document.getElementById('login-password-confirm');
+    if (confirmEl) confirmEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doRegister(); });
+  }
+
+  function startCloudListener() {
+    if (cloudListener) cloudListener();
+    if (!cloudDb || !cloudUser) return;
+    cloudListener = cloudCol().onSnapshot((snapshot) => {
+      if (cloudSyncing) return;
+      cloudSyncing = true;
+      snapshot.docChanges().forEach(change => {
+        const data = change.doc.data();
+        const id = change.doc.id;
+        if (change.type === 'removed') {
+          localStorage.removeItem('lyricnote_project_' + id);
+          const index = getProjectIndex().filter(e => e.id !== id);
+          saveProjectIndex(index);
+          if (currentProjectId === id) { currentProjectId = null; resetEditorState(); showHomeScreen(); }
+        } else {
+          const localRaw = localStorage.getItem('lyricnote_project_' + id);
+          const localData = localRaw ? JSON.parse(localRaw) : null;
+          if (!localData || (data.updatedAt || 0) > (localData.updatedAt || 0)) {
+            localStorage.setItem('lyricnote_project_' + id, JSON.stringify(data));
+            const index = getProjectIndex();
+            const existing = index.find(e => e.id === id);
+            if (existing) {
+              existing.name = data.name || data.songTitle || '未命名';
+              existing.studentName = data.studentName;
+              existing.lessonDate = data.lessonDate;
+              existing.updatedAt = data.updatedAt;
+            } else {
+              index.unshift({ id, name: data.name || data.songTitle || '未命名', createdAt: data.createdAt || data.updatedAt, updatedAt: data.updatedAt });
+            }
+            saveProjectIndex(index);
+            if (currentProjectId === id) loadProject(id);
+          }
+        }
+      });
+      if (document.getElementById('home-screen').style.display !== 'none') renderHomeScreen();
+      cloudSyncing = false;
+    }, (err) => {
+      console.error('Cloud listener error:', err);
+      cloudConnected = false;
+      updateCloudDot();
+    });
+  }
+
+  function cloudSaveProject(projectId) {
+    if (!cloudDb || !cloudUser || cloudSyncing) return;
+    const raw = localStorage.getItem('lyricnote_project_' + projectId);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    const now = Date.now();
+    if (now - lastCloudWrite < 500) {
+      clearTimeout(cloudSaveProject._timer);
+      cloudSaveProject._timer = setTimeout(() => cloudSaveProject(projectId), 600);
+      return;
+    }
+    lastCloudWrite = now;
+    cloudSyncing = true;
+    showCloudSyncing();
+    cloudCol().doc(projectId).set(data, { merge: true })
+      .then(() => { cloudSyncing = false; showCloudSynced(); })
+      .catch(e => { console.error('Cloud save error:', e); cloudSyncing = false; });
+  }
+
+  function cloudDeleteProject(projectId) {
+    if (!cloudDb || !cloudUser) return;
+    cloudSyncing = true;
+    cloudCol().doc(projectId).delete()
+      .then(() => { cloudSyncing = false; })
+      .catch(e => { console.error('Cloud delete error:', e); cloudSyncing = false; });
+  }
+
+  function pushLocalToCloud() {
+    if (!cloudDb || !cloudUser) return;
+    const index = getProjectIndex();
+    index.forEach(entry => {
+      const raw = localStorage.getItem('lyricnote_project_' + entry.id);
+      if (raw) {
+        const data = JSON.parse(raw);
+        cloudCol().doc(entry.id).set(data, { merge: true }).catch(e => console.error('Push error:', e));
+      }
+    });
+  }
+
+  function updateCloudDot() {
+    const homeStatus = document.getElementById('home-cloud-status');
+    if (homeStatus) {
+      const name = cloudUser ? (cloudUser.displayName || cloudUser.email.split('@')[0]) : '';
+      if (cloudConnected) {
+        homeStatus.className = 'home-cloud-status';
+        homeStatus.innerHTML = '<span class="cloud-dot"></span> ' + (name ? name + ' · 已连接云端' : '已连接云端') +
+          (cloudUser ? ' <button class="user-badge" onclick="doLogout()" title="退出登录"><span class="user-logout">退出</span></button>' : '');
+      } else {
+        homeStatus.className = 'home-cloud-status offline';
+        homeStatus.innerHTML = '<span class="cloud-dot"></span> 离线模式';
+      }
+    }
+  }
+  let _cloudIndicatorTimer = null;
+  function showCloudSynced() {
+    const el = document.getElementById('cloud-indicator');
+    if (!el) return;
+    clearTimeout(_cloudIndicatorTimer);
+    el.className = 'cloud-status show';
+    el.innerHTML = '<span class="cloud-dot"></span> ☁ 已同步';
+    _cloudIndicatorTimer = setTimeout(() => { el.classList.remove('show'); }, 2000);
+  }
+  function showCloudSyncing() {
+    const el = document.getElementById('cloud-indicator');
+    if (!el) return;
+    clearTimeout(_cloudIndicatorTimer);
+    el.className = 'cloud-status syncing show';
+    el.innerHTML = '<span class="cloud-dot"></span> 同步中…';
+  }
+
 
   init();
 </script>
