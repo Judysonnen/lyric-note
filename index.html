@@ -221,7 +221,7 @@
       display: flex; flex-wrap: wrap; align-items: flex-end;
       padding: 4px 0 8px 0; flex: 1; min-width: 0;
     }
-    .char-wrap { position: relative; display: inline-block; }
+    .char-wrap { position: relative; display: inline-block; overflow: visible; }
 
     .lyric-char {
       font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
@@ -253,42 +253,44 @@
     .lyric-char.has-note-single::after { left: 4px;  right: 4px;  }
 
     /* ── Underline / symbol marks ── */
-    .lyric-char.ul-wavy   { text-decoration: underline wavy #F43F5E;  text-underline-offset: 4px; text-decoration-thickness: 2.5px; }
-    .lyric-char.ul-solid  { text-decoration: overline solid #2563EB; text-decoration-thickness: 3px; }
-    .lyric-char.ul-dashed { text-decoration: underline dashed #059669;text-underline-offset: 4px; text-decoration-thickness: 2.5px; }
-    .lyric-char.ul-dotted { text-decoration: underline dotted #7C3AED;text-underline-offset: 4px; text-decoration-thickness: 3px; }
-    .lyric-char.ul-double { text-decoration: underline double #EA580C; text-underline-offset: 4px; text-decoration-thickness: 2.5px; }
+    .lyric-char.ul-wavy   { text-decoration: underline wavy #F43F5E;  text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2px * var(--font-scale)); }
+    .lyric-char.ul-solid  { text-decoration: underline solid #2563EB; text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2.5px * var(--font-scale)); }
+    .lyric-char.ul-dashed { text-decoration: underline dashed #059669;text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2px * var(--font-scale)); }
+    .lyric-char.ul-dotted { text-decoration: underline dotted #7C3AED;text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2.5px * var(--font-scale)); }
+    .lyric-char.ul-double { text-decoration: underline double #EA580C; text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2px * var(--font-scale)); }
 
-    /* Triangle ▽ below */
-    .lyric-char.ul-triangle::before {
-      content: '▽'; position: absolute; bottom: -10px; left: 50%;
-      transform: translateX(-50%); font-size: 14px; color: #0891B2;
-      pointer-events: none; line-height: 1; font-weight: 700;
+    /* Symbol marks — rendered as child elements so multiple can coexist */
+    .sym-mark {
+      position: absolute; pointer-events: none; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 5;
     }
-    /* Dot below */
-    .lyric-char.ul-dotbelow::before {
-      content: '●'; position: absolute; bottom: -8px; left: 50%;
-      transform: translateX(-50%); font-size: 10px; color: #DB2777;
-      pointer-events: none; line-height: 1;
+    .sym-triangle {
+      bottom: calc(2px * var(--font-scale)); left: 50%; transform: translateX(-50%);
+      font-size: calc(11px * var(--font-scale)); color: #0891B2;
     }
-    /* Accent > below */
-    .lyric-char.ul-accent::before {
-      content: '>'; position: absolute; bottom: -12px; left: 50%;
-      transform: translateX(-50%); font-size: 16px; font-weight: 900;
-      color: #B45309; pointer-events: none; line-height: 1; font-style: italic;
+    .sym-triangle::before { content: '▲'; }
+    .sym-dotbelow {
+      bottom: calc(3px * var(--font-scale)); left: 50%; transform: translateX(-50%);
+      font-size: calc(8px * var(--font-scale)); color: #DB2777;
     }
-    /* Slur arc — curved underline using border-radius */
-    .lyric-char.ul-slur::after {
-      content: ''; position: absolute;
-      left: 0px; right: 0px; bottom: -5px; height: 8px;
-      border: 2.5px solid #0D9488; border-top: none;
-      border-radius: 0 0 50% 50%; pointer-events: none;
+    .sym-dotbelow::before { content: '●'; }
+    .sym-accent {
+      bottom: calc(1px * var(--font-scale)); left: 50%; transform: translateX(-50%);
+      font-size: calc(15px * var(--font-scale)); font-weight: 900; color: #B45309; font-style: italic;
     }
-    /* Breath mark ' */
-    .lyric-char.ul-breath::before {
-      content: ','; position: absolute; top: -8px; right: -6px;
-      font-size: 20px; font-weight: 900; color: #64748B; pointer-events: none; line-height: 1;
+    .sym-accent::before { content: '>'; }
+    .sym-slur {
+      top: calc(4px * var(--font-scale)); left: calc(3px * var(--font-scale)); right: calc(3px * var(--font-scale)); width: auto;
+      height: calc(5px * var(--font-scale)); border: calc(2.5px * var(--font-scale)) solid #0D9488; border-bottom: none;
+      border-radius: 50% 50% 0 0; display: block;
     }
+    .sym-breath {
+      top: calc(8px * var(--font-scale)); right: calc(-3px * var(--font-scale));
+      font-size: calc(12px * var(--font-scale)); font-weight: 700; color: #D97706;
+      -webkit-text-stroke: calc(0.3px * var(--font-scale)) #D97706;
+    }
+    .sym-breath::before { content: '∨'; }
 
     /* Delete × */
     .char-wrap .del-x {
@@ -1282,8 +1284,8 @@
       <div class="sym-tooltip">波浪线</div>
     </button>
     <!-- solid -->
-    <button class="sym-btn" onclick="addUnderlineMark('solid')" title="连字符（上方）">
-      <div class="sym-inner"><span style="border-top:3px solid #2563EB;padding-top:2px;line-height:1;font-size:12px;">文</span></div>
+    <button class="sym-btn" onclick="addUnderlineMark('solid')" title="连字符">
+      <div class="sym-inner"><span style="border-bottom:3px solid #2563EB;padding-bottom:2px;line-height:1;font-size:12px;">文</span></div>
       <div class="sym-tooltip">连字符</div>
     </button>
     <!-- dashed -->
@@ -1304,8 +1306,8 @@
     <div class="tb-sep"></div>
     <!-- triangle -->
     <button class="sym-btn" onclick="addUnderlineMark('triangle')" title="三角（换音位置）">
-      <span style="font-size:14px;color:#0891B2;">▽</span>
-      <div class="sym-tooltip">三角▽</div>
+      <span style="font-size:14px;color:#0891B2;">▲</span>
+      <div class="sym-tooltip">三角▲</div>
     </button>
     <!-- dot below -->
     <button class="sym-btn" onclick="addUnderlineMark('dotbelow')" title="圆点（轻声/弱拍）">
@@ -1313,8 +1315,8 @@
       <div class="sym-tooltip">圆点</div>
     </button>
     <!-- slur arc -->
-    <button class="sym-btn" onclick="addUnderlineMark('slur')" title="连音弧线">
-      <span style="display:inline-block;width:14px;height:7px;border:2px solid #0D9488;border-top:none;border-radius:0 0 50% 50%;"></span>
+    <button class="sym-btn" onclick="addUnderlineMark('slur')" title="连音弧线（上方）">
+      <span style="display:inline-block;width:14px;height:7px;border:2.5px solid #0D9488;border-bottom:none;border-radius:50% 50% 0 0;"></span>
       <div class="sym-tooltip">连音弧</div>
     </button>
     <!-- accent -->
@@ -2220,6 +2222,9 @@
     const covering = annotations.filter(a => a.type==='underline' && absIdx>=a.charIndex && absIdx<a.charIndex+(a.length||1));
     return covering.length > 0 ? covering[covering.length-1] : null;
   }
+  function getCharUlAnns(absIdx) {
+    return annotations.filter(a => a.type==='underline' && absIdx>=a.charIndex && absIdx<a.charIndex+(a.length||1));
+  }
   function getCharTextColorAnn(absIdx) {
     const covering = annotations.filter(a => a.type==='textcolor' && absIdx>=a.charIndex && absIdx<a.charIndex+(a.length||1));
     return covering.length > 0 ? covering[covering.length-1] : null;
@@ -2659,9 +2664,17 @@
           else span.classList.add('has-note-inner');
         }
 
-        // Underline/symbol mark
-        const ulAnn = getCharUlAnn(absIdx);
-        if (ulAnn && ch.trim()) span.classList.add('ul-' + ulAnn.style);
+        // Underline/symbol marks (support multiple per char)
+        const ulAnns = getCharUlAnns(absIdx);
+        const ulAnn = ulAnns.length > 0 ? ulAnns[ulAnns.length-1] : null;
+        if (ch.trim()) {
+          ulAnns.forEach(ua => {
+            const st = ua.style;
+            if (['wavy','solid','dashed','dotted','double'].includes(st)) {
+              span.classList.add('ul-' + st);
+            }
+          });
+        }
 
         // Text color
         const tcAnn = getCharTextColorAnn(absIdx);
@@ -2718,6 +2731,18 @@
             tag.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); showPopover(e, noteAnn); }, {passive:false});
             wrap.appendChild(tag);
           }
+        }
+
+        // Symbol marks (rendered after span is in DOM)
+        if (ch.trim()) {
+          ulAnns.forEach(ua => {
+            const st = ua.style;
+            if (!['wavy','solid','dashed','dotted','double'].includes(st)) {
+              const sym = document.createElement('span');
+              sym.className = 'sym-mark sym-' + st;
+              wrap.appendChild(sym);
+            }
+          });
         }
 
         // Underline del × (on last char of group)
@@ -2870,7 +2895,16 @@
   function addUnderlineMark(style) {
     if (!selRange) return;
     const start=Math.min(selRange.start,selRange.end), len=Math.abs(selRange.end-selRange.start)+1;
-    annotations = annotations.filter(a => !(a.type==='underline' && rangesOverlap(a,start,len)));
+    const LINE_STYLES = ['wavy','solid','dashed','dotted','double'];
+    const BOTTOM_SYMBOLS = ['triangle','dotbelow','accent'];
+    const isLine = LINE_STYLES.includes(style);
+    const isBottomSym = BOTTOM_SYMBOLS.includes(style);
+    // Line styles mutually exclusive; bottom symbols (triangle/dot/accent) mutually exclusive; slur & breath independent
+    if (isLine) {
+      annotations = annotations.filter(a => !(a.type==='underline' && LINE_STYLES.includes(a.style) && rangesOverlap(a,start,len)));
+    } else if (isBottomSym) {
+      annotations = annotations.filter(a => !(a.type==='underline' && BOTTOM_SYMBOLS.includes(a.style) && rangesOverlap(a,start,len)));
+    }
     // Split around spaces — don't mark whitespace
     let runStart = -1;
     for (let i = 0; i < len; i++) {
@@ -3179,8 +3213,18 @@
           else if (iE) span.classList.add('has-note-end');
           else span.classList.add('has-note-inner');
         }
-        const ulAnn=getCharUlAnn(absIdx);
-        if (ulAnn) span.classList.add('ul-'+ulAnn.style);
+        const ulAnnsEx=getCharUlAnns(absIdx);
+        if (ch.trim()) {
+          ulAnnsEx.forEach(ua => {
+            if (['wavy','solid','dashed','dotted','double'].includes(ua.style)) {
+              span.classList.add('ul-'+ua.style);
+            } else {
+              const sym=document.createElement('span');
+              sym.className='sym-mark sym-'+ua.style;
+              wrap.appendChild(sym);
+            }
+          });
+        }
         const tcAnn2=getCharTextColorAnn(absIdx);
         if (tcAnn2) span.style.color=tcAnn2.color;
         const fontAnn2=getCharFontAnn(absIdx);
