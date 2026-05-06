@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>标唱 · LyricNote</title>
+  <link rel="icon" href="data:,">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600&display=swap');
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #EEEAF8;
+      --card: #FFFFFF;
+      --border: #E0DCF4;
+      --primary: #7C3AED;
+      --primary-light: #F5F3FF;
+      --primary-hover: #6D28D9;
+      --text: #1A1830;
+      --muted: #8078A8;
+      --danger: #EF4444;
+      --radius: 20px;
+      --shadow: 0 4px 24px rgba(60,40,120,0.09), 0 1px 4px rgba(60,40,120,0.04);
+      --shadow-float: 0 12px 36px rgba(17,24,39,0.14), 0 3px 10px rgba(17,24,39,0.06);
+      --font-scale: 1;
+    }
+
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .app { width: 100%; max-width: 880px; height: calc(100vh - 48px); display: flex; flex-direction: column; }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      padding: 26px 30px 26px 30px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ── Header ── */
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 18px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, #7C3AED, #A855F7);
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      color: white; font-size: 18px;
+      box-shadow: 0 4px 14px rgba(124,58,237,0.35);
+      flex-shrink: 0;
+    }
+    .title-block { min-width: 0; }
+    .panel-title { font-size: 17px; font-weight: 700; color: var(--text); letter-spacing: 0.02em; }
+    .song-title-row { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .song-title-display {
+      cursor: pointer; padding: 2px 7px; border-radius: 6px; transition: all 0.15s;
+      max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;
+    }
+    .song-title-display:hover { background: #F3F0FF; color: var(--primary); }
+    .song-title-display.placeholder { color: #C4B8E8; font-style: italic; font-weight: 400; }
+    .song-title-input {
+      background: transparent; border: none; border-bottom: 1.5px solid var(--primary);
+      outline: none; padding: 0 4px; font-family: inherit; font-size: 12px; color: var(--text); width: 200px;
+    }
+
+    .header-right { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 13px; border-radius: 10px;
+      font-size: 13px; font-weight: 500; cursor: pointer; border: none;
+      transition: all 0.15s; font-family: inherit; line-height: 1;
+    }
+    .btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+    .btn-outline { background: white; border: 1px solid var(--border); color: var(--text); }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-ghost { background: transparent; color: var(--muted); }
+    .btn-ghost:hover { background: #F3F0FF; color: var(--text); }
+    .btn-warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #B45309; }
+    .btn-warn:hover { background: #FEF3C7; }
+
+    /* ── Zoom control ── */
+    .zoom-control {
+      display: flex; align-items: center; gap: 1px;
+      background: white; border: 1px solid var(--border);
+      border-radius: 10px; padding: 2px; height: 34px;
+    }
+    .zoom-btn {
+      width: 26px; height: 26px; border: none; background: transparent;
+      color: var(--text); cursor: pointer; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 17px; font-weight: 400; transition: all 0.12s;
+      font-family: inherit; line-height: 1; user-select: none;
+    }
+    .zoom-btn:hover { background: var(--primary-light); color: var(--primary); }
+    .zoom-btn:disabled { color: #C4B8E8; cursor: not-allowed; background: transparent; }
+    .zoom-label {
+      font-size: 11px; font-weight: 600; color: var(--muted);
+      min-width: 34px; text-align: center; user-select: none; letter-spacing: 0.02em;
+    }
+
+    /* ── Section mode button ── */
+    .btn-section { background: white; border: 1px solid var(--border); color: var(--text); }
+    .btn-section:hover { border-color: #F59E0B; color: #B45309; background: #FFFBEB; }
+    .btn-section.active { background: #FFFBEB; border-color: #FCD34D; color: #B45309; font-weight: 600; }
+
+    /* ── Lyric scroll ── */
+    .lyric-scroll {
+      flex: 1; overflow-y: auto;
+      padding: 6px 4px 80px 4px;
+      min-height: 0;
+    }
+    .lyric-scroll::-webkit-scrollbar { width: 5px; }
+    .lyric-scroll::-webkit-scrollbar-track { background: transparent; }
+    .lyric-scroll::-webkit-scrollbar-thumb { background: #D0C8F0; border-radius: 4px; }
+    .lyric-scroll::-webkit-scrollbar-thumb:hover { background: #A89FD8; }
+
+    /* ── Section mode layout ── */
+    #lyric-container.section-mode .lyric-line-outer { padding-left: 40px; }
+
+    .lyric-block { display: flex; flex-direction: column; margin-bottom: 6px; }
+
+    .section-label-row {
+      display: flex; align-items: center; gap: 0;
+      margin-bottom: 1px;
+    }
+    .section-label {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.07em;
+      padding: 3px 10px 3px 8px;
+      border-radius: 6px 6px 0 0;
+      cursor: default; user-select: none; margin-left: 2px;
+    }
+    .section-label.clickable { cursor: pointer; transition: opacity 0.15s; }
+    .section-label.clickable:hover { opacity: 0.75; }
+    .sl-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.7; flex-shrink: 0; }
+
+    .sl-intro     { background: #F1F5F9; color: #64748B; }
+    .sl-verse     { background: #EFF6FF; color: #2563EB; }
+    .sl-prechorus { background: #FFF7ED; color: #EA580C; }
+    .sl-chorus    { background: #FFF1F2; color: #E11D48; }
+    .sl-bridge    { background: #F5F3FF; color: #7C3AED; }
+    .sl-interlude { background: #ECFDF5; color: #059669; }
+    .sl-outro     { background: #F8FAFC; color: #475569; }
+
+    .lyric-line-outer { display: flex; align-items: flex-start; position: relative; transition: padding-left 0.2s; }
+
+    .section-trigger {
+      position: absolute; left: 0; top: 6px;
+      width: 34px; height: 34px;
+      display: none;
+      align-items: center; justify-content: center;
+    }
+    .section-mode .section-trigger { display: flex; }
+    .section-trigger-btn {
+      width: 24px; height: 24px; border-radius: 6px;
+      border: 1.5px dashed #CBD5E1; background: white;
+      color: #94A3B8; font-size: 14px; line-height: 1;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: all 0.15s; user-select: none;
+    }
+    .section-trigger-btn:hover { border-color: #F59E0B; color: #F59E0B; background: #FFFBEB; border-style: solid; }
+    .section-trigger-btn.has-sec { border-style: solid; border-color: #FCD34D; color: #D97706; background: #FEF9EE; }
+
+    /* ── Section picker ── */
+    #section-picker {
+      position: fixed; background: white; border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: var(--shadow-float);
+      padding: 8px; z-index: 350; display: none; min-width: 160px;
+    }
+    #section-picker.visible { display: block; }
+    .sp-title { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding: 3px 8px 6px; }
+    .sp-opt {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 8px; cursor: pointer;
+      font-size: 13px; font-weight: 500; transition: background 0.1s;
+    }
+    .sp-opt:hover { background: #F8F6FF; }
+    .sp-opt .sp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .sp-sep { height: 1px; background: var(--border); margin: 4px 0; }
+    .sp-remove {
+      display: flex; align-items: center; gap: 8px;
+      padding: 7px 10px; border-radius: 8px; cursor: pointer;
+      font-size: 12px; color: var(--danger); transition: background 0.1s;
+    }
+    .sp-remove:hover { background: #FEF2F2; }
+
+    /* ── Lyric chars ── */
+    .lyric-line {
+      display: flex; flex-wrap: wrap; align-items: flex-end;
+      padding: 4px 0 8px 0; flex: 1; min-width: 0;
+    }
+    .char-wrap { position: relative; display: inline-block; }
+
+    .lyric-char {
+      font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+      font-size: calc(30px * var(--font-scale));
+      line-height: 1.85;
+      padding: 2px 4px;
+      cursor: default;
+      user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none;
+      display: inline-block; position: relative;
+      transition: background 0.08s;
+    }
+    .lyric-char:hover { background: #F3F0FF; border-radius: 4px; }
+    .lyric-char.sel { background: #EDE9FE; box-shadow: inset 0 0 0 1.5px #A78BFA; border-radius: 4px; }
+
+    /* Color marks */
+    .lyric-char.mark { background: var(--mark-color, transparent); }
+    .lyric-char.mark-start { border-top-left-radius: 6px; border-bottom-left-radius: 6px; padding-left: 5px; }
+    .lyric-char.mark-end   { border-top-right-radius: 6px; border-bottom-right-radius: 6px; padding-right: 5px; }
+
+    /* Note underline (::after) */
+    .lyric-char.has-note { position: relative; }
+    .lyric-char.has-note::after {
+      content: ''; position: absolute; left: 0; right: 0; bottom: -2px;
+      border-bottom: 2px dashed var(--primary); pointer-events: none;
+    }
+    .lyric-char.has-note-inner::after  { left: -3px; right: -3px; }
+    .lyric-char.has-note-start::after  { left: 4px;  right: -3px; }
+    .lyric-char.has-note-end::after    { left: -3px; right: 4px;  }
+    .lyric-char.has-note-single::after { left: 4px;  right: 4px;  }
+
+    /* ── Underline / symbol marks ── */
+    .lyric-char.ul-wavy   { text-decoration: underline wavy #F43F5E;  text-underline-offset: 6px; text-decoration-thickness: 2px; }
+    .lyric-char.ul-solid  { text-decoration: underline solid #2563EB; text-underline-offset: 6px; text-decoration-thickness: 2.5px; }
+    .lyric-char.ul-dashed { text-decoration: underline dashed #059669;text-underline-offset: 6px; text-decoration-thickness: 2px; }
+    .lyric-char.ul-dotted { text-decoration: underline dotted #7C3AED;text-underline-offset: 6px; text-decoration-thickness: 2px; }
+    .lyric-char.ul-double { text-decoration: underline double #EA580C; text-underline-offset: 4px; text-decoration-thickness: 2px; }
+
+    /* Triangle ▽ below */
+    .lyric-char.ul-triangle::before {
+      content: '▽'; position: absolute; bottom: -18px; left: 50%;
+      transform: translateX(-50%); font-size: 9px; color: #0891B2;
+      pointer-events: none; line-height: 1;
+    }
+    /* Dot below */
+    .lyric-char.ul-dotbelow::before {
+      content: '●'; position: absolute; bottom: -15px; left: 50%;
+      transform: translateX(-50%); font-size: 6px; color: #DB2777;
+      pointer-events: none; line-height: 1;
+    }
+    /* Accent > to the left */
+    .lyric-char.ul-accent::before {
+      content: '>'; position: absolute; top: 50%; left: -9px;
+      transform: translateY(-50%); font-size: 11px; font-weight: 700;
+      color: #B45309; pointer-events: none; line-height: 1; font-style: italic;
+    }
+    /* Slur arc — curved underline using border-radius */
+    .lyric-char.ul-slur::after {
+      content: ''; position: absolute;
+      left: 2px; right: 2px; bottom: -8px; height: 8px;
+      border: 2px solid #0D9488; border-top: none;
+      border-radius: 0 0 50% 50%; pointer-events: none;
+    }
+    /* Breath mark ' */
+    .lyric-char.ul-breath::before {
+      content: '𝄊'; position: absolute; top: -4px; right: -4px;
+      font-size: 12px; color: #64748B; pointer-events: none; line-height: 1;
+    }
+
+    /* Delete × */
+    .char-wrap .del-x {
+      position: absolute; top: -7px; right: -7px;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #1F2937; color: white; font-size: 10px; line-height: 16px;
+      text-align: center; cursor: pointer; opacity: 0; transform: scale(0.7);
+      transition: all 0.12s; z-index: 10;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.25); user-select: none; pointer-events: none;
+      font-weight: 600;
+    }
+    .char-wrap:hover .del-x.active { opacity: 1; transform: scale(1); pointer-events: auto; }
+    .char-wrap .del-x:hover { background: var(--danger); }
+    @media (hover: none) {
+      .char-wrap .del-x.active { opacity: 1; transform: scale(1); pointer-events: auto; }
+    }
+
+    /* Note tag */
+    .note-tag {
+      font-family: 'Noto Sans SC', sans-serif; font-size: 12px; font-weight: 500;
+      color: var(--primary); background: var(--primary-light);
+      border-radius: 8px; padding: 2px 9px; margin: 0 3px;
+      cursor: pointer; line-height: 1.5;
+      display: inline-flex; align-items: center;
+      border: 1px solid rgba(124,58,237,0.15);
+      transition: all 0.12s; vertical-align: middle;
+      max-width: 100%; word-break: break-all; white-space: normal;
+    }
+    .note-tag:hover { background: #EDE9FE; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(124,58,237,0.15); }
+
+    /* ── Float toolbar ── */
+    #float-toolbar {
+      position: absolute; background: white;
+      border: 1px solid var(--border); border-radius: 16px;
+      box-shadow: var(--shadow-float); padding: 7px 10px;
+      display: none; flex-direction: column; gap: 6px;
+      z-index: 200; animation: popUp 0.16s ease-out;
+      min-width: 0;
+    }
+    #float-toolbar.visible { display: flex; }
+    @keyframes popUp {
+      from { opacity: 0; transform: translateY(5px) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    #float-toolbar::before {
+      content: ''; position: absolute; top: -6px; left: var(--arrow-x, 50%);
+      transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px;
+      background: white; border-left: 1px solid var(--border); border-top: 1px solid var(--border);
+    }
+    #float-toolbar.flipped::before {
+      top: auto; bottom: -6px; border-left: none; border-top: none;
+      border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+
+    .tb-row { display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; }
+    .tb-row-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      color: #C0B8E0; user-select: none; flex-shrink: 0; min-width: 28px;
+    }
+    .tb-sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
+
+    #palette { display: flex; align-items: center; gap: 4px; }
+    .color-swatch {
+      width: 22px; height: 22px; border-radius: 7px; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.12s; position: relative; flex-shrink: 0;
+    }
+    .color-swatch:hover { transform: translateY(-1px); border-color: rgba(0,0,0,0.2); box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+    .color-swatch .swatch-del {
+      position: absolute; top: -5px; right: -5px; width: 13px; height: 13px; border-radius: 50%;
+      background: #1F2937; color: white; font-size: 9px; line-height: 13px; text-align: center;
+      cursor: pointer; display: none; box-shadow: 0 2px 4px rgba(0,0,0,0.25); user-select: none; font-weight: 500;
+    }
+    .color-swatch .swatch-del:hover { background: var(--danger); }
+    #palette.edit-mode .swatch-del { display: block; }
+    #palette.edit-mode .color-swatch { animation: wiggle 0.6s ease-in-out infinite; cursor: grab; }
+    @keyframes wiggle { 0%,100%{transform:rotate(-1.5deg);} 50%{transform:rotate(1.5deg);} }
+    .color-swatch.dragging { opacity: 0.4; cursor: grabbing; }
+    .color-swatch.drag-over { box-shadow: 0 0 0 2px var(--primary); }
+
+    .palette-edit-btn {
+      width: 22px; height: 22px; border-radius: 7px; border: none;
+      background: transparent; color: var(--muted);
+      cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s;
+    }
+    .palette-edit-btn:hover { background: #F3F0FF; color: var(--text); }
+    .palette-edit-btn.active { background: var(--primary-light); color: var(--primary); }
+    .palette-edit-btn svg { width: 13px; height: 13px; }
+
+    .custom-color-wrap {
+      display: flex; align-items: center; gap: 3px;
+      background: #F8F6FF; border-radius: 9px; padding: 2px; border: 1px solid var(--border);
+    }
+    .color-swatch-custom {
+      width: 20px; height: 20px; border-radius: 6px; cursor: pointer;
+      border: 1.5px dashed #C4B8E8;
+      background: linear-gradient(135deg,#FEF3C7,#DBEAFE,#D1FAE5,#FCE7F3);
+      background-size: 300% 300%; animation: gradShift 4s ease infinite;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.12s; position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    @keyframes gradShift { 0%,100%{background-position:0% 50%;} 50%{background-position:100% 50%;} }
+    .color-swatch-custom.has-color { animation: none; border-style: solid; border-color: rgba(0,0,0,0.15); }
+    .color-swatch-custom:hover { border-style: solid; border-color: var(--primary); }
+    .color-swatch-custom input[type="color"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer; border: none; padding: 0; width: 100%; height: 100%;
+    }
+    .color-swatch-custom span {
+      position: relative; background: rgba(255,255,255,0.85); border-radius: 50%;
+      width: 11px; height: 11px; display: flex; align-items: center; justify-content: center;
+      font-size: 9px; font-weight: 600; color: #64748B;
+    }
+    .color-swatch-custom.has-color span { display: none; }
+    .custom-add-btn {
+      display: none; height: 18px; padding: 0 6px; border-radius: 5px; border: none;
+      background: var(--primary); color: white; font-size: 10px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all 0.12s;
+    }
+    .custom-add-btn:hover { background: var(--primary-hover); }
+    .custom-color-wrap.active .custom-add-btn { display: flex; align-items: center; }
+
+    /* Symbol buttons */
+    .sym-btn {
+      height: 28px; padding: 0 8px; border-radius: 8px; border: none;
+      background: transparent; color: var(--text);
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-family: inherit; transition: all 0.12s;
+      flex-shrink: 0; position: relative; gap: 2px; white-space: nowrap;
+    }
+    .sym-btn:hover { background: #F3F0FF; }
+    .sym-btn .sym-inner {
+      display: flex; flex-direction: column; align-items: center; gap: 1px;
+      font-size: 11px; font-weight: 600; line-height: 1;
+    }
+    .sym-btn .sym-line { height: 2px; width: 14px; border-radius: 1px; }
+    .sym-btn .sym-label { font-size: 9px; color: var(--muted); font-weight: 400; }
+    .sym-btn .sym-tooltip {
+      position: absolute; bottom: calc(100% + 6px); left: 50%;
+      transform: translateX(-50%);
+      background: #1F2937; color: white;
+      font-size: 10px; padding: 3px 7px; border-radius: 5px;
+      white-space: nowrap; pointer-events: none; opacity: 0; transition: opacity 0.12s; font-weight: 500;
+    }
+    .sym-btn:hover .sym-tooltip { opacity: 1; }
+
+    .toolbar-btn {
+      height: 28px; padding: 0 10px; border-radius: 8px; border: none;
+      display: flex; align-items: center; gap: 4px;
+      cursor: pointer; font-size: 12px; font-weight: 500; font-family: inherit;
+      transition: all 0.12s; background: transparent; color: var(--text);
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .toolbar-btn:hover { background: #F3F0FF; }
+    .toolbar-btn.accent { color: var(--primary); }
+    .toolbar-btn.accent:hover { background: var(--primary-light); }
+    .toolbar-btn svg { width: 13px; height: 13px; }
+
+    /* ── Note Editor ── */
+    #note-editor {
+      position: absolute; background: white; border: 1px solid var(--border);
+      border-radius: 16px; box-shadow: var(--shadow-float);
+      padding: 14px; width: 300px; z-index: 210; display: none; animation: popUp 0.16s ease-out;
+    }
+    #note-editor.visible { display: block; }
+    .note-status { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-size: 11px; color: var(--muted); letter-spacing: 0.05em; }
+    .note-status-text { flex: 1; font-weight: 600; }
+    .note-status-text.recording { color: var(--danger); }
+    .rec-wave { display: none; align-items: flex-end; gap: 2px; height: 12px; }
+    .rec-wave.active { display: flex; }
+    .rec-wave span { width: 2px; background: var(--danger); border-radius: 1px; animation: wave 0.9s ease-in-out infinite; }
+    .rec-wave span:nth-child(1){height:40%;animation-delay:0s}
+    .rec-wave span:nth-child(2){height:70%;animation-delay:.15s}
+    .rec-wave span:nth-child(3){height:100%;animation-delay:.3s}
+    .rec-wave span:nth-child(4){height:60%;animation-delay:.45s}
+    .rec-wave span:nth-child(5){height:30%;animation-delay:.6s}
+    @keyframes wave { 0%,100%{transform:scaleY(0.4)} 50%{transform:scaleY(1)} }
+    #note-textarea {
+      width: 100%; min-height: 72px; border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 12px; font-size: 13px; font-family: inherit; line-height: 1.55;
+      outline: none; resize: vertical; color: var(--text);
+    }
+    #note-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    #note-textarea::placeholder { color: #94A3B8; font-style: italic; }
+    .note-editor-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 8px; }
+    .note-mic-toggle {
+      display: flex; align-items: center; gap: 5px; padding: 6px 10px; border-radius: 8px;
+      border: 1px solid var(--border); background: white; color: var(--muted);
+      font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.12s;
+    }
+    .note-mic-toggle:hover { border-color: var(--muted); color: var(--text); }
+    .note-mic-toggle.recording { background: #FEF2F2; border-color: #FECACA; color: var(--danger); }
+    .note-mic-toggle svg { width: 12px; height: 12px; }
+    .note-editor-actions { display: flex; gap: 6px; }
+    .note-btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: inherit; transition: all 0.12s; }
+    .note-btn-cancel { background: transparent; color: var(--muted); }
+    .note-btn-cancel:hover { background: #F3F0FF; color: var(--text); }
+    .note-btn-confirm { background: var(--primary); color: white; }
+    .note-btn-confirm:hover { background: var(--primary-hover); }
+    .note-btn-confirm:disabled { background: #CBD5E1; cursor: not-allowed; }
+
+    /* ── Popover ── */
+    .popover-overlay { position: fixed; inset: 0; z-index: 100; display: none; }
+    .popover-overlay.active { display: block; }
+    .popover-box {
+      position: absolute; background: white; border: 1px solid var(--border);
+      border-radius: 14px; box-shadow: var(--shadow-float);
+      padding: 14px 16px; width: 280px; z-index: 101; font-size: 13px; display: none;
+    }
+    .popover-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .popover-title { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+    .popover-actions { display: flex; gap: 4px; }
+    .popover-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 11px; padding: 4px 8px; border-radius: 6px; font-family: inherit; font-weight: 500; }
+    .popover-btn:hover { background: #F3F0FF; color: var(--text); }
+    .popover-btn.danger:hover { background: #FEF2F2; color: var(--danger); }
+    .popover-text { color: var(--text); line-height: 1.6; word-break: break-word; }
+
+    /* ── Modals ── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(17,24,39,0.5);
+      display: none; align-items: center; justify-content: center;
+      z-index: 300; backdrop-filter: blur(6px);
+    }
+    .modal-backdrop.active { display: flex; }
+    .modal {
+      background: white; border-radius: 22px; padding: 30px;
+      width: 640px; max-width: 92vw; max-height: 88vh;
+      box-shadow: 0 28px 72px rgba(0,0,0,0.22);
+      display: flex; flex-direction: column;
+    }
+    .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
+    .modal-desc { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+    .modal-desc.warn { color: #B45309; background: #FFFBEB; border-radius: 8px; padding: 8px 12px; }
+    .modal-field { margin-bottom: 14px; }
+    .modal-label { display: block; font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+    .modal input[type="text"] { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 15px; font-family: inherit; outline: none; color: var(--text); }
+    .modal input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .modal textarea {
+      width: 100%; min-height: 280px; flex: 1; border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 18px; font-size: 16px;
+      font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+      line-height: 2; resize: vertical; outline: none; color: var(--text);
+    }
+    .modal textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .auto-split-hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+
+    /* ── Preview ── */
+    .preview-modal {
+      background: white; border-radius: 22px; padding: 0;
+      width: 720px; max-width: 94vw; max-height: 92vh;
+      box-shadow: 0 28px 72px rgba(0,0,0,0.22);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .preview-header {
+      padding: 20px 24px; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;
+    }
+    .preview-title { font-size: 16px; font-weight: 700; }
+    .preview-subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .preview-close {
+      background: none; border: none; font-size: 20px; color: var(--muted);
+      cursor: pointer; width: 32px; height: 32px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; line-height: 1;
+    }
+    .preview-close:hover { background: #F3F0FF; color: var(--text); }
+    .preview-body {
+      flex: 1; overflow-y: auto; overflow-x: auto; background: #F3F0EA;
+      padding: 30px; display: flex; justify-content: center; align-items: flex-start; min-height: 0;
+    }
+    .preview-body::-webkit-scrollbar { width: 8px; }
+    .preview-body::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+    .preview-footer {
+      padding: 16px 24px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+      background: #FAFBFC; flex-shrink: 0;
+    }
+
+    /* ── Export sheet ── */
+    .export-sheet {
+      --export-paper: #F7F2E8;
+      --export-ink: #1F2937;
+      --export-muted: #7C6F64;
+      --export-rule: rgba(124,111,100,0.18);
+      --export-accent: #8C6A43;
+      background: var(--export-paper);
+      width: 560px; max-width: 100%;
+      padding: 64px 60px 54px 60px;
+      font-family: 'ZCOOL XiaoWei', 'Noto Serif SC', serif;
+      position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    .export-sheet.export-image { width: 720px; padding: 84px 84px 72px; }
+    .export-sheet.export-pdf   { width: 595px; min-height: 842px; padding: 78px 70px 70px; }
+    .export-header { text-align: center; padding-bottom: 22px; margin-bottom: 38px; border-bottom: 1px solid var(--export-rule); }
+    .export-brand {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: 'Noto Sans SC', sans-serif; font-size: 10px;
+      letter-spacing: 0.32em; text-transform: uppercase; color: var(--export-accent); font-weight: 600; margin-bottom: 16px;
+    }
+    .export-brand::before,.export-brand::after { content:''; width:30px; height:1px; background:rgba(140,106,67,0.35); }
+    .export-title {
+      font-size: 32px; font-weight: 600; color: var(--export-ink); margin-bottom: 10px;
+      font-family: 'ZCOOL XiaoWei','Noto Serif SC',serif; word-break: break-word; line-height: 1.45; letter-spacing: 0.03em;
+    }
+    .export-sheet.export-image .export-title { font-size: 38px; }
+    .export-date { font-family: 'Noto Sans SC',sans-serif; font-size: 11px; color: var(--export-muted); letter-spacing: 0.18em; }
+    .export-lyrics { min-height: 40px; }
+    .export-lyrics .lyric-line { margin-bottom: 26px; break-inside: avoid; page-break-inside: avoid; padding: 0; }
+    .export-lyrics .lyric-char {
+      font-size: 22px; line-height: 2.1; cursor: default; color: var(--export-ink);
+      padding: 1px 2px; font-family: 'ZCOOL XiaoWei','Noto Serif SC',serif;
+    }
+    .export-lyrics .lyric-char:hover { background: inherit; }
+    .export-lyrics .lyric-char.mark { box-shadow: inset 0 -0.55em 0 var(--mark-color,transparent); background: transparent; }
+    .export-lyrics .lyric-char.mark-start,.export-lyrics .lyric-char.mark-end { border-radius:0; padding-left:2px; padding-right:2px; }
+    .export-lyrics .lyric-char.has-note::after { border-bottom-color: var(--export-accent); border-bottom-style: solid; border-bottom-width: 1.5px; bottom: -1px; }
+    .export-lyrics .note-tag { font-size:11px; padding:1px 0 0 0; border-radius:0; background:transparent; color:var(--export-accent); margin-left:6px; font-weight:500; }
+    .export-section-label {
+      font-family: 'Noto Sans SC', sans-serif; font-size: 10px; font-weight: 700;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--export-accent); margin-bottom: 4px; margin-top: 20px; opacity: 0.75;
+    }
+    .export-section-label:first-child { margin-top: 0; }
+    .export-line-note {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 11px; line-height: 1.6; color: var(--export-accent);
+      font-style: italic; margin-top: 2px; margin-bottom: 10px;
+      padding-left: 10px; border-left: 2px solid var(--export-rule);
+      opacity: 0.8;
+    }
+    .export-footer {
+      margin-top: 46px; padding-top: 16px; border-top: 1px solid var(--export-rule);
+      text-align: center; font-family: 'Noto Sans SC',sans-serif;
+      font-size: 9px; color: var(--export-muted); letter-spacing: 0.26em; text-transform: uppercase;
+    }
+
+    /* Export notes section */
+    .export-notes-section {
+      margin-top: 36px;
+      padding-top: 24px;
+      border-top: 1px solid var(--export-rule);
+    }
+    .export-notes-heading {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--export-accent);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+    }
+    .export-notes-heading::after { content: ''; flex: 1; height: 1px; background: var(--export-rule); }
+    .export-notes-body {
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 13px; line-height: 2; color: var(--export-ink);
+    }
+    .export-notes-body .n-line { display: block; }
+    .export-notes-body .n-bullet   { padding-left: 4px; }
+    .export-notes-body .n-numbered { padding-left: 4px; }
+    .export-notes-body .n-star     { color: var(--export-accent); font-weight: 500; }
+    .export-notes-body .n-arrow    { padding-left: 4px; }
+    .export-notes-body .n-rule {
+      display: block; border: none; border-top: 1px solid var(--export-rule);
+      margin: 10px 0; height: 0;
+    }
+    .export-notes-body .n-blank    { display: block; height: 0.5em; }
+
+    /* ── Empty state ── */
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      flex: 1; gap: 12px; padding: 40px; text-align: center;
+    }
+    .empty-icon { font-size: 56px; opacity: 0.18; line-height: 1; filter: grayscale(1); }
+    .empty-title { font-size: 15px; font-weight: 600; color: #9C90C8; }
+    .empty-hint { font-size: 13px; color: #B8B0D4; max-width: 240px; line-height: 1.65; }
+
+    /* ── Notes layout ── */
+    .app { max-width: 1240px !important; }
+
+    /* Card becomes column: [header] [content-row] [bottom-notes] */
+    .content-row {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* Lyric column */
+    .lyric-panel {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ── Margin notes column ── */
+    .margin-col {
+      width: var(--margin-w, 210px);
+      flex-shrink: 0;
+      border-left: 1px solid var(--border);
+      background: #FAFAFA;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+      transition: width 0.2s;
+    }
+    .margin-col.hidden { display: none; }
+
+    .margin-col-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px 8px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: white;
+    }
+    .margin-col-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .margin-col-resize {
+      width: 4px; cursor: col-resize; flex-shrink: 0;
+      background: transparent; border-left: 1px solid var(--border);
+      transition: border-color 0.15s; position: relative;
+    }
+    .margin-col-resize:hover { border-color: var(--primary); }
+    .margin-col-resize.dragging { border-color: var(--primary); }
+
+    /* Margin scroll: synced with lyric-scroll */
+    .margin-scroll {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+      min-height: 0;
+    }
+    .margin-scroll::-webkit-scrollbar { width: 4px; }
+    .margin-scroll::-webkit-scrollbar-thumb { background: #D0C8F0; border-radius: 4px; }
+
+    /* Each margin row aligns with its lyric-block */
+    .margin-row {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      padding: 6px 10px 6px 10px;
+      border-bottom: 1px solid transparent;
+      cursor: pointer;
+      transition: background 0.1s;
+      min-height: 52px; /* synced to lyric-block min height */
+    }
+    .margin-row:hover { background: #F3F0FF; }
+    .margin-row.has-note { background: #FDFCFF; border-bottom-color: var(--border); }
+    .margin-row.editing { background: #F8F6FF; cursor: default; }
+
+    .margin-note-text {
+      font-size: 12px;
+      line-height: 1.65;
+      color: var(--text);
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .margin-note-placeholder {
+      font-size: 11px;
+      color: #D4C8F0;
+      font-style: italic;
+      display: none;
+    }
+    .margin-row:hover .margin-note-placeholder { display: block; }
+    .margin-row.has-note .margin-note-placeholder { display: none; }
+
+    .margin-note-input {
+      width: 100%;
+      border: 1px solid var(--primary);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 12px;
+      font-family: 'Noto Sans SC', sans-serif;
+      line-height: 1.65;
+      outline: none;
+      resize: none;
+      color: var(--text);
+      background: white;
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+      min-height: 56px;
+    }
+    .margin-note-footer {
+      display: flex; justify-content: flex-end; gap: 4px; margin-top: 5px;
+    }
+    .mn-btn {
+      height: 22px; padding: 0 8px; border-radius: 5px; border: none;
+      font-size: 11px; font-weight: 500; cursor: pointer; font-family: inherit;
+      transition: all 0.12s;
+    }
+    .mn-btn-cancel { background: transparent; color: var(--muted); }
+    .mn-btn-cancel:hover { background: #EEE; }
+    .mn-btn-save { background: var(--primary); color: white; }
+    .mn-btn-save:hover { background: var(--primary-hover); }
+
+    /* ── Bottom notes bar ── */
+    .bottom-notes {
+      flex-shrink: 0;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: var(--bottom-notes-h, 150px);
+      min-height: 60px;
+      max-height: 60vh;
+      overflow: hidden;
+    }
+    .bottom-notes.hidden { display: none; }
+
+    .bottom-notes-handle {
+      height: 8px;
+      cursor: row-resize;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #FAFAFA;
+    }
+    .bottom-notes-handle::after {
+      content: '';
+      width: 36px; height: 3px;
+      background: #D0C8F0;
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+    .bottom-notes-handle:hover::after { background: var(--primary); }
+    .bottom-notes-handle.dragging::after { background: var(--primary); }
+
+    .bottom-notes-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      height: 34px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
+      background: white;
+    }
+    .bottom-notes-left {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .bottom-notes-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .qb-btn {
+      height: 22px; padding: 0 7px; border: 1px solid var(--border); background: white;
+      color: var(--text); border-radius: 6px; font-size: 11px; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: all 0.12s;
+      display: inline-flex; align-items: center; white-space: nowrap;
+    }
+    .qb-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .qb-sep { width: 1px; height: 12px; background: var(--border); margin: 0 2px; flex-shrink: 0; display: inline-block; vertical-align: middle; }
+
+    .bottom-notes-right {
+      display: flex; align-items: center; gap: 6px;
+    }
+    .notes-char-count { font-size: 11px; color: var(--muted); }
+    .notes-saved-indicator {
+      font-size: 10px; color: #10B981; font-weight: 500;
+      opacity: 0; transition: opacity 0.4s;
+    }
+    .notes-saved-indicator.show { opacity: 1; }
+
+    .bottom-notes-body {
+      flex: 1; min-height: 0; display: flex;
+    }
+    #notes-textarea {
+      flex: 1; border: none; outline: none; resize: none;
+      padding: 10px 14px;
+      font-size: 13px; font-family: 'Noto Sans SC', sans-serif;
+      line-height: 1.85; color: var(--text); background: white;
+    }
+    #notes-textarea::placeholder { color: #C8BEE8; font-style: italic; }
+
+    /* Notes toggle button */
+    .btn-notes { background: white; border: 1px solid var(--border); color: var(--text); }
+    .btn-notes:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .btn-notes.active { background: var(--primary-light); border-color: rgba(124,58,237,0.35); color: var(--primary); font-weight: 600; }
+
+    .notes-action-btn {
+      width: 24px; height: 24px; border: none; background: transparent; color: var(--muted);
+      cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-size: 13px; transition: all 0.12s; font-family: inherit;
+    }
+    .notes-action-btn:hover { background: #F3F0FF; color: var(--text); }
+    .notes-action-btn.danger:hover { background: #FEF2F2; color: var(--danger); }
+
+    /* ── Responsive ── */
+    @media (max-width: 900px) {
+      body { padding: 12px; align-items: flex-start; }
+      .app { height: calc(100vh - 24px); max-width: 100%; }
+      .card { padding: 18px; }
+    }
+    @media (hover: none) and (pointer: coarse) {
+      .lyric-char { font-size: calc(26px * var(--font-scale)); padding: 4px 5px; }
+      #float-toolbar { padding: 10px 12px; gap: 8px; }
+      .color-swatch { width: 30px; height: 30px; border-radius: 9px; }
+      .toolbar-btn { height: 36px; padding: 0 14px; }
+      .sym-btn { height: 36px; padding: 0 10px; }
+    }
+    @media (max-width: 600px) {
+      body { padding: 8px; }
+      .app { height: calc(100vh - 16px); }
+      .card { padding: 14px; border-radius: 16px; }
+      .panel-header { flex-direction: column; align-items: stretch; gap: 10px; }
+      .header-right { flex-wrap: wrap; }
+      .lyric-char { font-size: calc(22px * var(--font-scale)); }
+      #float-toolbar { max-width: calc(100vw - 24px); }
+      .modal { padding: 20px; width: 100%; border-radius: 16px; }
+      .preview-modal { width: 100%; border-radius: 14px; }
+      .export-sheet { padding: 40px 28px; width: 100%; }
+      .export-sheet.export-image,.export-sheet.export-pdf { width: 100%; min-height: 0; }
+      .export-title { font-size: 24px; }
+      .export-lyrics .lyric-char { font-size: 19px; }
+      .margin-col { display: none; }
+      .bottom-notes { height: 140px !important; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="card">
+    <div class="panel-header">
+      <div class="header-left">
+        <div class="logo-icon">🎵</div>
+        <div class="title-block">
+          <div class="panel-title">标唱 <span style="font-weight:400;font-size:12px;color:var(--muted);margin-left:4px;letter-spacing:0.05em;">LyricNote</span></div>
+          <div class="song-title-row">
+            <span id="song-title-display" class="song-title-display placeholder" onclick="startEditSongTitle()">+ 添加歌名</span>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <!-- Zoom -->
+        <div class="zoom-control" title="缩放字体">
+          <button class="zoom-btn" id="zoom-out-btn" onclick="adjustZoom(-1)" title="缩小">−</button>
+          <span class="zoom-label" id="zoom-label">100%</span>
+          <button class="zoom-btn" id="zoom-in-btn" onclick="adjustZoom(1)" title="放大">+</button>
+        </div>
+        <!-- Notes panel -->
+        <button class="btn btn-notes" id="notes-btn" onclick="toggleNotesPanel()" title="练唱笔记">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          笔记
+        </button>
+        <!-- Section mode -->
+        <button class="btn btn-section" id="section-btn" onclick="toggleSectionMode()" title="划分段落">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          段落
+        </button>
+        <!-- Import -->
+        <button class="btn btn-outline" onclick="openModal(false)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          导入
+        </button>
+        <!-- Edit lyrics (shown when lyrics exist) -->
+        <button class="btn btn-outline" id="edit-lyrics-btn" onclick="openModal(true)" style="display:none" title="编辑当前歌词">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
+          编辑歌词
+        </button>
+        <button class="btn btn-outline" onclick="showPreview('pdf')" title="导出 PDF">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          PDF
+        </button>
+        <button class="btn btn-outline" onclick="showPreview('image')" title="导出图片">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          图片
+        </button>
+      </div>
+    </div>
+
+    <!-- Content row: lyrics + margin notes -->
+    <div class="content-row">
+      <!-- Lyrics column -->
+      <div class="lyric-panel">
+        <div class="lyric-scroll" id="lyric-scroll">
+          <div id="lyric-container"></div>
+        </div>
+      </div>
+
+      <!-- Margin resize handle + margin notes column -->
+      <div class="margin-col-resize hidden" id="margin-resize"></div>
+      <div class="margin-col hidden" id="margin-col">
+        <div class="margin-col-header">
+          <span class="margin-col-title">逐行笔记</span>
+          <button class="notes-action-btn" onclick="toggleMarginNotes()" title="收起逐行笔记">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+        </div>
+        <div class="margin-scroll" id="margin-scroll"></div>
+      </div>
+    </div>
+
+    <!-- Bottom notes bar: 整体总结 -->
+    <div class="bottom-notes hidden" id="bottom-notes">
+      <div class="bottom-notes-handle" id="bottom-notes-handle"></div>
+      <div class="bottom-notes-header">
+        <div class="bottom-notes-left">
+          <span class="bottom-notes-title">整体笔记</span>
+          <button class="qb-btn" onclick="insertNote('• ')">• 圆点</button>
+          <button class="qb-btn" onclick="insertNoteNumbered()">1. 编号</button>
+          <button class="qb-btn" onclick="insertNote('☆ ')">☆ 重点</button>
+          <button class="qb-btn" onclick="insertNote('→ ')">→ 箭头</button>
+          <span class="qb-sep"></span>
+          <button class="qb-btn" onclick="insertNote('\n─────\n')">分隔线</button>
+        </div>
+        <div class="bottom-notes-right">
+          <span class="notes-char-count" id="notes-char-count">0 字</span>
+          <span class="notes-saved-indicator" id="notes-saved">已保存</span>
+          <button class="notes-action-btn danger" onclick="clearNotes()" title="清空整体笔记">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="13" height="13"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="bottom-notes-body">
+        <textarea id="notes-textarea" placeholder="在这里写整体练唱总结...
+
+例如：
+• 副歌第二句注意换气位置
+1. 高音处气息要稳，不要紧
+☆ 情感：第三段需要更有力量感"></textarea>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Float Toolbar -->
+<div id="float-toolbar">
+  <!-- Row 1: Colors -->
+  <div class="tb-row">
+    <span class="tb-row-label">色</span>
+    <div id="palette"></div>
+    <div class="custom-color-wrap" id="custom-wrap">
+      <label class="color-swatch-custom" id="custom-color-trigger" title="自定义颜色">
+        <span>+</span>
+        <input type="color" id="custom-color" value="#FFD54F">
+      </label>
+      <button class="custom-add-btn" id="custom-add-btn" onclick="confirmCustomColor()">加入</button>
+    </div>
+    <button class="palette-edit-btn" id="palette-edit-btn" onclick="togglePaletteEditMode()" title="管理颜色">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/>
+      </svg>
+    </button>
+    <div class="tb-sep"></div>
+    <button class="toolbar-btn accent" onclick="openNoteEditor()" title="语音/文字备注">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+      备注
+    </button>
+  </div>
+  <!-- Row 2: Symbols -->
+  <div class="tb-row" style="padding-top:2px;border-top:1px solid var(--border);">
+    <span class="tb-row-label">记</span>
+    <!-- wavy -->
+    <button class="sym-btn" onclick="addUnderlineMark('wavy')" title="波浪线">
+      <div class="sym-inner"><span style="border-bottom:2px wavy #F43F5E;padding-bottom:2px;line-height:1;font-size:12px;">文</span></div>
+      <div class="sym-tooltip">波浪线</div>
+    </button>
+    <!-- solid -->
+    <button class="sym-btn" onclick="addUnderlineMark('solid')" title="横线">
+      <div class="sym-inner"><span style="border-bottom:2.5px solid #2563EB;padding-bottom:2px;line-height:1;font-size:12px;">文</span></div>
+      <div class="sym-tooltip">横线</div>
+    </button>
+    <!-- dashed -->
+    <button class="sym-btn" onclick="addUnderlineMark('dashed')" title="虚线">
+      <div class="sym-inner"><span style="border-bottom:2px dashed #059669;padding-bottom:2px;line-height:1;font-size:12px;">文</span></div>
+      <div class="sym-tooltip">虚线</div>
+    </button>
+    <!-- dotted -->
+    <button class="sym-btn" onclick="addUnderlineMark('dotted')" title="点线">
+      <div class="sym-inner"><span style="border-bottom:2px dotted #7C3AED;padding-bottom:2px;line-height:1;font-size:12px;">文</span></div>
+      <div class="sym-tooltip">点线</div>
+    </button>
+    <!-- double -->
+    <button class="sym-btn" onclick="addUnderlineMark('double')" title="双线">
+      <div class="sym-inner"><span style="border-bottom:3px double #EA580C;padding-bottom:2px;line-height:1;font-size:12px;">文</span></div>
+      <div class="sym-tooltip">双线</div>
+    </button>
+    <div class="tb-sep"></div>
+    <!-- triangle -->
+    <button class="sym-btn" onclick="addUnderlineMark('triangle')" title="三角（换音位置）">
+      <span style="font-size:14px;color:#0891B2;">▽</span>
+      <div class="sym-tooltip">三角▽</div>
+    </button>
+    <!-- dot below -->
+    <button class="sym-btn" onclick="addUnderlineMark('dotbelow')" title="圆点（轻声/弱拍）">
+      <span style="font-size:16px;color:#DB2777;line-height:1;">·</span>
+      <div class="sym-tooltip">圆点</div>
+    </button>
+    <!-- slur arc -->
+    <button class="sym-btn" onclick="addUnderlineMark('slur')" title="连音弧线">
+      <span style="display:inline-block;width:14px;height:7px;border:2px solid #0D9488;border-top:none;border-radius:0 0 50% 50%;"></span>
+      <div class="sym-tooltip">连音弧</div>
+    </button>
+    <!-- accent -->
+    <button class="sym-btn" onclick="addUnderlineMark('accent')" title="重音（>）">
+      <span style="font-size:13px;font-weight:700;font-style:italic;color:#B45309;">&gt;</span>
+      <div class="sym-tooltip">重音&gt;</div>
+    </button>
+    <!-- breath -->
+    <button class="sym-btn" onclick="addUnderlineMark('breath')" title="换气符">
+      <span style="font-size:14px;color:#64748B;">'</span>
+      <div class="sym-tooltip">换气'</div>
+    </button>
+    <div class="tb-sep"></div>
+    <!-- clear underline -->
+    <button class="toolbar-btn" onclick="clearUnderlineMarks()" title="清除选中区域的记号" style="color:var(--muted);font-size:11px;">
+      清除
+    </button>
+  </div>
+</div>
+
+<!-- Note Editor -->
+<div id="note-editor">
+  <div class="note-status">
+    <div class="rec-wave" id="rec-wave"><span></span><span></span><span></span><span></span><span></span></div>
+    <span class="note-status-text" id="note-status-text">准备中...</span>
+  </div>
+  <textarea id="note-textarea" placeholder="说话或直接输入备注..."></textarea>
+  <div class="note-editor-footer">
+    <button class="note-mic-toggle" id="note-mic-toggle" onclick="toggleNoteRecording()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 1 3 3v7a3 3 0 0 1-6 0V5a3 3 0 0 1 3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+      <span id="note-mic-label">录音</span>
+    </button>
+    <div class="note-editor-actions">
+      <button class="note-btn note-btn-cancel" onclick="cancelNoteEditor()">取消</button>
+      <button class="note-btn note-btn-confirm" id="note-confirm-btn" onclick="confirmNote()" disabled>确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- Note Popover -->
+<div class="popover-overlay" id="popover-overlay" onclick="closePopover()"></div>
+<div class="popover-box" id="popover-box">
+  <div class="popover-header">
+    <span class="popover-title">备注</span>
+    <div class="popover-actions">
+      <button class="popover-btn" onclick="editExistingNote()">编辑</button>
+      <button class="popover-btn danger" onclick="deleteNote()">删除</button>
+    </div>
+  </div>
+  <p class="popover-text" id="popover-text"></p>
+</div>
+
+<!-- Section Picker -->
+<div id="section-picker">
+  <div class="sp-title">选择段落</div>
+  <div id="section-picker-options"></div>
+</div>
+
+<!-- Import / Edit Modal -->
+<div class="modal-backdrop" id="modal" onclick="closeModalIfOut(event)">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">导入新歌词</div>
+    <div class="modal-desc" id="modal-desc">粘贴歌词进行新标注，现有标注会清除。</div>
+    <div class="modal-field">
+      <label class="modal-label" for="song-title-input">歌名（可选）</label>
+      <input type="text" id="song-title-input" placeholder="例如：大鱼 / 海阔天空..." maxlength="60">
+    </div>
+    <div class="modal-field" style="flex:1;display:flex;flex-direction:column;">
+      <label class="modal-label" for="lyrics-input">歌词</label>
+      <textarea id="lyrics-input" placeholder="在此输入或粘贴歌词，自动按换行和标点分句..."></textarea>
+      <p class="auto-split-hint" id="split-hint">自动分行：按换行符 &amp; 中英文标点（，。！？；：、…）拆成一句一行。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" id="import-confirm-btn" onclick="importLyrics()">确认</button>
+    </div>
+  </div>
+</div>
+
+<!-- Export Preview Modal -->
+<div class="modal-backdrop" id="preview-modal-bg" onclick="closePreviewIfOut(event)">
+  <div class="preview-modal">
+    <div class="preview-header">
+      <div>
+        <div class="preview-title" id="preview-title">导出预览</div>
+        <div class="preview-subtitle" id="preview-subtitle">确认后将下载文件</div>
+      </div>
+      <button class="preview-close" onclick="closePreview()">×</button>
+    </div>
+    <div class="preview-body">
+      <div class="export-sheet" id="export-sheet"></div>
+    </div>
+    <div class="preview-footer">
+      <button class="btn btn-ghost" onclick="closePreview()">取消</button>
+      <button class="btn btn-primary" id="preview-confirm-btn" onclick="confirmExport()">下载</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── State ───────────────────────────────────────────
+  let lyrics = '';
+  let songTitle = '';
+  let annotations = []; // {id, charIndex, length, type, color?, content?, style?}
+  let sections    = []; // {id, lineIndex, tag}
+  let selRange = null;
+  let isSelecting = false;
+  let recognition = null;
+  let isNoteRecording = false;
+  let activeNoteId = null;
+  let editingNoteId = null;
+  let noteBaseText = '';
+  let exportFormat = 'pdf';
+  let pendingCustomColor = null;
+  let sectionMode = false;
+  let activeSectionLine = null;
+  let isEditMode = false; // true = editing existing lyrics
+
+  const ZOOM_LEVELS = [0.65, 0.8, 1.0, 1.25, 1.55];
+  let zoomIndex = 2;
+
+  const DEFAULT_PALETTE = ['#FFF59D','#B3E5FC','#C8E6C9','#F8BBD0'];
+  let palette = loadPalette();
+  let paletteEditMode = false;
+
+  const SECTION_TAGS = [
+    { id:'intro',     label:'引子',  cls:'sl-intro',     color:'#64748B' },
+    { id:'verse',     label:'主歌',  cls:'sl-verse',     color:'#2563EB' },
+    { id:'prechorus', label:'预副歌',cls:'sl-prechorus',  color:'#EA580C' },
+    { id:'chorus',    label:'副歌',  cls:'sl-chorus',    color:'#E11D48' },
+    { id:'bridge',    label:'桥段',  cls:'sl-bridge',    color:'#7C3AED' },
+    { id:'interlude', label:'间奏',  cls:'sl-interlude', color:'#059669' },
+    { id:'outro',     label:'尾声',  cls:'sl-outro',     color:'#475569' },
+  ];
+
+  // ─── Init ─────────────────────────────────────────────
+  function init() {
+    setupSpeechRecognition();
+    setupCustomColorPicker();
+    buildSectionPicker();
+    renderPalette();
+    renderLyrics();
+    renderSongTitleDisplay();
+    updateZoomUI();
+    initNotesPanel();
+    document.addEventListener('click', onDocClick);
+  }
+
+  function onDocClick(e) {
+    // Close section picker if click outside
+    const picker = document.getElementById('section-picker');
+    if (picker.classList.contains('visible') && !picker.contains(e.target) && !e.target.closest('.section-trigger-btn') && !e.target.closest('.section-label')) {
+      closeSectionPicker();
+    }
+  }
+
+  // ─── Zoom ─────────────────────────────────────────────
+  function adjustZoom(delta) {
+    zoomIndex = Math.max(0, Math.min(ZOOM_LEVELS.length - 1, zoomIndex + delta));
+    document.documentElement.style.setProperty('--font-scale', ZOOM_LEVELS[zoomIndex]);
+    updateZoomUI();
+  }
+  function updateZoomUI() {
+    const pct = Math.round(ZOOM_LEVELS[zoomIndex] * 100);
+    document.getElementById('zoom-label').textContent = pct + '%';
+    document.getElementById('zoom-out-btn').disabled = zoomIndex === 0;
+    document.getElementById('zoom-in-btn').disabled  = zoomIndex === ZOOM_LEVELS.length - 1;
+  }
+
+  // ─── Song Title ────────────────────────────────────────
+  function renderSongTitleDisplay() {
+    const el = document.getElementById('song-title-display');
+    if (el) {
+      if (songTitle) {
+        el.textContent = songTitle; el.classList.remove('placeholder'); el.title = '点击编辑';
+      } else {
+        el.textContent = '+ 添加歌名'; el.classList.add('placeholder'); el.title = '点击添加';
+      }
+    }
+  }
+  function startEditSongTitle() {
+    const el = document.getElementById('song-title-display');
+    const input = document.createElement('input');
+    input.type = 'text'; input.className = 'song-title-input';
+    input.value = songTitle; input.placeholder = '输入歌名...'; input.maxLength = 60;
+    el.replaceWith(input); input.focus(); input.select();
+    const finish = () => {
+      songTitle = input.value.trim();
+      const newEl = document.createElement('span');
+      newEl.id = 'song-title-display'; newEl.className = 'song-title-display';
+      newEl.onclick = startEditSongTitle; input.replaceWith(newEl);
+      renderSongTitleDisplay();
+    };
+    input.addEventListener('blur', finish);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { input.value = songTitle; input.blur(); }
+    });
+  }
+
+  // ─── Speech ───────────────────────────────────────────
+  function setupSpeechRecognition() {
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    recognition = new SR();
+    recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'zh-CN';
+    recognition.onresult = (e) => {
+      let finalText = '', interimText = '';
+      for (let i = 0; i < e.results.length; i++) {
+        if (e.results[i].isFinal) finalText += e.results[i][0].transcript;
+        else interimText += e.results[i][0].transcript;
+      }
+      const ta = document.getElementById('note-textarea');
+      const sep = noteBaseText && !noteBaseText.endsWith(' ') && !noteBaseText.endsWith('\n') && finalText ? ' ' : '';
+      ta.value = noteBaseText + sep + finalText + interimText;
+      updateConfirmBtn();
+    };
+    recognition.onerror = (e) => {
+      if (e.error === 'no-speech') return;
+      if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+        isNoteRecording = false; setNoteStatus('no-permission');
+        document.getElementById('note-mic-toggle').classList.remove('recording');
+        document.getElementById('note-mic-label').textContent = '录音'; return;
+      }
+      stopNoteRecording();
+    };
+    recognition.onend = () => { if (isNoteRecording) { try { recognition.start(); } catch(err){} } };
+  }
+
+  // ─── Palette ──────────────────────────────────────────
+  function loadPalette() {
+    try { const r = localStorage.getItem('lyricnote_palette'); if (r) { const a = JSON.parse(r); if (Array.isArray(a) && a.length) return a; } } catch(e) {}
+    return [...DEFAULT_PALETTE];
+  }
+  function savePalette() { try { localStorage.setItem('lyricnote_palette', JSON.stringify(palette)); } catch(e){} }
+
+  function renderPalette() {
+    const container = document.getElementById('palette');
+    container.innerHTML = '';
+    container.classList.toggle('edit-mode', paletteEditMode);
+    const editBtn = document.getElementById('palette-edit-btn');
+    if (editBtn) editBtn.classList.toggle('active', paletteEditMode);
+
+    palette.forEach((color, idx) => {
+      const sw = document.createElement('div');
+      sw.className = 'color-swatch'; sw.style.background = color;
+      sw.title = paletteEditMode ? '拖动排序 · 点 × 删除' : color;
+      sw.dataset.idx = idx; sw.draggable = paletteEditMode;
+      sw.addEventListener('click', () => { if (!paletteEditMode) addColorMark(color); });
+      sw.addEventListener('dragstart', (e) => { if (!paletteEditMode){e.preventDefault();return;} sw.classList.add('dragging'); e.dataTransfer.setData('text/plain',String(idx)); });
+      sw.addEventListener('dragend', () => sw.classList.remove('dragging'));
+      sw.addEventListener('dragover', (e) => { if (!paletteEditMode) return; e.preventDefault(); sw.classList.add('drag-over'); });
+      sw.addEventListener('dragleave', () => sw.classList.remove('drag-over'));
+      sw.addEventListener('drop', (e) => {
+        if (!paletteEditMode) return; e.preventDefault(); sw.classList.remove('drag-over');
+        const from = parseInt(e.dataTransfer.getData('text/plain'),10);
+        const to = parseInt(sw.dataset.idx,10);
+        if (isNaN(from)||isNaN(to)||from===to) return;
+        const moved = palette.splice(from,1)[0]; palette.splice(to,0,moved);
+        savePalette(); renderPalette(); if (selRange) showToolbarAtSelection();
+      });
+      const del = document.createElement('div');
+      del.className = 'swatch-del'; del.textContent = '×'; del.title = '删除此颜色';
+      del.addEventListener('click', (e) => { e.stopPropagation(); palette.splice(idx,1); savePalette(); renderPalette(); if (selRange) showToolbarAtSelection(); });
+      del.addEventListener('mousedown', (e) => e.stopPropagation());
+      sw.appendChild(del); container.appendChild(sw);
+    });
+  }
+  function togglePaletteEditMode() { paletteEditMode = !paletteEditMode; renderPalette(); if (selRange) showToolbarAtSelection(); }
+
+  function setupCustomColorPicker() {
+    const input = document.getElementById('custom-color');
+    const trigger = document.getElementById('custom-color-trigger');
+    const wrap = document.getElementById('custom-wrap');
+    input.addEventListener('input', (e) => {
+      pendingCustomColor = e.target.value;
+      trigger.style.background = pendingCustomColor;
+      trigger.classList.add('has-color');
+      wrap.classList.add('active');
+    });
+  }
+  function confirmCustomColor() {
+    if (!pendingCustomColor) return;
+    if (!palette.includes(pendingCustomColor)) { palette.push(pendingCustomColor); savePalette(); }
+    const trigger = document.getElementById('custom-color-trigger');
+    const wrap = document.getElementById('custom-wrap');
+    trigger.style.background = ''; trigger.classList.remove('has-color'); wrap.classList.remove('active');
+    pendingCustomColor = null; renderPalette(); if (selRange) showToolbarAtSelection();
+  }
+
+  // ─── Section mode ─────────────────────────────────────
+  function buildSectionPicker() {
+    const container = document.getElementById('section-picker-options');
+    container.innerHTML = '';
+    SECTION_TAGS.forEach(tag => {
+      const opt = document.createElement('div');
+      opt.className = 'sp-opt';
+      opt.innerHTML = `<span class="sp-dot" style="background:${tag.color}"></span>${tag.label}`;
+      opt.addEventListener('click', () => selectSectionTag(tag.id));
+      container.appendChild(opt);
+    });
+    const sep = document.createElement('div'); sep.className = 'sp-sep'; container.appendChild(sep);
+    const rem = document.createElement('div'); rem.className = 'sp-remove'; rem.textContent = '删除段落标记';
+    rem.addEventListener('click', removeSectionTag); container.appendChild(rem);
+  }
+
+  function toggleSectionMode() {
+    sectionMode = !sectionMode;
+    const btn = document.getElementById('section-btn');
+    btn.classList.toggle('active', sectionMode);
+    renderLyrics();
+  }
+
+  function openSectionPicker(lineIdx, anchorEl) {
+    activeSectionLine = lineIdx;
+    const picker = document.getElementById('section-picker');
+    picker.classList.add('visible');
+    const rect = anchorEl.getBoundingClientRect();
+    let left = rect.left;
+    let top  = rect.bottom + 6;
+    const pw = 170;
+    if (left + pw > window.innerWidth - 12) left = window.innerWidth - pw - 12;
+    if (left < 8) left = 8;
+    if (top + 240 > window.innerHeight - 8) top = rect.top - 240;
+    picker.style.left = left + 'px';
+    picker.style.top  = top  + 'px';
+  }
+  function closeSectionPicker() {
+    document.getElementById('section-picker').classList.remove('visible');
+    activeSectionLine = null;
+  }
+  function selectSectionTag(tagId) {
+    sections = sections.filter(s => s.lineIndex !== activeSectionLine);
+    sections.push({ id: uid(), lineIndex: activeSectionLine, tag: tagId });
+    closeSectionPicker(); renderLyrics();
+  }
+  function removeSectionTag() {
+    sections = sections.filter(s => s.lineIndex !== activeSectionLine);
+    closeSectionPicker(); renderLyrics();
+  }
+
+  // ─── Lyrics Render ────────────────────────────────────
+  function getCharColorAnn(absIdx) {
+    const covering = annotations.filter(a => a.type==='color' && absIdx>=a.charIndex && absIdx<a.charIndex+(a.length||1));
+    return covering.length > 0 ? covering[covering.length-1] : null;
+  }
+  function getCharNoteAnn(absIdx) {
+    return annotations.find(a => a.type==='note' && absIdx>=a.charIndex && absIdx<a.charIndex+(a.length||1)) || null;
+  }
+  function getCharUlAnn(absIdx) {
+    const covering = annotations.filter(a => a.type==='underline' && absIdx>=a.charIndex && absIdx<a.charIndex+(a.length||1));
+    return covering.length > 0 ? covering[covering.length-1] : null;
+  }
+
+  function renderLyrics() {
+    const container = document.getElementById('lyric-container');
+    container.innerHTML = '';
+    container.classList.toggle('section-mode', sectionMode);
+
+    if (!lyrics) {
+      const em = document.createElement('div');
+      em.className = 'empty-state';
+      em.innerHTML = `<div class="empty-icon">🎵</div><div class="empty-title">还没有歌词</div><div class="empty-hint">点击右上角「导入」粘贴歌词，开始标注练唱。</div>`;
+      container.appendChild(em); return;
+    }
+
+    const lines = lyrics.split('\n');
+    let gi = 0;
+
+    lines.forEach((line, lineIdx) => {
+      const block = document.createElement('div');
+      block.className = 'lyric-block';
+
+      // Section label
+      const sec = sections.find(s => s.lineIndex === lineIdx);
+      if (sec) {
+        const tag = SECTION_TAGS.find(t => t.id === sec.tag);
+        if (tag) {
+          const lrow = document.createElement('div');
+          lrow.className = 'section-label-row';
+          const lbl = document.createElement('div');
+          lbl.className = `section-label ${tag.cls}`;
+          if (sectionMode) { lbl.classList.add('clickable'); lbl.title = '修改/删除'; }
+          lbl.innerHTML = `<span class="sl-dot"></span>${tag.label}`;
+          if (sectionMode) lbl.addEventListener('click', (e) => { e.stopPropagation(); openSectionPicker(lineIdx, lbl); });
+          lrow.appendChild(lbl);
+          block.appendChild(lrow);
+        }
+      }
+
+      const outer = document.createElement('div');
+      outer.className = 'lyric-line-outer';
+
+      // Section trigger button
+      const trigger = document.createElement('div');
+      trigger.className = 'section-trigger';
+      const trigBtn = document.createElement('div');
+      trigBtn.className = 'section-trigger-btn' + (sec ? ' has-sec' : '');
+      trigBtn.textContent = sec ? '✎' : '+';
+      trigBtn.title = sec ? '修改段落' : '添加段落';
+      trigBtn.addEventListener('click', (e) => { e.stopPropagation(); openSectionPicker(lineIdx, trigBtn); });
+      trigger.appendChild(trigBtn);
+      outer.appendChild(trigger);
+
+      const lineDiv = document.createElement('div');
+      lineDiv.className = 'lyric-line';
+
+      const chars = Array.from(line);
+      chars.forEach((ch, ci) => {
+        const absIdx = gi + ci;
+        const wrap = document.createElement('div');
+        wrap.className = 'char-wrap';
+        const span = document.createElement('span');
+        span.className = 'lyric-char';
+        span.dataset.idx = absIdx;
+        span.textContent = ch;
+
+        // Color
+        const myAnn = getCharColorAnn(absIdx);
+        if (myAnn) {
+          span.classList.add('mark');
+          span.style.setProperty('--mark-color', myAnn.color);
+          const prevA = ci>0 ? getCharColorAnn(absIdx-1) : null;
+          const nextA = ci<chars.length-1 ? getCharColorAnn(absIdx+1) : null;
+          if (!prevA||prevA.id!==myAnn.id) span.classList.add('mark-start');
+          if (!nextA||nextA.id!==myAnn.id) span.classList.add('mark-end');
+        }
+
+        // Note underline
+        const noteAnn = getCharNoteAnn(absIdx);
+        if (noteAnn) {
+          span.classList.add('has-note');
+          const pn = ci>0 ? getCharNoteAnn(absIdx-1) : null;
+          const nn = ci<chars.length-1 ? getCharNoteAnn(absIdx+1) : null;
+          const iS = !pn||pn.id!==noteAnn.id, iE = !nn||nn.id!==noteAnn.id;
+          if (iS&&iE) span.classList.add('has-note-single');
+          else if (iS) span.classList.add('has-note-start');
+          else if (iE) span.classList.add('has-note-end');
+          else span.classList.add('has-note-inner');
+        }
+
+        // Underline/symbol mark
+        const ulAnn = getCharUlAnn(absIdx);
+        if (ulAnn) span.classList.add('ul-' + ulAnn.style);
+
+        // Selection highlight
+        if (selRange && absIdx >= Math.min(selRange.start,selRange.end) && absIdx <= Math.max(selRange.start,selRange.end)) span.classList.add('sel');
+
+        span.addEventListener('mousedown', (e) => { e.preventDefault(); startSel(absIdx); });
+        span.addEventListener('mousemove', () => { if (isSelecting) extSel(absIdx); });
+        span.addEventListener('touchstart', (e) => { e.preventDefault(); startSel(absIdx); }, {passive:false});
+
+        wrap.appendChild(span);
+
+        // Color del ×
+        if (myAnn) {
+          const nextA2 = ci<chars.length-1 ? getCharColorAnn(absIdx+1) : null;
+          if (!nextA2||nextA2.id!==myAnn.id) {
+            const delX = document.createElement('div');
+            delX.className = 'del-x active'; delX.textContent = '×'; delX.title = '删除色块';
+            delX.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); });
+            delX.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); deleteAnnotation(myAnn.id); }, {passive:false});
+            delX.addEventListener('click', (e) => { e.stopPropagation(); deleteAnnotation(myAnn.id); });
+            wrap.appendChild(delX);
+          }
+        }
+
+        // Note tag
+        if (noteAnn) {
+          const nxt = ci<chars.length-1 ? getCharNoteAnn(absIdx+1) : null;
+          if (!nxt||nxt.id!==noteAnn.id) {
+            const tag = document.createElement('span');
+            tag.className = 'note-tag'; tag.textContent = noteAnn.content;
+            tag.addEventListener('click', (e) => { e.stopPropagation(); showPopover(e, noteAnn); });
+            tag.addEventListener('mousedown', (e) => e.stopPropagation());
+            tag.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); showPopover(e, noteAnn); }, {passive:false});
+            wrap.appendChild(tag);
+          }
+        }
+
+        // Underline del × (on last char of group)
+        if (ulAnn) {
+          const nxtUl = ci<chars.length-1 ? getCharUlAnn(absIdx+1) : null;
+          if (!nxtUl||nxtUl.id!==ulAnn.id) {
+            const delX = document.createElement('div');
+            delX.className = 'del-x active'; delX.textContent = '×'; delX.title = '删除记号';
+            delX.style.background = '#475569';
+            delX.addEventListener('mousedown', (e) => { e.stopPropagation(); e.preventDefault(); });
+            delX.addEventListener('touchstart', (e) => { e.stopPropagation(); e.preventDefault(); deleteAnnotation(ulAnn.id); }, {passive:false});
+            delX.addEventListener('click', (e) => { e.stopPropagation(); deleteAnnotation(ulAnn.id); });
+            wrap.appendChild(delX);
+          }
+        }
+
+        lineDiv.appendChild(wrap);
+      });
+
+      gi += line.length + 1;
+      outer.appendChild(lineDiv);
+      block.appendChild(outer);
+      container.appendChild(block);
+    });
+  }
+
+  // ─── Selection ────────────────────────────────────────
+  function updateSelectionClasses() {
+    const all = document.querySelectorAll('#lyric-container .lyric-char');
+    if (!selRange) { all.forEach(el => el.classList.remove('sel')); return; }
+    const lo = Math.min(selRange.start,selRange.end), hi = Math.max(selRange.start,selRange.end);
+    all.forEach(el => {
+      const idx = parseInt(el.dataset.idx,10);
+      if (idx>=lo && idx<=hi) el.classList.add('sel'); else el.classList.remove('sel');
+    });
+  }
+  function startSel(idx) { isSelecting=true; selRange={start:idx,end:idx}; hideToolbar(); updateSelectionClasses(); }
+  function extSel(idx)  { if (!isSelecting) return; if (selRange&&selRange.end===idx) return; selRange={...selRange,end:idx}; updateSelectionClasses(); }
+  function endSel()     { if (isSelecting&&selRange) { isSelecting=false; showToolbarAtSelection(); } else isSelecting=false; }
+  function clearSelection() { selRange=null; hideToolbar(); updateSelectionClasses(); }
+
+  document.addEventListener('mouseup', endSel);
+  document.addEventListener('touchend', endSel);
+  document.addEventListener('touchcancel', endSel);
+  document.addEventListener('touchmove', (e) => {
+    if (!isSelecting) return;
+    const t = e.touches[0]; if (!t) return;
+    const el = document.elementFromPoint(t.clientX, t.clientY); if (!el) return;
+    const charEl = el.closest('.lyric-char');
+    if (charEl && charEl.dataset.idx !== undefined) { e.preventDefault(); extSel(parseInt(charEl.dataset.idx,10)); }
+  }, {passive:false});
+
+  document.addEventListener('mousedown', (e) => {
+    if (paletteEditMode && !e.target.closest('#palette,#palette-edit-btn')) { paletteEditMode=false; renderPalette(); if (selRange) showToolbarAtSelection(); }
+    const inI = e.target.closest('.lyric-char,.note-tag,#float-toolbar,#note-editor,#popover-box,.modal,.preview-modal,.btn,.del-x,.song-title-display,.song-title-input,.section-trigger-btn,.section-label');
+    if (!inI && selRange) clearSelection();
+  });
+  document.addEventListener('touchstart', (e) => {
+    const inI = e.target.closest('.lyric-char,.note-tag,#float-toolbar,#note-editor,#popover-box,.modal,.preview-modal,.btn,.del-x,.song-title-display,.song-title-input,.swatch-del,.color-swatch,.section-trigger-btn,.section-label');
+    if (!inI) { if (paletteEditMode){paletteEditMode=false;renderPalette();} if (selRange) clearSelection(); }
+  }, {passive:true});
+
+  // ─── Positioning ──────────────────────────────────────
+  function getSelectionBounds() {
+    if (!selRange) return null;
+    const lo=Math.min(selRange.start,selRange.end), hi=Math.max(selRange.start,selRange.end);
+    const sEl=document.querySelector(`.lyric-char[data-idx="${lo}"]`);
+    const eEl=document.querySelector(`.lyric-char[data-idx="${hi}"]`);
+    if (!sEl||!eEl) return null;
+    const sR=sEl.getBoundingClientRect(), eR=eEl.getBoundingClientRect();
+    return {
+      left:Math.min(sR.left,eR.left), right:Math.max(sR.right,eR.right),
+      top:Math.min(sR.top,eR.top), bottom:Math.max(sR.bottom,eR.bottom),
+      centerX:(Math.min(sR.left,eR.left)+Math.max(sR.right,eR.right))/2
+    };
+  }
+  function positionFloat(el, flippedClass='flipped') {
+    const bounds=getSelectionBounds(); if (!bounds) return;
+    requestAnimationFrame(() => {
+      const r=el.getBoundingClientRect(), w=r.width, h=r.height, gap=14, margin=10;
+      let left=bounds.centerX-w/2, top=bounds.bottom+gap, flipped=false;
+      if (top+h>window.innerHeight-margin) { top=bounds.top-h-gap; flipped=true; }
+      if (top<margin) { top=Math.max(margin,bounds.bottom+gap); flipped=false; }
+      if (left<margin) left=margin;
+      if (left+w>window.innerWidth-margin) left=window.innerWidth-w-margin;
+      const arrowX=Math.max(16,Math.min(w-16,bounds.centerX-left));
+      el.style.setProperty('--arrow-x', arrowX+'px');
+      if (flipped) el.classList.add(flippedClass); else el.classList.remove(flippedClass);
+      el.style.left=(left+window.scrollX)+'px';
+      el.style.top=(top+window.scrollY)+'px';
+    });
+  }
+  function showToolbarAtSelection() { const tb=document.getElementById('float-toolbar'); tb.classList.add('visible'); positionFloat(tb); }
+  function hideToolbar() {
+    document.getElementById('float-toolbar').classList.remove('visible');
+    const wrap=document.getElementById('custom-wrap'), trigger=document.getElementById('custom-color-trigger');
+    if (wrap) wrap.classList.remove('active');
+    if (trigger) { trigger.style.background=''; trigger.classList.remove('has-color'); }
+    pendingCustomColor=null;
+  }
+
+  // ─── Annotations ──────────────────────────────────────
+  function addColorMark(color) {
+    if (!selRange) return;
+    const start=Math.min(selRange.start,selRange.end), len=Math.abs(selRange.end-selRange.start)+1;
+    annotations.push({id:uid(), charIndex:start, length:len, type:'color', color});
+    clearSelection(); renderLyrics();
+  }
+  function addUnderlineMark(style) {
+    if (!selRange) return;
+    const start=Math.min(selRange.start,selRange.end), len=Math.abs(selRange.end-selRange.start)+1;
+    // Remove existing underline on same range
+    annotations = annotations.filter(a => !(a.type==='underline' && rangesOverlap(a,start,len)));
+    annotations.push({id:uid(), charIndex:start, length:len, type:'underline', style});
+    clearSelection(); renderLyrics();
+  }
+  function clearUnderlineMarks() {
+    if (!selRange) return;
+    const start=Math.min(selRange.start,selRange.end), len=Math.abs(selRange.end-selRange.start)+1;
+    annotations = annotations.filter(a => !(a.type==='underline' && rangesOverlap(a,start,len)));
+    clearSelection(); renderLyrics();
+  }
+  function rangesOverlap(ann, start, len) {
+    return ann.charIndex < start+len && ann.charIndex+(ann.length||1) > start;
+  }
+  function deleteAnnotation(id) { annotations=annotations.filter(a=>a.id!==id); renderLyrics(); }
+
+  // ─── Note Editor ──────────────────────────────────────
+  function openNoteEditor() {
+    if (!selRange) return;
+    editingNoteId=null;
+    const editor=document.getElementById('note-editor'), ta=document.getElementById('note-textarea');
+    ta.value=''; noteBaseText=''; updateConfirmBtn(); setNoteStatus('ready');
+    hideToolbar(); editor.classList.add('visible'); positionFloat(editor);
+    setTimeout(() => { startNoteRecording(); }, 80);
+  }
+  function setNoteStatus(state) {
+    const text=document.getElementById('note-status-text'), wave=document.getElementById('rec-wave');
+    text.classList.remove('recording'); wave.classList.remove('active');
+    if (state==='recording'){text.textContent='正在聆听...';text.classList.add('recording');wave.classList.add('active');}
+    else if (state==='ready'){text.textContent='准备中...';}
+    else if (state==='idle'){text.textContent='已停止 · 可编辑';}
+    else if (state==='unsupported'){text.textContent='浏览器不支持语音，请手动输入';}
+    else if (state==='no-permission'){text.textContent='⚠ 麦克风权限被拒绝';}
+  }
+  async function startNoteRecording() {
+    if (!recognition){setNoteStatus('unsupported');return;}
+    if (isNoteRecording) return;
+    if (!window.isSecureContext){setNoteStatus('no-permission');return;}
+    try { const stream=await navigator.mediaDevices.getUserMedia({audio:true}); stream.getTracks().forEach(t=>t.stop()); } catch(err){setNoteStatus('no-permission');return;}
+    noteBaseText=document.getElementById('note-textarea').value;
+    isNoteRecording=true;
+    document.getElementById('note-mic-toggle').classList.add('recording');
+    document.getElementById('note-mic-label').textContent='停止';
+    setNoteStatus('recording');
+    try { recognition.start(); } catch(e){}
+  }
+  function stopNoteRecording() {
+    isNoteRecording=false;
+    if (recognition){try{recognition.stop();}catch(e){}}
+    document.getElementById('note-mic-toggle').classList.remove('recording');
+    document.getElementById('note-mic-label').textContent='录音';
+    setNoteStatus('idle');
+  }
+  function toggleNoteRecording() { if (isNoteRecording) stopNoteRecording(); else startNoteRecording(); }
+  function updateConfirmBtn() { document.getElementById('note-confirm-btn').disabled=!document.getElementById('note-textarea').value.trim(); }
+  document.addEventListener('input', (e) => { if (e.target.id==='note-textarea'){if(isNoteRecording)noteBaseText=e.target.value;updateConfirmBtn();} });
+  function cancelNoteEditor() { stopNoteRecording(); document.getElementById('note-editor').classList.remove('visible'); editingNoteId=null; clearSelection(); }
+  function confirmNote() {
+    const content=document.getElementById('note-textarea').value.trim(); if (!content) return;
+    stopNoteRecording();
+    if (editingNoteId) { const ann=annotations.find(a=>a.id===editingNoteId); if(ann) ann.content=content; editingNoteId=null; }
+    else if (selRange) {
+      const start=Math.min(selRange.start,selRange.end), len=Math.abs(selRange.end-selRange.start)+1;
+      annotations.push({id:uid(), charIndex:start, length:len, type:'note', content});
+    }
+    document.getElementById('note-editor').classList.remove('visible');
+    clearSelection(); renderLyrics();
+  }
+
+  // ─── Popover ──────────────────────────────────────────
+  function showPopover(e, ann) {
+    activeNoteId=ann.id;
+    const box=document.getElementById('popover-box'), overlay=document.getElementById('popover-overlay');
+    document.getElementById('popover-text').textContent=ann.content;
+    let anchor=(e.currentTarget&&e.currentTarget.getBoundingClientRect)?e.currentTarget:(e.target&&e.target.closest?e.target.closest('.note-tag'):null);
+    let rect;
+    if (anchor) rect=anchor.getBoundingClientRect();
+    else if (e.touches&&e.touches[0]){const t=e.touches[0];rect={left:t.clientX,right:t.clientX,top:t.clientY,bottom:t.clientY};}
+    else rect={left:100,right:100,top:100,bottom:100};
+    box.style.display='block'; overlay.classList.add('active');
+    requestAnimationFrame(() => {
+      const bw=box.offsetWidth;
+      let left=rect.left+window.scrollX;
+      if (left+bw>window.innerWidth-12) left=window.innerWidth-bw-12;
+      if (left<12) left=12;
+      box.style.left=left+'px'; box.style.top=(rect.bottom+window.scrollY+8)+'px';
+    });
+  }
+  function closePopover() { document.getElementById('popover-box').style.display='none'; document.getElementById('popover-overlay').classList.remove('active'); activeNoteId=null; }
+  function deleteNote() { if(activeNoteId){annotations=annotations.filter(a=>a.id!==activeNoteId);closePopover();renderLyrics();} }
+  function editExistingNote() {
+    if (!activeNoteId) return;
+    const ann=annotations.find(a=>a.id===activeNoteId); if (!ann) return;
+    editingNoteId=activeNoteId;
+    selRange={start:ann.charIndex,end:ann.charIndex+(ann.length||1)-1};
+    renderLyrics(); closePopover();
+    const editor=document.getElementById('note-editor'), ta=document.getElementById('note-textarea');
+    ta.value=ann.content; noteBaseText=ann.content; updateConfirmBtn(); setNoteStatus('idle');
+    editor.classList.add('visible'); positionFloat(editor);
+    setTimeout(()=>ta.focus(),50);
+  }
+
+  // ─── Import / Edit Modal ─────────────────────────────
+  function openModal(editMode) {
+    isEditMode = !!editMode;
+    document.getElementById('modal').classList.add('active');
+    document.getElementById('song-title-input').value = songTitle;
+
+    if (isEditMode && lyrics) {
+      document.getElementById('modal-title').textContent = '编辑歌词';
+      const annCount = annotations.length + sections.length;
+      const desc = document.getElementById('modal-desc');
+      if (annCount > 0) {
+        desc.textContent = `注意：修改后确认将清除现有 ${annCount} 处标注及段落。`;
+        desc.className = 'modal-desc warn';
+      } else {
+        desc.textContent = '直接修改歌词内容，确认后重新生成。';
+        desc.className = 'modal-desc';
+      }
+      document.getElementById('lyrics-input').value = lyrics;
+      document.getElementById('split-hint').textContent = '编辑模式：仅按换行符分行，不自动分句。';
+      document.getElementById('import-confirm-btn').textContent = '确认修改';
+    } else {
+      document.getElementById('modal-title').textContent = '导入新歌词';
+      document.getElementById('modal-desc').textContent = '粘贴歌词进行新标注，现有标注会清除。';
+      document.getElementById('modal-desc').className = 'modal-desc';
+      document.getElementById('lyrics-input').value = '';
+      document.getElementById('split-hint').textContent = '自动分行：按换行符 & 中英文标点（，。！？；：、…）拆成一句一行。';
+      document.getElementById('import-confirm-btn').textContent = '确认';
+    }
+    setTimeout(() => document.getElementById('lyrics-input').focus(), 50);
+  }
+  function closeModal() { document.getElementById('modal').classList.remove('active'); document.getElementById('lyrics-input').value=''; }
+  function closeModalIfOut(e) { if(e.target.id==='modal') closeModal(); }
+
+  function autoSplitLyrics(raw) {
+    if (!raw) return '';
+    const parts=raw.split(/[\n\r,.;:!?，。！？；：、…—\-]+/g)
+      .map(s=>s.trim())
+      .map(s=>s.replace(/^[\s\u3000"'""''`()（）【】\[\]《》「」『』<>]+/,''))
+      .map(s=>s.replace(/[\s\u3000"'""''`()（）【】\[\]《》「」『』<>]+$/,''))
+      .filter(s=>s.length>0);
+    return parts.join('\n');
+  }
+
+  function importLyrics() {
+    const rawTitle=document.getElementById('song-title-input').value.trim();
+    const raw=document.getElementById('lyrics-input').value;
+    let processed;
+    if (isEditMode) {
+      processed = raw.split(/[\n\r]+/).map(s=>s.trim()).filter(s=>s.length>0).join('\n');
+    } else {
+      processed = autoSplitLyrics(raw);
+    }
+    if (!processed) return;
+    songTitle=rawTitle; lyrics=processed;
+    annotations=[]; sections=[]; selRange=null;
+    hideToolbar(); closeModal(); renderLyrics(); renderSongTitleDisplay();
+    document.getElementById('edit-lyrics-btn').style.display='';
+    afterLyricsUpdate();
+  }
+
+  // ─── Export Preview ────────────────────────────────────
+  function showPreview(format) {
+    exportFormat=format; buildExportSheet();
+    document.getElementById('preview-title').textContent=format==='pdf'?'导出 PDF 预览':'导出图片预览';
+    document.getElementById('preview-subtitle').textContent=format==='pdf'?'将按 A4 自动分页':'完整长图导出';
+    document.getElementById('preview-confirm-btn').textContent=format==='pdf'?'下载 PDF':'下载图片';
+    document.getElementById('preview-modal-bg').classList.add('active');
+  }
+  function closePreview() { document.getElementById('preview-modal-bg').classList.remove('active'); }
+  function closePreviewIfOut(e) { if(e.target.id==='preview-modal-bg') closePreview(); }
+
+  function buildExportSheet() {
+    const sheet=document.getElementById('export-sheet');
+    sheet.className=`export-sheet ${exportFormat==='pdf'?'export-pdf':'export-image'}`;
+    const today=new Date();
+    const dateStr=`${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
+    const titleHTML=songTitle?`<div class="export-title">${escapeHtml(songTitle)}</div>`:'<div class="export-title">未命名歌词</div>';
+    const footerText=exportFormat==='pdf'?'LyricNote Archive':'LyricNote Poster';
+    const notesRaw = (document.getElementById('notes-textarea').value||'').trim();
+    const notesHTML = notesRaw ? `
+      <div class="export-notes-section">
+        <div class="export-notes-heading">练唱笔记</div>
+        <div class="export-notes-body">${renderNotesAsExportHTML(notesRaw)}</div>
+      </div>` : '';
+    sheet.innerHTML=`
+      <div class="export-header">
+        <div class="export-brand">LyricNote</div>
+        ${titleHTML}
+        <div class="export-date">${dateStr}</div>
+      </div>
+      <div class="export-lyrics" id="export-lyrics-body"></div>
+      ${notesHTML}
+      <div class="export-footer">${footerText}</div>
+    `;
+    renderLyricsInto(document.getElementById('export-lyrics-body'), true);
+  }
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function renderLyricsInto(container, forExport=false) {
+    container.innerHTML='';
+    const lines=lyrics.split('\n');
+    let gi=0;
+    lines.forEach((line, lineIdx) => {
+      // Section label in export
+      if (forExport) {
+        const sec=sections.find(s=>s.lineIndex===lineIdx);
+        if (sec) {
+          const tag=SECTION_TAGS.find(t=>t.id===sec.tag);
+          if (tag) {
+            const lbl=document.createElement('div');
+            lbl.className='export-section-label';
+            lbl.textContent=`— ${tag.label} —`;
+            container.appendChild(lbl);
+          }
+        }
+      }
+
+      const lineDiv=document.createElement('div');
+      lineDiv.className='lyric-line';
+      const chars=Array.from(line);
+      chars.forEach((ch,ci) => {
+        const absIdx=gi+ci;
+        const wrap=document.createElement('div'); wrap.className='char-wrap';
+        const span=document.createElement('span'); span.className='lyric-char'; span.textContent=ch;
+        const myAnn=getCharColorAnn(absIdx);
+        if (myAnn) {
+          span.classList.add('mark'); span.style.setProperty('--mark-color',myAnn.color);
+          const pA=ci>0?getCharColorAnn(absIdx-1):null, nA=ci<chars.length-1?getCharColorAnn(absIdx+1):null;
+          if (!pA||pA.id!==myAnn.id) span.classList.add('mark-start');
+          if (!nA||nA.id!==myAnn.id) span.classList.add('mark-end');
+        }
+        const noteAnn=getCharNoteAnn(absIdx);
+        if (noteAnn) {
+          span.classList.add('has-note');
+          const pn=ci>0?getCharNoteAnn(absIdx-1):null, nn=ci<chars.length-1?getCharNoteAnn(absIdx+1):null;
+          const iS=!pn||pn.id!==noteAnn.id, iE=!nn||nn.id!==noteAnn.id;
+          if (iS&&iE) span.classList.add('has-note-single');
+          else if (iS) span.classList.add('has-note-start');
+          else if (iE) span.classList.add('has-note-end');
+          else span.classList.add('has-note-inner');
+        }
+        const ulAnn=getCharUlAnn(absIdx);
+        if (ulAnn) span.classList.add('ul-'+ulAnn.style);
+        wrap.appendChild(span);
+        if (noteAnn) {
+          const nn2=ci<chars.length-1?getCharNoteAnn(absIdx+1):null;
+          if (!nn2||nn2.id!==noteAnn.id) {
+            const tag=document.createElement('span'); tag.className='note-tag'; tag.textContent=noteAnn.content;
+            wrap.appendChild(tag);
+          }
+        }
+        lineDiv.appendChild(wrap);
+      });
+      gi+=line.length+1;
+      container.appendChild(lineDiv);
+      // Per-line note in export
+      if (forExport) {
+        const ln = lineNotes.find(n => n.lineIndex === lineIdx);
+        if (ln && ln.text.trim()) {
+          const noteDiv = document.createElement('div');
+          noteDiv.className = 'export-line-note';
+          noteDiv.textContent = ln.text.trim();
+          container.appendChild(noteDiv);
+        }
+      }
+    });
+  }
+
+  function getCanvasOptions(element, scale=2) {
+    const rect=element.getBoundingClientRect();
+    return {
+      scale, useCORS:true,
+      backgroundColor: getComputedStyle(element).backgroundColor||'#FFFFFF',
+      width:Math.ceil(rect.width), height:Math.ceil(element.scrollHeight),
+      windowWidth:Math.ceil(rect.width), windowHeight:Math.ceil(element.scrollHeight),
+      scrollX:0, scrollY:-window.scrollY
+    };
+  }
+
+  function buildPdfPages() {
+    const sheet=document.getElementById('export-sheet');
+    const lyricBody=document.getElementById('export-lyrics-body');
+    const notesSection=sheet.querySelector('.export-notes-section');
+    const lineEls=lyricBody?Array.from(lyricBody.querySelectorAll('.lyric-line,.export-section-label,.export-line-note')):[];
+    if (!lineEls.length) { const only=sheet.cloneNode(true); ['position','opacity','left','top','visibility'].forEach(p=>only.style[p]=''); return [only]; }
+    const header=sheet.querySelector('.export-header'), footer=sheet.querySelector('.export-footer');
+    const notesSectionHTML=notesSection?notesSection.outerHTML:'';
+    const sheetStyle=getComputedStyle(sheet);
+    const pageHeight=842;
+    const usableH=pageHeight-parseFloat(sheetStyle.paddingTop)-parseFloat(sheetStyle.paddingBottom)-header.offsetHeight-footer.offsetHeight-40;
+    const offscreen=(el)=>{el.style.cssText='position:fixed;left:-99999px;top:0;opacity:1;pointer-events:none;z-index:-1;';}
+    const clearStage=(el)=>{['position','left','top','opacity','pointerEvents','zIndex','visibility'].forEach(p=>el.style[p]='');}
+    const createShell=(includeNotes=false)=>{
+      const p=sheet.cloneNode(false); p.className=sheet.className;
+      p.innerHTML=`<div class="export-header">${header.innerHTML}</div><div class="export-lyrics"></div>${includeNotes?notesSectionHTML:''}<div class="export-footer">${footer.innerHTML}</div>`;
+      return p;
+    };
+    const pages=[]; let cur=createShell(); offscreen(cur); document.body.appendChild(cur); let curL=cur.querySelector('.export-lyrics');
+    const snap=(isLast=false)=>{
+      // On last page: rebuild with notes section included so it flows naturally
+      if (isLast && notesSectionHTML) {
+        cur.remove();
+        cur=createShell(true); offscreen(cur); document.body.appendChild(cur);
+        curL=cur.querySelector('.export-lyrics');
+        // re-append all children of the page's lyrics that we already built
+        Array.from(pages.length>0?[]:[] ).forEach(c=>curL.appendChild(c)); // placeholder — handled below
+      }
+      const s=cur.cloneNode(true); clearStage(s); pages.push(s);
+    };
+    lineEls.forEach((line, idx)=>{
+      curL.appendChild(line.cloneNode(true));
+      const isLast = idx === lineEls.length - 1;
+      if (!isLast && curL.scrollHeight>usableH && curL.children.length>1) {
+        curL.removeChild(curL.lastChild); snap(); cur.remove();
+        cur=createShell(); offscreen(cur); document.body.appendChild(cur); curL=cur.querySelector('.export-lyrics');
+        curL.appendChild(line.cloneNode(true));
+      }
+    });
+    // Final page: inject notes section into the cloned shell
+    if (notesSectionHTML) {
+      const lastFooter = cur.querySelector('.export-footer');
+      const noteEl = document.createElement('div');
+      noteEl.innerHTML = notesSectionHTML;
+      cur.insertBefore(noteEl.firstElementChild, lastFooter);
+    }
+    const finalSnap = cur.cloneNode(true); clearStage(finalSnap); pages.push(finalSnap);
+    cur.remove(); return pages;
+  }
+
+  async function confirmExport() {
+    const sheet=document.getElementById('export-sheet'), btn=document.getElementById('preview-confirm-btn');
+    btn.disabled=true; btn.textContent='生成中...';
+    try {
+      const d=new Date(), dstr=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+      const safeTitle=(songTitle||'lyrics').replace(/[\/:*?"<>|]/g,'_').slice(0,40);
+      if (exportFormat==='pdf') {
+        const {jsPDF}=window.jspdf, pdf=new jsPDF('p','mm','a4');
+        const pW=pdf.internal.pageSize.getWidth(), pH=pdf.internal.pageSize.getHeight();
+        const pages=buildPdfPages();
+        for (let i=0;i<pages.length;i++) {
+          const page=pages[i];
+          page.style.cssText='position:fixed;left:-99999px;top:0;opacity:1;pointer-events:none;z-index:-1;';
+          document.body.appendChild(page);
+          await new Promise(r=>requestAnimationFrame(r));
+          const pc=await html2canvas(page,getCanvasOptions(page,2.5));
+          const rH=(pc.height*pW)/pc.width;
+          if (i>0) pdf.addPage();
+          pdf.addImage(pc.toDataURL('image/png'),'PNG',0,0,pW,Math.min(pH,rH));
+          page.remove();
+        }
+        pdf.save(`LyricNote_${safeTitle}_${dstr}.pdf`);
+      } else {
+        const canvas=await html2canvas(sheet,getCanvasOptions(sheet,3));
+        const link=document.createElement('a');
+        link.download=`LyricNote_${safeTitle}_${dstr}.png`;
+        link.href=canvas.toDataURL('image/png'); link.click();
+      }
+    } catch(err) { console.error(err); alert('导出失败，请重试'); }
+    btn.disabled=false;
+    btn.textContent=exportFormat==='pdf'?'下载 PDF':'下载图片';
+    closePreview();
+  }
+
+  function uid() { return Math.random().toString(36).slice(2,9); }
+
+  // ─── Notes: state ─────────────────────────────────────
+  let notesSaveTimer = null;
+  let notesVisible = false;
+  let lineNotes = [];       // {id, lineIndex, text}
+  let marginW = 210;
+  let bottomNotesH = 150;
+  let activeLineEditor = null; // {lineIndex, el}
+
+  function initNotesPanel() {
+    // Load summary notes
+    const ta = document.getElementById('notes-textarea');
+    try { const s = localStorage.getItem('lyricnote_notes'); if (s) { ta.value = s; updateNotesCount(); } } catch(e) {}
+    ta.addEventListener('input', () => { updateNotesCount(); clearTimeout(notesSaveTimer); notesSaveTimer = setTimeout(saveNotes, 700); });
+
+    // Load line notes
+    try { const s = localStorage.getItem('lyricnote_line_notes'); if (s) lineNotes = JSON.parse(s); } catch(e) {}
+
+    // Load dimensions
+    try { const w = parseInt(localStorage.getItem('lyricnote_margin_w'),10); if (w>=120&&w<=500) marginW=w; } catch(e) {}
+    try { const h = parseInt(localStorage.getItem('lyricnote_bottom_h'),10); if (h>=60&&h<=600) bottomNotesH=h; } catch(e) {}
+    document.documentElement.style.setProperty('--margin-w', marginW+'px');
+    document.documentElement.style.setProperty('--bottom-notes-h', bottomNotesH+'px');
+
+    // Margin resize (drag right edge of margin col = column left boundary)
+    const resizeHandle = document.getElementById('margin-resize');
+    resizeHandle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const startX = e.clientX, startW = marginW;
+      resizeHandle.classList.add('dragging');
+      const onMove = (e) => {
+        const newW = Math.max(120, Math.min(500, startW - (e.clientX - startX)));
+        marginW = newW;
+        document.documentElement.style.setProperty('--margin-w', newW+'px');
+        document.getElementById('margin-col').style.width = newW+'px';
+        syncMarginScroll();
+        try { localStorage.setItem('lyricnote_margin_w', newW); } catch(e) {}
+      };
+      const onUp = () => { resizeHandle.classList.remove('dragging'); document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+
+    // Bottom notes resize (drag handle)
+    const bnHandle = document.getElementById('bottom-notes-handle');
+    bnHandle.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const startY = e.clientY, startH = bottomNotesH;
+      bnHandle.classList.add('dragging');
+      const onMove = (e) => {
+        const newH = Math.max(60, Math.min(600, startH - (e.clientY - startY)));
+        bottomNotesH = newH;
+        document.documentElement.style.setProperty('--bottom-notes-h', newH+'px');
+        document.getElementById('bottom-notes').style.height = newH+'px';
+        try { localStorage.setItem('lyricnote_bottom_h', newH); } catch(e) {}
+      };
+      const onUp = () => { bnHandle.classList.remove('dragging'); document.removeEventListener('mousemove', onMove); document.removeEventListener('mouseup', onUp); };
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+
+    // Sync margin scroll with lyric scroll
+    const lyricScroll = document.getElementById('lyric-scroll');
+    const marginScroll = document.getElementById('margin-scroll');
+    lyricScroll.addEventListener('scroll', syncMarginScroll);
+    marginScroll.addEventListener('scroll', () => { lyricScroll.scrollTop = marginScroll.scrollTop; });
+  }
+
+  function syncMarginScroll() {
+    const ls = document.getElementById('lyric-scroll');
+    const ms = document.getElementById('margin-scroll');
+    if (ms) ms.scrollTop = ls.scrollTop;
+  }
+
+  // ─── Notes visibility toggle ──────────────────────────
+  function toggleNotesPanel() {
+    notesVisible = !notesVisible;
+    const btn = document.getElementById('notes-btn');
+    const marginCol = document.getElementById('margin-col');
+    const marginResize = document.getElementById('margin-resize');
+    const bottomNotes = document.getElementById('bottom-notes');
+    if (notesVisible) {
+      marginCol.classList.remove('hidden');
+      marginResize.classList.remove('hidden');
+      bottomNotes.classList.remove('hidden');
+      btn.classList.add('active');
+      renderMarginNotes();
+    } else {
+      marginCol.classList.add('hidden');
+      marginResize.classList.add('hidden');
+      bottomNotes.classList.add('hidden');
+      btn.classList.remove('active');
+    }
+  }
+  function toggleMarginNotes() {
+    document.getElementById('margin-col').classList.toggle('hidden');
+    document.getElementById('margin-resize').classList.toggle('hidden');
+  }
+
+  // ─── Margin (per-line) notes ──────────────────────────
+  function renderMarginNotes() {
+    if (!notesVisible) return;
+    const container = document.getElementById('margin-scroll');
+    container.innerHTML = '';
+    if (!lyrics) return;
+    const lines = lyrics.split('\n');
+    lines.forEach((line, lineIdx) => {
+      const note = lineNotes.find(n => n.lineIndex === lineIdx);
+      const row = document.createElement('div');
+      row.className = 'margin-row' + (note ? ' has-note' : '');
+      row.dataset.lineIdx = lineIdx;
+
+      // Match height to corresponding lyric-block
+      const lyricBlock = document.querySelectorAll('#lyric-container .lyric-block')[lineIdx];
+      if (lyricBlock) {
+        // Sync height after paint
+        setTimeout(() => { row.style.minHeight = lyricBlock.offsetHeight + 'px'; }, 0);
+      }
+
+      if (note) {
+        const textEl = document.createElement('div');
+        textEl.className = 'margin-note-text';
+        textEl.textContent = note.text;
+        row.appendChild(textEl);
+      } else {
+        const ph = document.createElement('div');
+        ph.className = 'margin-note-placeholder';
+        ph.textContent = '+ 添加笔记';
+        row.appendChild(ph);
+      }
+
+      row.addEventListener('click', () => openLineNoteEditor(lineIdx, row));
+      container.appendChild(row);
+    });
+  }
+
+  function openLineNoteEditor(lineIdx, rowEl) {
+    // Close any existing editor
+    if (activeLineEditor) closeLineNoteEditor(false);
+
+    rowEl.classList.add('editing');
+    rowEl.innerHTML = '';
+
+    const note = lineNotes.find(n => n.lineIndex === lineIdx);
+    const ta = document.createElement('textarea');
+    ta.className = 'margin-note-input';
+    ta.value = note ? note.text : '';
+    ta.placeholder = '这行的练唱笔记...';
+    ta.rows = 3;
+
+    const footer = document.createElement('div');
+    footer.className = 'margin-note-footer';
+
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'mn-btn mn-btn-cancel';
+    cancelBtn.textContent = '取消';
+    cancelBtn.addEventListener('mousedown', (e) => { e.preventDefault(); closeLineNoteEditor(false); });
+
+    const saveBtn = document.createElement('button');
+    saveBtn.className = 'mn-btn mn-btn-save';
+    saveBtn.textContent = '保存';
+    saveBtn.addEventListener('mousedown', (e) => { e.preventDefault(); saveLineNote(lineIdx, ta.value.trim()); });
+
+    footer.appendChild(cancelBtn);
+    footer.appendChild(saveBtn);
+    rowEl.appendChild(ta);
+    rowEl.appendChild(footer);
+
+    activeLineEditor = { lineIdx, rowEl };
+    setTimeout(() => { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }, 30);
+
+    // Save on Ctrl+Enter
+    ta.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') { e.preventDefault(); saveLineNote(lineIdx, ta.value.trim()); }
+      if (e.key === 'Escape') { e.preventDefault(); closeLineNoteEditor(false); }
+    });
+  }
+
+  function saveLineNote(lineIdx, text) {
+    lineNotes = lineNotes.filter(n => n.lineIndex !== lineIdx);
+    if (text) lineNotes.push({ id: uid(), lineIndex: lineIdx, text });
+    try { localStorage.setItem('lyricnote_line_notes', JSON.stringify(lineNotes)); } catch(e) {}
+    closeLineNoteEditor(true);
+  }
+
+  function closeLineNoteEditor(rerender) {
+    if (!activeLineEditor) return;
+    activeLineEditor = null;
+    if (rerender) renderMarginNotes();
+    else {
+      // Just restore the row visually without full re-render
+      renderMarginNotes();
+    }
+  }
+
+  // ─── Summary (bottom) notes ───────────────────────────
+  function saveNotes() {
+    const ta = document.getElementById('notes-textarea');
+    try { localStorage.setItem('lyricnote_notes', ta.value); } catch(e) {}
+    const ind = document.getElementById('notes-saved');
+    ind.classList.add('show');
+    setTimeout(() => ind.classList.remove('show'), 1600);
+  }
+  function updateNotesCount() {
+    const ta = document.getElementById('notes-textarea');
+    const len = ta.value.replace(/\s/g,'').length;
+    document.getElementById('notes-char-count').textContent = len + ' 字';
+  }
+  function clearNotes() {
+    if (!document.getElementById('notes-textarea').value.trim()) return;
+    if (!confirm('确认清空整体笔记？')) return;
+    document.getElementById('notes-textarea').value = '';
+    updateNotesCount(); saveNotes();
+  }
+  function insertNote(text) {
+    const ta = document.getElementById('notes-textarea');
+    const start = ta.selectionStart, end = ta.selectionEnd;
+    const before = ta.value.slice(0, start), after = ta.value.slice(end);
+    const needsNL = before.length > 0 && !before.endsWith('\n');
+    const ins = (needsNL ? '\n' : '') + text;
+    ta.value = before + ins + after;
+    const pos = before.length + ins.length;
+    ta.setSelectionRange(pos, pos);
+    ta.focus(); ta.dispatchEvent(new Event('input'));
+  }
+  function insertNoteNumbered() {
+    const ta = document.getElementById('notes-textarea');
+    let maxNum = 0;
+    ta.value.split('\n').forEach(l => { const m = l.match(/^(\d+)\./); if (m) maxNum = Math.max(maxNum, parseInt(m[1],10)); });
+    insertNote(`${maxNum + 1}. `);
+  }
+
+  // ─── Notes text parser (shared for export & preview) ──
+  function parseNotesText(text, prefix) {
+    return text.split('\n').map(line => {
+      const t = line.trim();
+      if (!t) return `<span class="${prefix}-blank"></span>`;
+      if (/^[─—]{3,}$/.test(t)) return `<hr class="${prefix}-rule">`;
+      if (/^[•·]\s/.test(t)) return `<span class="${prefix}-line ${prefix}-bullet">${escapeHtml(line)}</span>`;
+      if (/^\d+\.\s/.test(t)) return `<span class="${prefix}-line ${prefix}-numbered">${escapeHtml(line)}</span>`;
+      if (/^[☆★✦✧]\s/.test(t)) return `<span class="${prefix}-line ${prefix}-star">${escapeHtml(line)}</span>`;
+      if (/^[→⇒➜➡]\s/.test(t)) return `<span class="${prefix}-line ${prefix}-arrow">${escapeHtml(line)}</span>`;
+      return `<span class="${prefix}-line">${escapeHtml(line)}</span>`;
+    }).join('');
+  }
+  function renderNotesAsExportHTML(text) { return parseNotesText(text, 'n'); }
+
+  // Re-render margin notes after lyrics update
+  function afterLyricsUpdate() {
+    if (notesVisible) setTimeout(renderMarginNotes, 50);
+  }
+
+  init();
+</script>
+</body>
+</html>
