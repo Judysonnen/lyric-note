@@ -157,8 +157,8 @@
     }
     .section-label {
       display: inline-flex; align-items: center; gap: 5px;
-      font-size: 11px; font-weight: 700; letter-spacing: 0.07em;
-      padding: 3px 10px 3px 8px;
+      font-size: calc(11px * var(--font-scale)); font-weight: 700; letter-spacing: 0.07em;
+      padding: calc(3px * var(--font-scale)) calc(10px * var(--font-scale)) calc(3px * var(--font-scale)) calc(8px * var(--font-scale));
       border-radius: 6px 6px 0 0;
       cursor: default; user-select: none; margin-left: 2px;
     }
@@ -310,9 +310,9 @@
 
     /* Note tag */
     .note-tag {
-      font-family: 'Noto Sans SC', sans-serif; font-size: 12px; font-weight: 500;
+      font-family: 'Noto Sans SC', sans-serif; font-size: calc(12px * var(--font-scale)); font-weight: 500;
       color: var(--primary); background: var(--primary-light);
-      border-radius: 8px; padding: 2px 9px; margin: 0 3px;
+      border-radius: 8px; padding: calc(2px * var(--font-scale)) calc(9px * var(--font-scale)); margin: 0 3px;
       cursor: pointer; line-height: 1.5;
       display: inline-flex; align-items: center;
       border: 1px solid rgba(124,58,237,0.15);
