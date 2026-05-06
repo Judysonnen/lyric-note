@@ -1190,22 +1190,52 @@
       flex: 1; padding: 36px 24px; text-align: center;
     }
     .login-form {
-      width: 100%; max-width: 300px; display: flex; flex-direction: column; gap: 10px;
-      margin-top: 20px;
+      width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 10px;
+      margin-top: 20px; margin-left: auto; margin-right: auto;
     }
+    .login-field { position: relative; }
     .login-input {
-      padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px;
+      width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px;
       font-size: 14px; font-family: inherit; outline: none; color: var(--text);
-      transition: border-color 0.15s;
+      transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box;
     }
     .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
-    .login-actions { display: flex; gap: 8px; margin-top: 6px; }
-    .login-actions .btn { flex: 1; justify-content: center; padding: 10px 16px; font-size: 14px; }
-    .login-error {
-      font-size: 12px; color: var(--danger); margin-top: 6px;
-      min-height: 18px;
+    .login-input.has-error { border-color: var(--danger); }
+    .login-input.has-error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
+    .login-input.is-valid { border-color: #22C55E; }
+    .login-input.is-valid:focus { box-shadow: 0 0 0 3px rgba(34,197,94,0.1); }
+    .field-status {
+      position: absolute; left: 100%; top: 50%; transform: translateY(-50%);
+      margin-left: 8px;
+      font-size: 11px; white-space: nowrap;
+      opacity: 0; transition: opacity 0.2s; pointer-events: none;
     }
-    .login-hint { font-size: 11px; color: var(--muted); margin-top: 10px; line-height: 1.6; }
+    .field-status.visible { opacity: 1; }
+    .field-status.error { color: var(--danger); }
+    .field-status.valid { color: #22C55E; }
+    .field-status.hint { color: #C4B8E8; }
+    /* Password toggle */
+    .pw-wrapper { position: relative; }
+    .pw-wrapper .login-input { padding-right: 40px; }
+    .pw-toggle {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; color: var(--muted);
+      padding: 4px; font-size: 16px; line-height: 1; transition: color 0.12s;
+    }
+    .pw-toggle:hover { color: var(--text); }
+    .login-actions { display: flex; gap: 8px; margin-top: 6px; }
+    .login-actions .btn { flex: 1; justify-content: center; padding: 10px 16px; font-size: 14px; transition: opacity 0.15s; }
+    .login-error {
+      font-size: 12px; color: var(--danger); text-align: center;
+      min-height: 18px; word-break: break-word;
+    }
+    /* Confirm field slide transition */
+    #confirm-field {
+      overflow: hidden; max-height: 0; opacity: 0;
+      transition: max-height 0.25s ease, opacity 0.2s ease, margin 0.25s ease;
+      margin-top: -10px;
+    }
+    #confirm-field.show { max-height: 60px; opacity: 1; margin-top: 0; }
     .user-badge {
       display: inline-flex; align-items: center; gap: 4px;
       font-size: 11px; color: var(--muted); font-weight: 400;
@@ -1253,15 +1283,29 @@
       <div class="home-title">标唱 <span>LyricNote</span></div>
       <div class="home-subtitle">登录以同步你的歌词笔记</div>
       <div class="login-form">
-        <input class="login-input" id="login-username" type="text" placeholder="用户名" autocomplete="username" autofocus>
-        <input class="login-input" id="login-password" type="password" placeholder="密码" autocomplete="current-password">
-        <input class="login-input" id="login-password-confirm" type="password" placeholder="确认密码（仅注册时需要）" autocomplete="new-password" style="display:none">
-        <div class="login-error" id="login-error"></div>
+        <div class="login-field">
+          <input class="login-input" id="login-username" type="text" placeholder="用户名" autocomplete="username" aria-label="用户名" aria-describedby="status-username" maxlength="30" autofocus>
+          <div class="field-status" id="status-username" role="alert" aria-live="polite"></div>
+        </div>
+        <div class="login-field">
+          <div class="pw-wrapper">
+            <input class="login-input" id="login-password" type="password" placeholder="密码" autocomplete="current-password" aria-label="密码" aria-describedby="status-password">
+            <button type="button" class="pw-toggle" onclick="togglePwVisibility('login-password',this)" tabindex="-1" aria-label="显示密码">👁</button>
+          </div>
+          <div class="field-status" id="status-password" role="alert" aria-live="polite"></div>
+        </div>
+        <div class="login-field" id="confirm-field">
+          <div class="pw-wrapper">
+            <input class="login-input" id="login-password-confirm" type="password" placeholder="确认密码" autocomplete="new-password" aria-label="确认密码" aria-describedby="status-confirm" tabindex="-1">
+            <button type="button" class="pw-toggle" onclick="togglePwVisibility('login-password-confirm',this)" tabindex="-1" aria-label="显示密码">👁</button>
+          </div>
+          <div class="field-status" id="status-confirm" role="alert" aria-live="polite"></div>
+        </div>
+        <div class="login-error" id="login-error" role="alert" aria-live="polite"></div>
         <div class="login-actions">
           <button class="btn btn-primary" onclick="doLogin()">登录</button>
           <button class="btn btn-outline" id="register-btn" onclick="handleRegister()">注册</button>
         </div>
-        <div class="login-hint">首次使用请先注册，之后在任何设备登录即可访问你的笔记。</div>
       </div>
     </div>
 
@@ -3984,14 +4028,110 @@
     resetRegisterMode();
   }
 
+  let loginBusy = false;
+  const fieldTouched = {}; // track which fields have been interacted with
+
+  function clearFieldStatuses() {
+    document.querySelectorAll('.field-status').forEach(el => { el.textContent = ''; el.className = 'field-status'; });
+    document.querySelectorAll('.login-input').forEach(el => { el.classList.remove('has-error', 'is-valid'); el.removeAttribute('aria-invalid'); });
+    document.getElementById('login-error').textContent = '';
+    Object.keys(fieldTouched).forEach(k => delete fieldTouched[k]);
+  }
+  function setFieldStatus(inputId, statusId, msg, type) {
+    // type: 'error' | 'valid' | 'hint'
+    const input = document.getElementById(inputId);
+    const el = document.getElementById(statusId);
+    if (input) {
+      input.classList.remove('has-error', 'is-valid');
+      input.removeAttribute('aria-invalid');
+      if (type === 'error') { input.classList.add('has-error'); input.setAttribute('aria-invalid', 'true'); }
+      else if (type === 'valid') input.classList.add('is-valid');
+      // hint: no border change
+    }
+    if (el) {
+      el.className = 'field-status visible ' + type;
+      el.textContent = msg;
+    }
+  }
+  function clearFieldStatus(inputId, statusId) {
+    const input = document.getElementById(inputId);
+    const el = document.getElementById(statusId);
+    if (input) { input.classList.remove('has-error', 'is-valid'); input.removeAttribute('aria-invalid'); }
+    if (el) { el.textContent = ''; el.className = 'field-status'; }
+  }
+  function setLoginBusy(busy) {
+    loginBusy = busy;
+    document.querySelectorAll('.login-actions .btn').forEach(b => {
+      b.disabled = busy;
+      b.style.opacity = busy ? '0.6' : '';
+    });
+  }
+  function togglePwVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') { input.type = 'text'; btn.textContent = '🙈'; }
+    else { input.type = 'password'; btn.textContent = '👁'; }
+  }
+
+  // Real-time field validation
+  function validateField(inputId, hintOnly) {
+    // hintOnly=true: show grey hint, don't mark as error (used on focus before typing)
+    const el = document.getElementById(inputId);
+    if (!el) return true;
+    const val = el.value;
+    const trimVal = val.trim();
+    if (inputId === 'login-username') {
+      const sid = 'status-username';
+      if (!trimVal) {
+        if (hintOnly && registerMode) { setFieldStatus(inputId, sid, '至少 2 位', 'hint'); return false; }
+        if (hintOnly) return false;
+        setFieldStatus(inputId, sid, '请输入', 'error'); return false;
+      }
+      if (registerMode && trimVal.length < 2) { setFieldStatus(inputId, sid, '至少 2 位', hintOnly ? 'hint' : 'error'); return false; }
+      setFieldStatus(inputId, sid, '✓', 'valid'); return true;
+    }
+    if (inputId === 'login-password') {
+      const sid = 'status-password';
+      if (!val) {
+        if (hintOnly && registerMode) { setFieldStatus(inputId, sid, '至少 6 位', 'hint'); return false; }
+        if (hintOnly) return false;
+        setFieldStatus(inputId, sid, '请输入', 'error'); return false;
+      }
+      if (registerMode && val.length < 6) { setFieldStatus(inputId, sid, '至少 6 位', hintOnly ? 'hint' : 'error'); return false; }
+      setFieldStatus(inputId, sid, '✓', 'valid');
+      if (registerMode && fieldTouched['login-password-confirm']) validateField('login-password-confirm');
+      return true;
+    }
+    if (inputId === 'login-password-confirm') {
+      const sid = 'status-confirm';
+      const pw = document.getElementById('login-password').value;
+      if (!val) {
+        if (hintOnly) { setFieldStatus(inputId, sid, '再次输入', 'hint'); return false; }
+        setFieldStatus(inputId, sid, '请输入', 'error'); return false;
+      }
+      if (pw && val !== pw) { setFieldStatus(inputId, sid, '不一致', hintOnly ? 'hint' : 'error'); return false; }
+      if (pw && val === pw) { setFieldStatus(inputId, sid, '✓', 'valid'); return true; }
+      clearFieldStatus(inputId, sid); return true;
+    }
+    return true;
+  }
+
   async function doLogin() {
     if (registerMode) { resetRegisterMode(); return; }
+    if (loginBusy) return;
+    document.getElementById('login-error').textContent = '';
+    // Mark all as touched and validate
+    fieldTouched['login-username'] = true;
+    fieldTouched['login-password'] = true;
+    const v1 = validateField('login-username');
+    const v2 = validateField('login-password');
+    if (!v1 || !v2) {
+      if (!v1) document.getElementById('login-username').focus();
+      else document.getElementById('login-password').focus();
+      return;
+    }
     const username = document.getElementById('login-username').value.trim();
     const password = document.getElementById('login-password').value;
-    const errEl = document.getElementById('login-error');
-    errEl.style.color = '';
-    if (!username || !password) { errEl.textContent = '请输入用户名和密码'; return; }
-    errEl.textContent = '';
+    setLoginBusy(true);
     try {
       const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: toEmail(username), password
@@ -3999,39 +4139,51 @@
       if (error) throw error;
       onAuthSuccess(data.user);
     } catch(e) {
-      errEl.textContent = e.message === 'Invalid login credentials'
-        ? '用户名或密码错误' : '登录失败: ' + e.message;
-    }
+      const msg = e?.message || '未知错误';
+      document.getElementById('login-error').textContent = msg === 'Invalid login credentials'
+        ? '用户名或密码错误' : '登录失败: ' + msg;
+    } finally { setLoginBusy(false); }
   }
 
   let registerMode = false;
 
   function handleRegister() {
-    const confirmInput = document.getElementById('login-password-confirm');
-    const errEl = document.getElementById('login-error');
+    if (loginBusy) return;
     if (!registerMode) {
+      clearFieldStatuses();
       registerMode = true;
-      confirmInput.style.display = '';
-      confirmInput.focus();
+      const cf = document.getElementById('confirm-field');
+      cf.classList.add('show');
+      document.getElementById('login-password-confirm').tabIndex = 0;
       document.getElementById('register-btn').textContent = '确认注册';
-      errEl.textContent = '请再次输入密码确认';
-      errEl.style.color = 'var(--muted)';
+      const u = document.getElementById('login-username');
+      const p = document.getElementById('login-password');
+      const c = document.getElementById('login-password-confirm');
+      if (!u.value.trim()) u.focus();
+      else if (!p.value) p.focus();
+      else c.focus();
       return;
     }
     doRegister();
   }
 
   async function doRegister() {
+    if (loginBusy) return;
+    document.getElementById('login-error').textContent = '';
+    const errEl = document.getElementById('login-error');
+    // Mark all as touched and validate
+    ['login-username','login-password','login-password-confirm'].forEach(id => { fieldTouched[id] = true; });
+    const v1 = validateField('login-username');
+    const v2 = validateField('login-password');
+    const v3 = validateField('login-password-confirm');
+    if (!v1 || !v2 || !v3) {
+      const firstBad = !v1 ? 'login-username' : !v2 ? 'login-password' : 'login-password-confirm';
+      document.getElementById(firstBad).focus();
+      return;
+    }
     const username = document.getElementById('login-username').value.trim();
     const password = document.getElementById('login-password').value;
-    const password2 = document.getElementById('login-password-confirm').value;
-    const errEl = document.getElementById('login-error');
-    errEl.style.color = '';
-    if (!username || !password) { errEl.textContent = '请输入用户名和密码'; return; }
-    if (username.length < 2) { errEl.textContent = '用户名至少 2 个字符'; return; }
-    if (password.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
-    if (password !== password2) { errEl.textContent = '两次输入的密码不一致'; return; }
-    errEl.textContent = '';
+    setLoginBusy(true);
     try {
       const { data, error } = await supabaseClient.auth.signUp({
         email: toEmail(username), password,
@@ -4043,22 +4195,24 @@
         onAuthSuccess(data.user);
       }
     } catch(e) {
-      if (e.message.includes('already registered')) {
+      const msg = e?.message || '未知错误';
+      if (msg.includes('already registered')) {
         errEl.textContent = '该用户名已被注册';
       } else {
-        errEl.textContent = '注册失败: ' + e.message;
+        errEl.textContent = '注册失败: ' + msg;
       }
-    }
+    } finally { setLoginBusy(false); }
   }
 
   function resetRegisterMode() {
     registerMode = false;
+    const confirmField = document.getElementById('confirm-field');
+    if (confirmField) confirmField.classList.remove('show');
     const confirmInput = document.getElementById('login-password-confirm');
-    if (confirmInput) { confirmInput.style.display = 'none'; confirmInput.value = ''; }
+    if (confirmInput) { confirmInput.value = ''; confirmInput.tabIndex = -1; }
     const btn = document.getElementById('register-btn');
     if (btn) btn.textContent = '注册';
-    const errEl = document.getElementById('login-error');
-    if (errEl) { errEl.textContent = ''; errEl.style.color = ''; }
+    clearFieldStatuses();
   }
 
   async function doLogout() {
@@ -4067,12 +4221,32 @@
   }
 
   function setupLoginKeyboard() {
-    ['login-username', 'login-password'].forEach(id => {
+    const fieldMap = {
+      'login-username': 'status-username',
+      'login-password': 'status-password',
+      'login-password-confirm': 'status-confirm'
+    };
+    Object.entries(fieldMap).forEach(([id, sid]) => {
       const el = document.getElementById(id);
-      if (el) el.addEventListener('keydown', (e) => { if (e.key === 'Enter') { resetRegisterMode(); doLogin(); } });
+      if (!el) return;
+      el.addEventListener('focus', () => {
+        if (!fieldTouched[id] && registerMode) validateField(id, true);
+      });
+      el.addEventListener('input', () => {
+        document.getElementById('login-error').textContent = '';
+        if (el.value && registerMode) fieldTouched[id] = true;
+        if (fieldTouched[id]) validateField(id);
+        else if (registerMode) validateField(id, true);
+      });
+      el.addEventListener('blur', () => {
+        if (el.value) { fieldTouched[id] = true; validateField(id); }
+        else if (!fieldTouched[id]) clearFieldStatus(id, sid);
+      });
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); if (registerMode) doRegister(); else doLogin(); }
+        if (e.key === 'Escape' && registerMode) { e.preventDefault(); resetRegisterMode(); }
+      });
     });
-    const confirmEl = document.getElementById('login-password-confirm');
-    if (confirmEl) confirmEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') doRegister(); });
   }
 
   async function pullFromCloud() {
