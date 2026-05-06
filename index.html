@@ -3335,7 +3335,6 @@
     const editor=document.getElementById('note-editor'), ta=document.getElementById('note-textarea');
     ta.value=''; noteBaseText=''; updateConfirmBtn(); setNoteStatus('ready');
     hideToolbar(); editor.classList.add('visible'); positionFloat(editor);
-    setTimeout(() => { startNoteRecording(); }, 80);
   }
   function setNoteStatus(state) {
     const text=document.getElementById('note-status-text'), wave=document.getElementById('rec-wave');
