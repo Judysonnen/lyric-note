@@ -10,29 +10,44 @@
   <!-- Supabase SDK for cloud sync -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600&family=ZCOOL+KuaiLe&family=ZCOOL+QingKe+HuangYou&family=Ma+Shan+Zheng&family=Liu+Jian+Mao+Cao&family=Long+Cang&family=Zhi+Mang+Xing&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=ZCOOL+QingKe+HuangYou&family=Ma+Shan+Zheng&family=Liu+Jian+Mao+Cao&family=Long+Cang&family=Zhi+Mang+Xing&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Caveat:wght@400;500&display=swap');
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #EEEAF8;
-      --card: #FFFFFF;
-      --border: #E0DCF4;
-      --primary: #7C3AED;
-      --primary-light: #F5F3FF;
-      --primary-hover: #6D28D9;
-      --text: #1A1830;
-      --muted: #8078A8;
-      --danger: #EF4444;
-      --radius: 20px;
-      --shadow: 0 4px 24px rgba(60,40,120,0.09), 0 1px 4px rgba(60,40,120,0.04);
-      --shadow-float: 0 12px 36px rgba(17,24,39,0.14), 0 3px 10px rgba(17,24,39,0.06);
+      /* Warm cream + serif system (style A: 温润书页) */
+      --bg: #FAF5EC;
+      --card: #FFFBF4;
+      --card-warm: #FDF6E9;
+      --border: #E5DAC7;
+      --border-soft: #F0E7D5;
+      --primary: #C76754;          /* dusty rose */
+      --primary-light: #F4DCD4;
+      --primary-hover: #A85543;
+      --accent-lavender: #8B7BAD;
+      --accent-lavender-soft: #E8DFEF;
+      --accent-gold: #C4924A;
+      --accent-gold-soft: #F0E2C5;
+      --accent-sage: #8FA37D;
+      --text: #2A2018;
+      --text-soft: #5C4E40;
+      --muted: #9B8B7A;
+      --faint: #C9B5A0;
+      --danger: #B85543;
+      --radius: 14px;
+      --shadow: 0 4px 24px rgba(120,80,50,0.06), 0 1px 3px rgba(120,80,50,0.04);
+      --shadow-float: 0 12px 36px rgba(120,80,50,0.12), 0 3px 10px rgba(120,80,50,0.06);
       --font-scale: 1;
+      --font-display: "Noto Serif SC", "Cormorant Garamond", serif;
+      --font-latin: "Cormorant Garamond", "Noto Serif SC", serif;
     }
 
     body {
       font-family: 'Noto Sans SC', sans-serif;
       background: var(--bg);
+      background-image:
+        radial-gradient(circle at 15% 25%, rgba(199, 103, 84, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 85% 75%, rgba(139, 123, 173, 0.04) 0%, transparent 50%);
       color: var(--text);
       min-height: 100vh;
       display: flex;
@@ -40,6 +55,7 @@
       justify-content: center;
       padding: 24px;
     }
+    .panel-title { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.04em; }
 
     .app { width: 100%; max-width: 880px; height: calc(100vh - 48px); display: flex; flex-direction: column; }
 
@@ -71,11 +87,12 @@
     .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .logo-icon {
       width: 40px; height: 40px;
-      background: linear-gradient(135deg, #7C3AED, #A855F7);
+      background: linear-gradient(135deg, #C76754 0%, #C4924A 100%);
       border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
-      color: white; font-size: 18px;
-      box-shadow: 0 4px 14px rgba(124,58,237,0.35);
+      color: var(--card); font-size: 20px;
+      font-family: var(--font-display);
+      box-shadow: 0 4px 14px rgba(199, 103, 84, 0.3);
       flex-shrink: 0;
     }
     .title-block { min-width: 0; }
@@ -85,8 +102,8 @@
       cursor: pointer; padding: 2px 7px; border-radius: 6px; transition: all 0.15s;
       max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-weight: 500;
     }
-    .song-title-display:hover { background: #F3F0FF; color: var(--primary); }
-    .song-title-display.placeholder { color: #C4B8E8; font-style: italic; font-weight: 400; }
+    .song-title-display:hover { background: #FDF4EC; color: var(--primary); }
+    .song-title-display.placeholder { color: #C9B5A0; font-style: italic; font-weight: 400; }
     .song-title-input {
       background: transparent; border: none; border-bottom: 1.5px solid var(--primary);
       outline: none; padding: 0 4px; font-family: inherit; font-size: 12px; color: var(--text); width: 200px;
@@ -108,7 +125,7 @@
     .btn-primary { background: var(--primary); color: white; }
     .btn-primary:hover { background: var(--primary-hover); }
     .btn-ghost { background: transparent; color: var(--muted); }
-    .btn-ghost:hover { background: #F3F0FF; color: var(--text); }
+    .btn-ghost:hover { background: #FDF4EC; color: var(--text); }
     .btn-warn { background: #FFFBEB; border: 1px solid #FDE68A; color: #B45309; }
     .btn-warn:hover { background: #FEF3C7; }
 
@@ -126,7 +143,7 @@
       font-family: inherit; line-height: 1; user-select: none;
     }
     .zoom-btn:hover { background: var(--primary-light); color: var(--primary); }
-    .zoom-btn:disabled { color: #C4B8E8; cursor: not-allowed; background: transparent; }
+    .zoom-btn:disabled { color: #C9B5A0; cursor: not-allowed; background: transparent; }
     .zoom-label {
       font-size: 11px; font-weight: 600; color: var(--muted);
       min-width: 34px; text-align: center; user-select: none; letter-spacing: 0.02em;
@@ -145,8 +162,8 @@
     }
     .lyric-scroll::-webkit-scrollbar { width: 5px; }
     .lyric-scroll::-webkit-scrollbar-track { background: transparent; }
-    .lyric-scroll::-webkit-scrollbar-thumb { background: #D0C8F0; border-radius: 4px; }
-    .lyric-scroll::-webkit-scrollbar-thumb:hover { background: #A89FD8; }
+    .lyric-scroll::-webkit-scrollbar-thumb { background: #D9C9B6; border-radius: 4px; }
+    .lyric-scroll::-webkit-scrollbar-thumb:hover { background: #A89580; }
 
     /* ── Section mode layout ── */
     #lyric-container.section-mode .lyric-line-outer { padding-left: 40px; }
@@ -168,13 +185,13 @@
     .section-label.clickable:hover { opacity: 0.75; }
     .sl-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: 0.7; flex-shrink: 0; }
 
-    .sl-intro     { background: #F1F5F9; color: #64748B; }
-    .sl-verse     { background: #EFF6FF; color: #2563EB; }
-    .sl-prechorus { background: #FFF7ED; color: #EA580C; }
-    .sl-chorus    { background: #FFF1F2; color: #E11D48; }
-    .sl-bridge    { background: #F5F3FF; color: #7C3AED; }
-    .sl-interlude { background: #ECFDF5; color: #059669; }
-    .sl-outro     { background: #F8FAFC; color: #475569; }
+    .sl-intro     { background: #F0E7D5; color: #6B5E4F; }
+    .sl-verse     { background: #E5E9DD; color: #6B7F5F; }
+    .sl-prechorus { background: #F0E2C5; color: #C4924A; }
+    .sl-chorus    { background: #F4DCD4; color: #C76754; }
+    .sl-bridge    { background: #E8DFEF; color: #8B7BAD; }
+    .sl-interlude { background: #DDE7E5; color: #5F8079; }
+    .sl-outro     { background: #ECE5D5; color: #88775F; }
 
     .lyric-line-outer { display: flex; align-items: flex-start; position: relative; transition: padding-left 0.2s; }
 
@@ -208,7 +225,7 @@
       padding: 7px 10px; border-radius: 8px; cursor: pointer;
       font-size: 13px; font-weight: 500; transition: background 0.1s;
     }
-    .sp-opt:hover { background: #F8F6FF; }
+    .sp-opt:hover { background: #FDF6EE; }
     .sp-opt .sp-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
     .sp-sep { height: 1px; background: var(--border); margin: 4px 0; }
     .sp-remove {
@@ -235,8 +252,8 @@
       display: inline-block; position: relative;
       transition: background 0.08s;
     }
-    .lyric-char:hover { background: #F3F0FF; border-radius: 4px; }
-    .lyric-char.sel { background: #EDE9FE; box-shadow: inset 0 0 0 1.5px #A78BFA; border-radius: 4px; }
+    .lyric-char:hover { background: #FDF4EC; border-radius: 4px; }
+    .lyric-char.sel { background: #F4DCD4; box-shadow: inset 0 0 0 1.5px #C76754; border-radius: 4px; }
 
     /* Color marks */
     .lyric-char.mark { background: var(--mark-color, transparent); }
@@ -258,7 +275,7 @@
     .lyric-char.ul-wavy   { text-decoration: underline wavy #F43F5E;  text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2px * var(--font-scale)); }
     .lyric-char.ul-solid  { text-decoration: underline solid #2563EB; text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2.5px * var(--font-scale)); }
     .lyric-char.ul-dashed { text-decoration: underline dashed #059669;text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2px * var(--font-scale)); }
-    .lyric-char.ul-dotted { text-decoration: underline dotted #7C3AED;text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2.5px * var(--font-scale)); }
+    .lyric-char.ul-dotted { text-decoration: underline dotted #C76754;text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2.5px * var(--font-scale)); }
     .lyric-char.ul-double { text-decoration: underline double #EA580C; text-underline-offset: calc(10px * var(--font-scale)); text-decoration-thickness: calc(2px * var(--font-scale)); }
 
     /* Symbol marks — rendered as child elements so multiple can coexist */
@@ -342,11 +359,11 @@
       border-radius: 8px; padding: calc(2px * var(--font-scale)) calc(9px * var(--font-scale)); margin: 0 3px;
       cursor: pointer; line-height: 1.5;
       display: inline-flex; align-items: center;
-      border: 1px solid rgba(124,58,237,0.15);
+      border: 1px solid rgba(199,103,84,0.18);
       transition: all 0.12s; vertical-align: middle;
       max-width: 100%; word-break: break-all; white-space: normal;
     }
-    .note-tag:hover { background: #EDE9FE; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(124,58,237,0.15); }
+    .note-tag:hover { background: #F4DCD4; transform: translateY(-1px); box-shadow: 0 2px 6px rgba(199,103,84,0.18); }
 
     /* ── Float toolbar ── */
     #float-toolbar {
@@ -375,7 +392,7 @@
     .tb-row { display: flex; align-items: center; gap: 5px; flex-wrap: nowrap; }
     .tb-row-label {
       font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-      color: #C0B8E0; user-select: none; flex-shrink: 0; min-width: 28px;
+      color: #C9B5A0; user-select: none; flex-shrink: 0; min-width: 28px;
     }
     .tb-sep { width: 1px; height: 20px; background: var(--border); margin: 0 2px; flex-shrink: 0; }
 
@@ -402,7 +419,7 @@
       background: transparent; color: var(--muted);
       cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.12s;
     }
-    .palette-edit-btn:hover { background: #F3F0FF; color: var(--text); }
+    .palette-edit-btn:hover { background: #FDF4EC; color: var(--text); }
     .palette-edit-btn.active { background: var(--primary-light); color: var(--primary); }
     .palette-edit-btn svg { width: 13px; height: 13px; }
 
@@ -415,7 +432,7 @@
       font-size: 13px; font-family: inherit; transition: all 0.12s;
       flex-shrink: 0; position: relative; gap: 2px; white-space: nowrap;
     }
-    .sym-btn:hover { background: #F3F0FF; }
+    .sym-btn:hover { background: #FDF4EC; }
     .sym-btn .sym-inner {
       display: flex; flex-direction: column; align-items: center; gap: 1px;
       font-size: 11px; font-weight: 600; line-height: 1;
@@ -438,7 +455,7 @@
       transition: all 0.12s; background: transparent; color: var(--text);
       white-space: nowrap; flex-shrink: 0;
     }
-    .toolbar-btn:hover { background: #F3F0FF; }
+    .toolbar-btn:hover { background: #FDF4EC; }
     .toolbar-btn.accent { color: var(--primary); }
     .toolbar-btn.accent:hover { background: var(--primary-light); }
     .toolbar-btn svg { width: 13px; height: 13px; }
@@ -467,7 +484,7 @@
       padding: 10px 12px; font-size: 13px; font-family: inherit; line-height: 1.55;
       outline: none; resize: vertical; color: var(--text);
     }
-    #note-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    #note-textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(199,103,84,0.12); }
     #note-textarea::placeholder { color: #94A3B8; font-style: italic; }
     .note-editor-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; gap: 8px; }
     .note-mic-toggle {
@@ -481,7 +498,7 @@
     .note-editor-actions { display: flex; gap: 6px; }
     .note-btn { padding: 7px 14px; border-radius: 8px; font-size: 12px; font-weight: 500; cursor: pointer; border: none; font-family: inherit; transition: all 0.12s; }
     .note-btn-cancel { background: transparent; color: var(--muted); }
-    .note-btn-cancel:hover { background: #F3F0FF; color: var(--text); }
+    .note-btn-cancel:hover { background: #FDF4EC; color: var(--text); }
     .note-btn-confirm { background: var(--primary); color: white; }
     .note-btn-confirm:hover { background: var(--primary-hover); }
     .note-btn-confirm:disabled { background: #CBD5E1; cursor: not-allowed; }
@@ -498,7 +515,7 @@
     .popover-title { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
     .popover-actions { display: flex; gap: 4px; }
     .popover-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 11px; padding: 4px 8px; border-radius: 6px; font-family: inherit; font-weight: 500; }
-    .popover-btn:hover { background: #F3F0FF; color: var(--text); }
+    .popover-btn:hover { background: #FDF4EC; color: var(--text); }
     .popover-btn.danger:hover { background: #FEF2F2; color: var(--danger); }
     .popover-text { color: var(--text); line-height: 1.6; word-break: break-word; }
 
@@ -510,10 +527,79 @@
     }
     .modal-backdrop.active { display: flex; }
     .modal {
-      background: white; border-radius: 22px; padding: 30px;
-      width: 640px; max-width: 92vw; max-height: 88vh;
-      box-shadow: 0 28px 72px rgba(0,0,0,0.22);
+      background: var(--card); border-radius: 22px; padding: 30px;
+      width: 860px; max-width: 94vw; max-height: 88vh;
+      box-shadow: 0 28px 72px rgba(120, 80, 50, 0.22);
       display: flex; flex-direction: column;
+    }
+    .lyrics-edit-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      flex: 1;
+      min-height: 240px;
+    }
+    .lyrics-edit-row > .col {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .lyrics-edit-row .col-label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .lyrics-edit-row .col-label .badge-live {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.16em;
+      color: var(--accent-sage);
+      background: rgba(143, 163, 125, 0.15);
+      padding: 2px 7px;
+      border-radius: 999px;
+      text-transform: uppercase;
+    }
+    #lyrics-preview {
+      flex: 1;
+      min-height: 220px;
+      max-height: 50vh;
+      overflow-y: auto;
+      padding: 14px 16px;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      background: var(--card-warm);
+      font-family: var(--font-display);
+      font-size: 16px;
+      line-height: 1.85;
+      color: var(--text);
+      letter-spacing: 0.05em;
+    }
+    #lyrics-preview .pv-line { padding: 2px 0; border-bottom: 1px dashed transparent; }
+    #lyrics-preview .pv-line + .pv-line { border-top: 1px dashed var(--border-soft); }
+    #lyrics-preview .pv-empty {
+      color: var(--muted);
+      font-style: italic;
+      text-align: center;
+      padding: 32px 12px;
+      font-size: 13px;
+      font-family: 'Noto Sans SC', sans-serif;
+      letter-spacing: 0.02em;
+    }
+    #lyrics-preview-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+      letter-spacing: 0.04em;
+    }
+    @media (max-width: 700px) {
+      .lyrics-edit-row { grid-template-columns: 1fr; }
+      #lyrics-preview { min-height: 120px; max-height: 30vh; }
     }
     .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 5px; }
     .modal-desc { font-size: 13px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
@@ -524,7 +610,7 @@
       width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: 10px;
       font-size: 15px; font-family: inherit; outline: none; color: var(--text); background: white;
     }
-    .modal input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .modal input[type="text"]:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(199,103,84,0.12); }
 
     /* ── Custom date picker trigger ── */
     .date-trigger {
@@ -535,7 +621,7 @@
     }
     .date-trigger:hover { border-color: var(--primary); }
     .date-trigger .dt-icon { color: var(--muted); font-size: 16px; }
-    .date-trigger .dt-placeholder { color: #C4B8E8; }
+    .date-trigger .dt-placeholder { color: #C9B5A0; }
 
     /* ── Custom calendar panel ── */
     .cal-panel {
@@ -578,7 +664,7 @@
       display: flex; align-items: center; justify-content: center;
     }
     .cal-day:hover { background: var(--primary-light); color: var(--primary); }
-    .cal-day.other { color: #D0C8F0; }
+    .cal-day.other { color: #D9C9B6; }
     .cal-day.today { font-weight: 700; box-shadow: inset 0 0 0 1.5px var(--border); }
     .cal-day.selected { background: var(--primary); color: white; font-weight: 600; }
     .cal-day.selected:hover { background: var(--primary-hover); }
@@ -597,14 +683,14 @@
       font-size: 12px; cursor: pointer; font-family: inherit;
       padding: 4px 8px; border-radius: 6px; transition: background 0.12s;
     }
-    .cal-clear-btn:hover { background: #F3F0FF; color: var(--text); }
+    .cal-clear-btn:hover { background: #FDF4EC; color: var(--text); }
     .modal textarea {
       width: 100%; min-height: 280px; flex: 1; border: 1px solid var(--border); border-radius: 12px;
       padding: 16px 18px; font-size: 16px;
       font-family: 'Noto Serif SC', serif;
       line-height: 2; resize: vertical; outline: none; color: var(--text);
     }
-    .modal textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .modal textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(199,103,84,0.12); }
     .auto-split-hint { font-size: 11px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
     .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
 
@@ -626,7 +712,7 @@
       cursor: pointer; width: 32px; height: 32px; border-radius: 8px;
       display: flex; align-items: center; justify-content: center; line-height: 1;
     }
-    .preview-close:hover { background: #F3F0FF; color: var(--text); }
+    .preview-close:hover { background: #FDF4EC; color: var(--text); }
     .preview-body {
       flex: 1; overflow-y: auto; overflow-x: auto; background: #F3F0EA;
       padding: 30px; display: flex; justify-content: center; align-items: flex-start; min-height: 0;
@@ -670,10 +756,28 @@
     .export-date { font-family: 'Noto Sans SC',sans-serif; font-size: 11px; color: var(--export-muted); letter-spacing: 0.18em; }
     .export-lyrics { min-height: 40px; }
     .export-lyrics .lyric-line { margin-bottom: 0; break-inside: avoid; page-break-inside: avoid; padding: 0; }
-    .export-lyrics .lyric-char {
-      font-size: 22px; line-height: 2.1; cursor: default; color: var(--export-ink);
-      padding: 1px 2px; font-family: 'Noto Serif SC',serif;
+    /* Char wrapper reserves vertical space for all symbol marks so multi-layer chars stay aligned with single-layer chars */
+    .export-lyrics .char-wrap {
+      position: relative;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+      padding: 18px 0 16px;
+      margin: 0 1px;
     }
+    .export-lyrics .lyric-char {
+      font-size: 22px; line-height: 1; cursor: default; color: var(--export-ink);
+      padding: 1px 2px; font-family: 'Noto Serif SC',serif;
+      vertical-align: middle;
+      display: inline-block;
+    }
+    /* Stack multiple bottom marks side-by-side rather than overlapping */
+    .export-lyrics .char-wrap > .sym-accent     { bottom: 0; }
+    .export-lyrics .char-wrap > .sym-triangle   { bottom: 0; }
+    .export-lyrics .char-wrap > .sym-dotbelow   { bottom: 2px; }
+    .export-lyrics .char-wrap > .sym-accent ~ .sym-triangle { bottom: 0; left: calc(50% + 8px); }
+    .export-lyrics .char-wrap > .sym-accent ~ .sym-dotbelow,
+    .export-lyrics .char-wrap > .sym-triangle ~ .sym-dotbelow { left: calc(50% - 8px); }
     .export-lyrics .lyric-char:hover { background: inherit; }
     .export-lyrics .lyric-char.mark { box-shadow: inset 0 -0.55em 0 var(--mark-color,transparent); background: transparent; }
     .export-lyrics .lyric-char.mark-start,.export-lyrics .lyric-char.mark-end { border-radius:0; padding-left:2px; padding-right:2px; }
@@ -759,10 +863,10 @@
     }
     .home-logo {
       width: 64px; height: 64px; border-radius: 18px;
-      background: linear-gradient(135deg, #7C3AED, #A855F7);
+      background: linear-gradient(135deg, #C76754, #D87E6B);
       display: flex; align-items: center; justify-content: center;
       font-size: 28px; color: white;
-      box-shadow: 0 8px 24px rgba(124,58,237,0.3); margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(199,103,84,0.3); margin-bottom: 16px;
     }
     .home-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
     .home-title span { font-weight: 400; font-size: 13px; color: var(--muted); letter-spacing: 0.05em; margin-left: 6px; }
@@ -772,13 +876,121 @@
 
     .recent-section { width: 100%; max-width: 460px; text-align: left; }
     .recent-header { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+
+    /* ── Student chips filter ── */
+    .home-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin: 4px 0 12px;
+    }
+    .home-toolbar-label {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+      text-transform: uppercase;
+      font-weight: 600;
+    }
+    .home-toolbar-controls { display: flex; align-items: center; gap: 10px; }
+    .stu-search-wrap { position: relative; display: flex; align-items: center; }
+    .stu-search-wrap .ss-ico {
+      position: absolute; left: 11px;
+      font-size: 13px; color: var(--muted);
+      pointer-events: none;
+    }
+    .stu-search-input {
+      width: 150px;
+      padding: 6px 12px 6px 30px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      font-size: 12px;
+      font-family: 'Noto Sans SC', sans-serif;
+      color: var(--text);
+      transition: all 0.18s;
+      outline: none;
+    }
+    .stu-search-input::placeholder { color: var(--faint); font-style: italic; }
+    .stu-search-input:focus {
+      border-color: var(--accent-lavender);
+      width: 200px;
+      box-shadow: 0 0 0 3px var(--accent-lavender-soft);
+    }
+    .sort-select-wrap { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; }
+    .home-sort-sel {
+      padding: 6px 26px 6px 12px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 999px;
+      font-size: 12px;
+      font-family: 'Noto Sans SC', sans-serif;
+      color: var(--text);
+      letter-spacing: 0.02em;
+      cursor: pointer;
+      outline: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239B8B7A' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+    .home-sort-sel:hover { border-color: var(--text); }
+    .student-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .stu-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 14px 7px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 12px;
+      color: var(--text-soft);
+      cursor: pointer;
+      transition: all 0.16s;
+      letter-spacing: 0.03em;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-weight: 500;
+    }
+    .stu-chip:hover { border-color: var(--text); color: var(--text); }
+    .stu-chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--c, var(--muted)); }
+    .stu-chip-count {
+      font-family: var(--font-latin);
+      font-style: italic;
+      font-size: 12px;
+      color: var(--muted);
+    }
+    .stu-chip.active {
+      background: var(--text);
+      border-color: var(--text);
+      color: var(--card);
+    }
+    .stu-chip.active .stu-chip-count { color: var(--card); opacity: 0.7; }
+    .stu-chip.is-other {
+      background: transparent;
+      border-style: dashed;
+      color: var(--muted);
+    }
+    .stu-chip.is-more {
+      background: transparent;
+      border-style: dashed;
+      border-color: var(--accent-lavender);
+      color: var(--accent-lavender);
+      font-style: italic;
+    }
     .project-search {
       width: 100%; padding: 9px 14px 9px 32px; border: 1px solid var(--border);
       border-radius: 10px; font-size: 13px; font-family: inherit; outline: none;
       color: var(--text); background: white url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238078A8' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 10px center no-repeat;
       margin-bottom: 14px; transition: border-color 0.15s;
     }
-    .project-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.08); }
+    .project-search:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(199,103,84,0.1); }
     .project-group { margin-bottom: 16px; }
     .project-group-title {
       font-size: 12px; font-weight: 600; color: var(--text); padding: 6px 2px;
@@ -809,11 +1021,18 @@
       background: white; border: 1px solid var(--border);
       cursor: pointer; transition: all 0.15s; position: relative;
     }
-    .recent-item:hover { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 2px 8px rgba(124,58,237,0.08); }
-    .recent-item-icon { font-size: 20px; flex-shrink: 0; }
+    .recent-item:hover { border-color: var(--primary); background: var(--primary-light); box-shadow: 0 2px 8px rgba(199,103,84,0.1); }
+    .recent-item-icon {
+      font-family: var(--font-display);
+      font-size: 22px;
+      flex-shrink: 0;
+      width: 30px;
+      text-align: center;
+      line-height: 1;
+    }
     .recent-item-info { flex: 1; min-width: 0; }
-    .recent-item-name { font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .recent-item-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .recent-item-name { font-family: var(--font-display); font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .recent-item-meta { font-size: 11px; color: var(--muted); margin-top: 3px; letter-spacing: 0.02em; }
     .recent-item-del {
       width: 24px; height: 24px; border-radius: 6px; border: none;
       background: transparent; color: var(--muted); cursor: pointer;
@@ -822,7 +1041,7 @@
     }
     .recent-item:hover .recent-item-del { opacity: 1; }
     .recent-item-del:hover { background: #FEF2F2; color: var(--danger); }
-    .home-empty { font-size: 13px; color: #C4B8E8; font-style: italic; padding: 16px 0; text-align: center; }
+    .home-empty { font-size: 13px; color: #C9B5A0; font-style: italic; padding: 16px 0; text-align: center; }
 
     /* ── Notes layout ── */
     .app { max-width: 1240px !important; }
@@ -854,11 +1073,11 @@
       position: relative;
       box-sizing: border-box;
     }
-    .margin-cell:hover { background: #F3F0FF; }
+    .margin-cell:hover { background: #FDF4EC; }
     .margin-cell.has-note {
-      border-left: 2.5px solid rgba(124,58,237,0.25);
+      border-left: 2.5px solid rgba(199,103,84,0.25);
     }
-    .margin-cell.editing { background: #F8F6FF; cursor: default; }
+    .margin-cell.editing { background: #FDF6EE; cursor: default; }
 
     .margin-note-text {
       font-size: 12px;
@@ -870,7 +1089,7 @@
     }
     .margin-note-placeholder {
       font-size: 10px;
-      color: #C4B8E8;
+      color: #C9B5A0;
       font-style: italic;
       display: none;
       margin-top: 2px;
@@ -889,7 +1108,7 @@
       resize: none;
       color: var(--text);
       background: white;
-      box-shadow: 0 0 0 3px rgba(124,58,237,0.1);
+      box-shadow: 0 0 0 3px rgba(199,103,84,0.12);
       min-height: 56px;
     }
     .margin-note-footer {
@@ -930,7 +1149,7 @@
     .bottom-notes-handle::after {
       content: '';
       width: 36px; height: 3px;
-      background: #D0C8F0;
+      background: #D9C9B6;
       border-radius: 2px;
       transition: background 0.15s;
     }
@@ -987,14 +1206,14 @@
     /* Notes toggle button */
     .btn-notes { background: white; border: 1px solid var(--border); color: var(--text); }
     .btn-notes:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-    .btn-notes.active { background: var(--primary-light); border-color: rgba(124,58,237,0.35); color: var(--primary); font-weight: 600; }
+    .btn-notes.active { background: var(--primary-light); border-color: rgba(199,103,84,0.35); color: var(--primary); font-weight: 600; }
 
     .notes-action-btn {
       width: 24px; height: 24px; border: none; background: transparent; color: var(--muted);
       cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center;
       font-size: 13px; transition: all 0.12s; font-family: inherit;
     }
-    .notes-action-btn:hover { background: #F3F0FF; color: var(--text); }
+    .notes-action-btn:hover { background: #FDF4EC; color: var(--text); }
     .notes-action-btn.danger:hover { background: #FEF2F2; color: var(--danger); }
 
     /* ── Notes split buttons ── */
@@ -1043,13 +1262,13 @@
 
     /* ── Palette + add button ── */
     .palette-add-btn {
-      width: 22px; height: 22px; border-radius: 7px; border: 1.5px dashed #C4B8E8;
-      background: var(--primary-light); color: #A78BFA; cursor: pointer;
+      width: 22px; height: 22px; border-radius: 7px; border: 1.5px dashed #C9B5A0;
+      background: var(--primary-light); color: #C76754; cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       font-size: 14px; font-weight: 700; transition: all 0.13s; flex-shrink: 0;
     }
     .palette-add-btn:hover { border-style: solid; border-color: var(--primary); color: var(--primary); }
-    .palette-add-btn.open { border-style: solid; border-color: var(--primary); color: var(--primary); background: #EDE9FE; }
+    .palette-add-btn.open { border-style: solid; border-color: var(--primary); color: var(--primary); background: #F4DCD4; }
 
     /* ── Custom Color Picker Panel ── */
     .color-picker-panel {
@@ -1071,7 +1290,7 @@
       cursor: pointer; border-radius: 6px; display: flex; align-items: center; justify-content: center;
       font-size: 16px; line-height: 1; transition: background 0.1s;
     }
-    .cp-close:hover { background: #F3F0FF; color: var(--text); }
+    .cp-close:hover { background: #FDF4EC; color: var(--text); }
 
     .cp-preview-row { display: flex; align-items: center; gap: 10px; margin-bottom: 11px; }
     .cp-preview-swatch {
@@ -1087,15 +1306,15 @@
     .cp-swatch-icon { position: relative; pointer-events: none; font-size: 15px; transition: color 0.15s; }
 
     .cp-hex-wrap { flex: 1; }
-    .cp-hex-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C0B8E0; margin-bottom: 4px; }
+    .cp-hex-label { font-size: 9px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #C9B5A0; margin-bottom: 4px; }
     .cp-hex-input {
       width: 100%; padding: 5px 9px; border: 1.5px solid var(--border); border-radius: 8px;
       font-size: 13px; font-family: 'SF Mono','Fira Mono','Consolas',monospace;
       font-weight: 600; color: var(--text); outline: none; transition: border-color 0.12s, box-shadow 0.12s;
     }
-    .cp-hex-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .cp-hex-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(199,103,84,0.12); }
 
-    .cp-grid-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #C0B8E0; margin-bottom: 7px; }
+    .cp-grid-label { font-size: 9px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #C9B5A0; margin-bottom: 7px; }
     .cp-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; margin-bottom: 12px; }
     .cp-grid-swatch {
       aspect-ratio: 1; border-radius: 6px; cursor: pointer;
@@ -1113,8 +1332,8 @@
     }
     .cp-btn-use { background: var(--primary); color: white; }
     .cp-btn-use:hover { background: var(--primary-hover); }
-    .cp-btn-add { background: var(--primary-light); color: var(--primary); border: 1px solid rgba(124,58,237,0.2); }
-    .cp-btn-add:hover { background: #EDE9FE; }
+    .cp-btn-add { background: var(--primary-light); color: var(--primary); border: 1px solid rgba(199,103,84,0.2); }
+    .cp-btn-add:hover { background: #F4DCD4; }
 
     /* ── Font Picker Panel ── */
     .font-picker-panel {
@@ -1125,7 +1344,7 @@
     }
     .font-picker-panel.visible { display: block; animation: cpPopIn 0.18s cubic-bezier(.34,1.4,.64,1); }
     .font-picker-panel::-webkit-scrollbar { width: 4px; }
-    .font-picker-panel::-webkit-scrollbar-thumb { background: #D0C8F0; border-radius: 4px; }
+    .font-picker-panel::-webkit-scrollbar-thumb { background: #D9C9B6; border-radius: 4px; }
     .fp-preview {
       padding: 12px 14px; margin-bottom: 10px;
       background: var(--primary-light); border-radius: 10px;
@@ -1138,7 +1357,7 @@
       padding: 7px 10px; border-radius: 8px; cursor: pointer;
       transition: background 0.1s; gap: 8px;
     }
-    .fp-font-opt:hover { background: #F8F6FF; }
+    .fp-font-opt:hover { background: #FDF6EE; }
     .fp-font-opt.selected { background: var(--primary-light); outline: 2px solid var(--primary); }
     .fp-font-name { font-size: 11px; color: var(--muted); flex-shrink: 0; min-width: 44px; }
     .fp-font-sample { font-size: 18px; color: var(--text); flex: 1; text-align: center; }
@@ -1146,11 +1365,11 @@
 
     /* ── Lyric ↔ Margin note hover highlight ── */
     .lyric-row.margin-highlight .lyric-block {
-      background: #F5F3FF;
+      background: #F4DCD4;
       border-radius: 6px;
     }
     .lyric-row.margin-highlight .margin-cell {
-      background: #F5F3FF;
+      background: #F4DCD4;
     }
 
     /* ── Responsive ── */
@@ -1199,7 +1418,7 @@
       font-size: 14px; font-family: inherit; outline: none; color: var(--text);
       transition: border-color 0.15s, box-shadow 0.15s; box-sizing: border-box;
     }
-    .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(124,58,237,0.1); }
+    .login-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(199,103,84,0.12); }
     .login-input.has-error { border-color: var(--danger); }
     .login-input.has-error:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
     .login-input.is-valid { border-color: #22C55E; }
@@ -1213,7 +1432,7 @@
     .field-status.visible { opacity: 1; }
     .field-status.error { color: var(--danger); }
     .field-status.valid { color: #22C55E; }
-    .field-status.hint { color: #C4B8E8; }
+    .field-status.hint { color: #C9B5A0; }
     /* Password toggle */
     .pw-wrapper { position: relative; }
     .pw-wrapper .login-input { padding-right: 40px; }
@@ -1244,7 +1463,7 @@
     }
     .user-badge:hover { color: var(--primary); }
     .user-badge .user-logout {
-      font-size: 10px; color: #C4B8E8; margin-left: 2px; transition: color 0.15s;
+      font-size: 10px; color: #C9B5A0; margin-left: 2px; transition: color 0.15s;
     }
     .user-badge:hover .user-logout { color: var(--danger); }
 
@@ -1363,6 +1582,10 @@
             总结
           </button>
         </div>
+        <button class="btn btn-outline" id="undo-btn" onclick="undo()" title="撤销 (⌘Z)" disabled>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-15-6.7L3 13"/></svg>
+          撤销
+        </button>
         <button class="btn btn-outline" id="section-btn" onclick="toggleSectionMode()" title="划分段落">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           段落
@@ -1468,7 +1691,7 @@
     </button>
     <!-- dotted -->
     <button class="sym-btn" onclick="addUnderlineMark('dotted')" title="点线">
-      <div class="sym-inner"><span style="border-bottom:2px dotted #7C3AED;padding-bottom:2px;line-height:1;font-size:12px;">文</span></div>
+      <div class="sym-inner"><span style="border-bottom:2px dotted #C76754;padding-bottom:2px;line-height:1;font-size:12px;">文</span></div>
       <div class="sym-tooltip">点线</div>
     </button>
     <!-- double -->
@@ -1604,7 +1827,7 @@
 <div id="cal-panel" class="cal-panel"></div>
 
 <!-- Import / Edit Modal -->
-<div class="modal-backdrop" id="modal" onclick="closeModalIfOut(event)">
+<div class="modal-backdrop" id="modal">
   <div class="modal">
     <div class="modal-title" id="modal-title">导入新歌词</div>
     <div class="modal-desc" id="modal-desc">粘贴歌词进行新标注，现有标注会清除。</div>
@@ -1615,7 +1838,8 @@
     <div style="display:flex;gap:10px;">
       <div class="modal-field" style="flex:1;">
         <label class="modal-label" for="student-name-input">学生姓名（可选）</label>
-        <input type="text" id="student-name-input" placeholder="例如：小明" maxlength="30">
+        <input type="text" id="student-name-input" list="student-name-list" placeholder="例如：小明（选过的会自动补全）" maxlength="30" autocomplete="off">
+        <datalist id="student-name-list"></datalist>
       </div>
       <div class="modal-field" style="flex:1;">
         <label class="modal-label">日期（可选）</label>
@@ -1625,10 +1849,25 @@
         </div>
       </div>
     </div>
-    <div class="modal-field" style="flex:1;display:flex;flex-direction:column;">
-      <label class="modal-label" for="lyrics-input">歌词</label>
-      <textarea id="lyrics-input" placeholder="在此输入或粘贴歌词，自动按换行和标点分句..."></textarea>
-      <p class="auto-split-hint" id="split-hint">自动分行：按换行符 &amp; 中英文标点（，。！？；：、…）拆成一句一行。</p>
+    <div class="modal-field" style="flex:1;display:flex;flex-direction:column;min-height:0;">
+      <div class="lyrics-edit-row">
+        <div class="col">
+          <div class="col-label">
+            <span>原始歌词 · 编辑</span>
+            <span id="lyrics-input-meta" style="font-weight: 500; color: var(--faint); letter-spacing: 0.04em;">0 字</span>
+          </div>
+          <textarea id="lyrics-input" placeholder="在此输入或粘贴歌词..." oninput="updateLyricsPreview()"></textarea>
+        </div>
+        <div class="col">
+          <div class="col-label">
+            <span>分行预览 · 实时</span>
+            <span class="badge-live">LIVE</span>
+          </div>
+          <div id="lyrics-preview"><div class="pv-empty">输入或粘贴歌词，这里会实时显示分行效果</div></div>
+          <p id="lyrics-preview-meta">0 行</p>
+        </div>
+      </div>
+      <p class="auto-split-hint" id="split-hint" style="margin-top: 10px;">自动分行：换行符 + 中英文标点（，。！？；：、…—）。短横线「-」保留不换行。</p>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="closeModal()">取消</button>
@@ -1690,7 +1929,7 @@
     { id:'verse',     label:'主歌',  cls:'sl-verse',     color:'#2563EB' },
     { id:'prechorus', label:'预副歌',cls:'sl-prechorus',  color:'#EA580C' },
     { id:'chorus',    label:'副歌',  cls:'sl-chorus',    color:'#E11D48' },
-    { id:'bridge',    label:'桥段',  cls:'sl-bridge',    color:'#7C3AED' },
+    { id:'bridge',    label:'桥段',  cls:'sl-bridge',    color:'#C76754' },
     { id:'interlude', label:'间奏',  cls:'sl-interlude', color:'#059669' },
     { id:'outro',     label:'尾声',  cls:'sl-outro',     color:'#475569' },
   ];
@@ -2469,11 +2708,72 @@
   function getProjectIndex() {
     try { const r = localStorage.getItem('lyricnote_projects_index'); return r ? JSON.parse(r) : []; } catch(e) { return []; }
   }
+  // Aggregate all distinct student names with their song counts. Sorted by count desc.
+  function getAllStudents() {
+    const counts = new Map();
+    getProjectIndex().forEach(p => {
+      const name = (p.studentName || '').trim();
+      if (!name) return;
+      counts.set(name, (counts.get(name) || 0) + 1);
+    });
+    return Array.from(counts.entries())
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], 'zh'))
+      .map(([name, count]) => ({ name, count }));
+  }
   function saveProjectIndex(index) {
     try { localStorage.setItem('lyricnote_projects_index', JSON.stringify(index)); } catch(e) {}
   }
 
-  function saveState() {
+  // ── Undo stack ──────────────────────────────────────
+  // Snapshot of editable state. Cap stack to keep memory under control.
+  const HISTORY_MAX = 50;
+  let historyStack = [];
+  let isRestoringHistory = false;
+  function snapshotState() {
+    return {
+      lyrics,
+      annotations: JSON.parse(JSON.stringify(annotations)),
+      sections: JSON.parse(JSON.stringify(sections)),
+      lineNotes: JSON.parse(JSON.stringify(lineNotes || [])),
+      songTitle, studentName, lessonDate,
+      notes: (document.getElementById('notes-textarea') || {}).value || ''
+    };
+  }
+  function pushHistory() {
+    if (isRestoringHistory) return;
+    if (!currentProjectId) return;
+    historyStack.push(snapshotState());
+    if (historyStack.length > HISTORY_MAX) historyStack.shift();
+    refreshUndoBtn();
+  }
+  function refreshUndoBtn() {
+    const b = document.getElementById('undo-btn');
+    if (b) b.disabled = historyStack.length === 0;
+  }
+  function undo() {
+    if (!historyStack.length) return;
+    const prev = historyStack.pop();
+    isRestoringHistory = true;
+    try {
+      lyrics = prev.lyrics;
+      annotations = prev.annotations;
+      sections = prev.sections;
+      lineNotes = prev.lineNotes;
+      songTitle = prev.songTitle;
+      studentName = prev.studentName;
+      lessonDate = prev.lessonDate;
+      const ta = document.getElementById('notes-textarea');
+      if (ta) { ta.value = prev.notes; if (typeof updateNotesCount === 'function') updateNotesCount(); }
+      selRange = null;
+      if (typeof renderLyrics === 'function') renderLyrics();
+      if (typeof renderSongTitleDisplay === 'function') renderSongTitleDisplay();
+      saveStateDirect();
+      refreshUndoBtn();
+    } finally {
+      isRestoringHistory = false;
+    }
+  }
+  function saveStateDirect() {
     if (!currentProjectId) return;
     try {
       const project = {
@@ -2490,10 +2790,24 @@
       const entry = index.find(e => e.id === currentProjectId);
       if (entry) { entry.name = project.name; entry.studentName = studentName; entry.lessonDate = lessonDate; entry.updatedAt = project.updatedAt; }
       saveProjectIndex(index);
-      // Cloud sync
       cloudSaveProject(currentProjectId);
     } catch(e) {}
   }
+  function saveState() {
+    pushHistory();
+    saveStateDirect();
+  }
+  // Ctrl/Cmd+Z hotkey
+  document.addEventListener('keydown', (e) => {
+    const meta = e.ctrlKey || e.metaKey;
+    if (!meta || e.key.toLowerCase() !== 'z' || e.shiftKey) return;
+    const t = e.target;
+    // Don't fire inside text inputs (let native undo work there)
+    if (t && (t.tagName === 'TEXTAREA' || t.tagName === 'INPUT' || t.isContentEditable)) return;
+    if (!historyStack.length) return;
+    e.preventDefault();
+    undo();
+  });
 
   function createProject(name) {
     const id = uid();
@@ -2567,6 +2881,7 @@
     document.getElementById('edit-lyrics-btn').style.display = 'none';
     document.documentElement.style.setProperty('--font-scale', 1);
     updateZoomUI(); updateNotesCount();
+    historyStack = []; refreshUndoBtn();
   }
 
   // ─── Home Screen ──────────────────────────────────────
@@ -2582,29 +2897,50 @@
   }
 
   let homeSearchQuery = '';
+  let homeStudentSearch = '';
+  let selectedStudentFilter = null; // null = all, '' = ungrouped, 'name' = specific
+  let homeSortMode = 'count'; // 'count' | 'recent' | 'name' | 'created'
+  let showAllStudentChips = false;
   let _searchBound = false;
 
   function renderHomeScreen() {
     const container = document.getElementById('recent-projects');
-    const allIndex = getProjectIndex().sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
+    const allIndex = getProjectIndex();
     if (allIndex.length === 0) {
       _searchBound = false;
       container.innerHTML = '<div class="home-empty">还没有项目，导入歌词开始吧</div>';
       return;
     }
 
-    // Ensure search bar exists (only create once)
     if (!document.getElementById('project-search')) {
       _searchBound = false;
-      container.innerHTML = `<div class="recent-header">我的项目 <span class="project-group-count" id="project-count">${allIndex.length}</span></div>
+      container.innerHTML = `
+        <div class="recent-header">我的歌词集 <span class="project-group-count" id="project-count">${allIndex.length}</span></div>
         <input class="project-search" id="project-search" placeholder="搜索歌曲、学生…">
+        <div class="home-toolbar">
+          <div class="home-toolbar-label">学生筛选 · Filter by student</div>
+          <div class="home-toolbar-controls">
+            <div class="stu-search-wrap">
+              <span class="ss-ico">⌕</span>
+              <input class="stu-search-input" id="student-search" placeholder="搜索学生..." autocomplete="off">
+            </div>
+            <div class="sort-select-wrap">
+              <span>排序</span>
+              <select class="home-sort-sel" id="home-sort">
+                <option value="count">歌词最多</option>
+                <option value="recent">最近上课</option>
+                <option value="name">按姓名 A-Z</option>
+                <option value="created">首次添加</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="student-chips" id="student-chips"></div>
         <div id="project-list"></div>`;
     }
-    // Update count
     const countEl = document.getElementById('project-count');
     if (countEl) countEl.textContent = allIndex.length;
 
-    // Bind search events once
     if (!_searchBound) {
       _searchBound = true;
       const searchEl = document.getElementById('project-search');
@@ -2612,19 +2948,103 @@
       searchEl.addEventListener('compositionstart', () => { composing = true; });
       searchEl.addEventListener('compositionend', () => { composing = false; homeSearchQuery = searchEl.value; visibleCount = PAGE_SIZE; renderProjectList(); });
       searchEl.addEventListener('input', () => { if (!composing) { homeSearchQuery = searchEl.value; visibleCount = PAGE_SIZE; renderProjectList(); } });
+
+      const stuSearchEl = document.getElementById('student-search');
+      let stuComposing = false;
+      stuSearchEl.addEventListener('compositionstart', () => { stuComposing = true; });
+      stuSearchEl.addEventListener('compositionend', () => { stuComposing = false; homeStudentSearch = stuSearchEl.value; renderStudentChips(); });
+      stuSearchEl.addEventListener('input', () => { if (!stuComposing) { homeStudentSearch = stuSearchEl.value; renderStudentChips(); } });
+
+      const sortEl = document.getElementById('home-sort');
+      sortEl.addEventListener('change', () => { homeSortMode = sortEl.value; renderStudentChips(); renderProjectList(); });
     }
 
+    renderStudentChips();
     renderProjectList();
   }
 
+  // Stable color palette assigned to students by hashing their name
+  const STU_CHIP_COLORS = ['var(--primary)', 'var(--accent-lavender)', 'var(--accent-gold)', 'var(--accent-sage)', '#6B7B8C', '#B86838', '#5F8079', '#88775F'];
+  function studentColor(name) {
+    if (!name) return 'var(--muted)';
+    let h = 0;
+    for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
+    return STU_CHIP_COLORS[h % STU_CHIP_COLORS.length];
+  }
+
+  function getSortedStudents(idx) {
+    // idx: getProjectIndex() result
+    const stuStats = new Map();
+    let ungroupedCount = 0;
+    idx.forEach(p => {
+      const n = (p.studentName || '').trim();
+      if (!n) { ungroupedCount++; return; }
+      const s = stuStats.get(n) || { name: n, count: 0, latest: 0, earliest: Infinity };
+      s.count++;
+      s.latest = Math.max(s.latest, p.updatedAt || p.createdAt || 0);
+      s.earliest = Math.min(s.earliest, p.createdAt || p.updatedAt || Infinity);
+      stuStats.set(n, s);
+    });
+    const list = Array.from(stuStats.values());
+    list.sort((a, b) => {
+      if (homeSortMode === 'recent') return b.latest - a.latest;
+      if (homeSortMode === 'name') return a.name.localeCompare(b.name, 'zh');
+      if (homeSortMode === 'created') return a.earliest - b.earliest;
+      return b.count - a.count || a.name.localeCompare(b.name, 'zh');
+    });
+    return { students: list, ungroupedCount };
+  }
+
+  const STU_CHIPS_VISIBLE = 8;
+
+  function renderStudentChips() {
+    const wrap = document.getElementById('student-chips');
+    if (!wrap) return;
+    const all = getProjectIndex();
+    const { students, ungroupedCount } = getSortedStudents(all);
+    const q = (homeStudentSearch || '').trim().toLowerCase();
+    const filtered = q ? students.filter(s => s.name.toLowerCase().includes(q)) : students;
+    const visible = showAllStudentChips ? filtered : filtered.slice(0, STU_CHIPS_VISIBLE);
+    const overflow = filtered.length - visible.length;
+
+    const items = [];
+    items.push(`<button class="stu-chip${selectedStudentFilter === null ? ' active' : ''}" onclick="setStudentFilter(null)">全部<span class="stu-chip-count">${all.length}</span></button>`);
+    visible.forEach(s => {
+      const active = selectedStudentFilter === s.name;
+      items.push(`<button class="stu-chip${active ? ' active' : ''}" style="--c:${studentColor(s.name)}" onclick="setStudentFilter(${JSON.stringify(s.name)})"><span class="stu-chip-dot"></span>${escHtml(s.name)}<span class="stu-chip-count">${s.count}</span></button>`);
+    });
+    if (overflow > 0) {
+      items.push(`<button class="stu-chip is-more" onclick="expandStudentChips()">+ ${overflow}<span class="stu-chip-count">余</span></button>`);
+    } else if (showAllStudentChips && filtered.length > STU_CHIPS_VISIBLE) {
+      items.push(`<button class="stu-chip is-more" onclick="collapseStudentChips()">收起</button>`);
+    }
+    if (ungroupedCount > 0 && !q) {
+      items.push(`<button class="stu-chip is-other${selectedStudentFilter === '' ? ' active' : ''}" onclick="setStudentFilter('')">未指定<span class="stu-chip-count">${ungroupedCount}</span></button>`);
+    }
+    wrap.innerHTML = items.join('');
+  }
+
+  function setStudentFilter(name) {
+    selectedStudentFilter = name;
+    visibleCount = PAGE_SIZE;
+    renderStudentChips();
+    renderProjectList();
+  }
+  function expandStudentChips() { showAllStudentChips = true; renderStudentChips(); }
+  function collapseStudentChips() { showAllStudentChips = false; renderStudentChips(); }
+
   const PAGE_SIZE = 20;
   let visibleCount = PAGE_SIZE;
-  let collapsedGroups = {};
+  let collapsedGroups = {}; // legacy, unused
 
   function renderProjectList() {
     const listEl = document.getElementById('project-list');
     if (!listEl) return;
-    const allIndex = getProjectIndex().sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
+    let allIndex = getProjectIndex().sort((a,b) => (b.updatedAt||0) - (a.updatedAt||0));
+    // Apply student filter
+    if (selectedStudentFilter !== null) {
+      allIndex = allIndex.filter(p => (p.studentName || '') === selectedStudentFilter);
+    }
     const q = homeSearchQuery.toLowerCase();
     const index = q ? allIndex.filter(p =>
       (p.name||'').toLowerCase().includes(q) ||
@@ -2633,63 +3053,37 @@
     ) : allIndex;
 
     if (index.length === 0) {
-      listEl.innerHTML = '<div class="home-empty">没有匹配的项目</div>';
+      listEl.innerHTML = selectedStudentFilter
+        ? `<div class="home-empty">「${escHtml(selectedStudentFilter || '未指定')}」名下还没有歌词</div>`
+        : '<div class="home-empty">没有匹配的项目</div>';
       return;
     }
 
-    // When searching, show all results; otherwise paginate
-    const showAll = !!q;
+    const showAll = !!q || selectedStudentFilter !== null;
     const displayCount = showAll ? index.length : Math.min(visibleCount, index.length);
     const displayIndex = index.slice(0, displayCount);
     const hasMore = !showAll && index.length > displayCount;
 
-    // Group by student
-    const groups = {};
-    displayIndex.forEach(p => {
-      const key = p.studentName || '';
-      if (!groups[key]) groups[key] = [];
-      groups[key].push(p);
-    });
-    const groupKeys = Object.keys(groups).sort((a, b) => {
-      if (!a && b) return 1;
-      if (a && !b) return -1;
-      return a.localeCompare(b, 'zh');
-    });
-    const useGroups = !q && groupKeys.length > 1;
-
     const fmtDate = (ts) => { if (!ts) return ''; const d = new Date(ts); return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`; };
 
-    let html = '';
-    groupKeys.forEach(key => {
-      const gid = key || '__ungrouped__';
-      const collapsed = collapsedGroups[gid];
-      if (useGroups) {
-        html += `<div class="project-group${collapsed ? ' collapsed' : ''}">
-          <div class="project-group-title" onclick="toggleGroup('${escHtml(gid)}')">
-            <span class="project-group-arrow">▼</span>
-            ${key ? escHtml(key) : '未分组'}
-            <span class="project-group-count">${groups[key].length}</span>
-          </div>`;
-      }
-      html += '<div class="recent-list">';
-      groups[key].forEach(p => {
-        const metaParts = [];
-        if (!useGroups && p.studentName) metaParts.push(p.studentName);
-        if (p.lessonDate) metaParts.push(p.lessonDate);
-        if (p.createdAt) metaParts.push('创建 ' + fmtDate(p.createdAt));
-        if (p.updatedAt && p.updatedAt !== p.createdAt) metaParts.push('修改 ' + fmtDate(p.updatedAt));
-        html += `<div class="recent-item" onclick="loadProject('${p.id}')">
-          <div class="recent-item-icon">🎵</div>
-          <div class="recent-item-info">
-            <div class="recent-item-name">${escHtml(p.name || '未命名歌词')}</div>
-            <div class="recent-item-meta">${escHtml(metaParts.join(' · '))}</div>
-          </div>
-          <button class="recent-item-del" onclick="event.stopPropagation();deleteProjectConfirm('${p.id}')" title="删除">×</button>
-        </div>`;
-      });
-      html += '</div>';
-      if (useGroups) html += '</div>';
+    let html = '<div class="recent-list">';
+    displayIndex.forEach(p => {
+      const metaParts = [];
+      if (p.studentName && selectedStudentFilter !== p.studentName) metaParts.push(p.studentName);
+      if (p.lessonDate) metaParts.push(p.lessonDate);
+      if (p.createdAt) metaParts.push('创建 ' + fmtDate(p.createdAt));
+      if (p.updatedAt && p.updatedAt !== p.createdAt) metaParts.push('修改 ' + fmtDate(p.updatedAt));
+      const dotColor = p.studentName ? studentColor(p.studentName) : 'var(--muted)';
+      html += `<div class="recent-item" onclick="loadProject('${p.id}')">
+        <div class="recent-item-icon" style="color: ${dotColor};">♪</div>
+        <div class="recent-item-info">
+          <div class="recent-item-name">${escHtml(p.name || '未命名歌词')}</div>
+          <div class="recent-item-meta">${escHtml(metaParts.join(' · '))}</div>
+        </div>
+        <button class="recent-item-del" onclick="event.stopPropagation();deleteProjectConfirm('${p.id}')" title="删除">×</button>
+      </div>`;
     });
+    html += '</div>';
 
     if (hasMore) {
       const remaining = index.length - displayCount;
@@ -3423,6 +3817,13 @@
     document.getElementById('modal').classList.add('active');
     document.getElementById('song-title-input').value = songTitle;
     document.getElementById('student-name-input').value = studentName;
+    // Populate student datalist with historical names (sorted by usage)
+    const dl = document.getElementById('student-name-list');
+    if (dl) {
+      dl.innerHTML = getAllStudents()
+        .map(s => `<option value="${s.name.replace(/"/g, '&quot;')}">${s.count} 首</option>`)
+        .join('');
+    }
     // Set custom date trigger
     const dateVal = lessonDate || (isEditMode ? '' : new Date().toISOString().slice(0,10));
     const trigger = document.getElementById('lesson-date-trigger');
@@ -3452,17 +3853,69 @@
       document.getElementById('modal-desc').textContent = '粘贴歌词，开始新的标注。';
       document.getElementById('modal-desc').className = 'modal-desc';
       document.getElementById('lyrics-input').value = '';
-      document.getElementById('split-hint').textContent = '自动分行：按换行符 & 中英文标点（，。！？；：、…）拆成一句一行。';
+      document.getElementById('split-hint').textContent = '自动分行：换行符 + 中英文标点（，。！？；：、…—）。短横线「-」保留不换行。';
       document.getElementById('import-confirm-btn').textContent = '确认导入';
     }
     setTimeout(() => document.getElementById('lyrics-input').focus(), 50);
+    // Snapshot for dirty-check on close
+    modalOriginalLyrics = document.getElementById('lyrics-input').value;
+    // Live preview hook (renders right after value is set)
+    if (typeof updateLyricsPreview === 'function') updateLyricsPreview();
   }
-  function closeModal() { document.getElementById('modal').classList.remove('active'); document.getElementById('lyrics-input').value=''; }
-  function closeModalIfOut(e) { if(e.target.id==='modal') closeModal(); }
+  let modalOriginalLyrics = '';
+  function closeModal(force) {
+    const li = document.getElementById('lyrics-input');
+    const current = (li && li.value) || '';
+    const dirty = current.trim() !== (modalOriginalLyrics || '').trim();
+    if (!force && dirty) {
+      const msg = isEditMode
+        ? '歌词已修改但未保存，确定放弃吗？'
+        : '已经输入歌词但未确认导入，确定放弃吗？';
+      if (!confirm(msg)) return;
+    }
+    document.getElementById('modal').classList.remove('active');
+    if (li) li.value='';
+    modalOriginalLyrics = '';
+  }
+  // Backdrop click disabled — must use 取消/确认 explicitly. Escape will also confirm.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const m = document.getElementById('modal');
+    if (m && m.classList.contains('active')) {
+      e.preventDefault();
+      closeModal();
+    }
+  });
+
+  function updateLyricsPreview() {
+    const li = document.getElementById('lyrics-input');
+    const pv = document.getElementById('lyrics-preview');
+    const pvMeta = document.getElementById('lyrics-preview-meta');
+    const liMeta = document.getElementById('lyrics-input-meta');
+    if (!li || !pv) return;
+    const raw = li.value;
+    if (liMeta) liMeta.textContent = (raw.length || 0) + ' 字';
+    if (!raw.trim()) {
+      pv.innerHTML = '<div class="pv-empty">输入或粘贴歌词，这里会实时显示分行效果</div>';
+      if (pvMeta) pvMeta.textContent = '0 行';
+      return;
+    }
+    let processed;
+    if (isEditMode) {
+      processed = raw.split(/[\n\r]+/).map(s=>s.trim()).filter(s=>s.length>0).join('\n');
+    } else {
+      processed = autoSplitLyrics(raw);
+    }
+    const lines = processed ? processed.split('\n') : [];
+    pv.innerHTML = lines.length
+      ? lines.map(l => '<div class="pv-line">' + escapeHtml(l) + '</div>').join('')
+      : '<div class="pv-empty">分行结果为空</div>';
+    if (pvMeta) pvMeta.textContent = lines.length + ' 行';
+  }
 
   function autoSplitLyrics(raw) {
     if (!raw) return '';
-    const parts=raw.split(/[\n\r,.;:!?，。！？；：、…—\-]+/g)
+    const parts=raw.split(/[\n\r,.;:!?，。！？；：、…—]+/g)
       .map(s=>s.trim())
       .map(s=>s.replace(/^[\s\u3000"'""''`()（）【】\[\]《》「」『』<>]+/,''))
       .map(s=>s.replace(/[\s\u3000"'""''`()（）【】\[\]《》「」『』<>]+$/,''))
@@ -3510,7 +3963,7 @@
         createProject(songTitle);
       }
     }
-    hideToolbar(); closeModal(); renderLyrics(); renderSongTitleDisplay();
+    hideToolbar(); closeModal(true); renderLyrics(); renderSongTitleDisplay();
     document.getElementById('edit-lyrics-btn').style.display='';
     showEditorView();
     afterLyricsUpdate(); saveState();
