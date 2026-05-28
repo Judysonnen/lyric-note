@@ -835,8 +835,22 @@
     .export-lyrics .char-wrap > .sym-triangle   { bottom: 12px; font-size: 11px; }
     .export-lyrics .char-wrap > .sym-accent     { bottom: 22px; font-size: 13px; }
     .export-lyrics .char-wrap > .sym-slur       { top: 12px; left: 2px; right: 2px; height: 6px; border-width: 1.5px; }
-    .export-lyrics .char-wrap > .sym-breath     { top: 4px; right: -2px; font-size: 12px; }
-    .export-lyrics .char-wrap > .sym-breath-before { top: 4px; left: -2px; font-size: 12px; }
+    /* Inline breath marks: sit BETWEEN char-wraps in export so reader can tell
+       which side of the char they belong to. The mark rotates slightly toward
+       the char it modifies (left-leaning ∨ for "before", right-leaning for "after"). */
+    .export-lyrics .inline-breath {
+      display: inline-block;
+      font-family: 'Noto Serif SC', serif;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      color: #B85543;
+      vertical-align: middle;
+      padding: 0 1px;
+      transform: translateY(-4px);
+    }
+    .export-lyrics .inline-breath-before { margin-right: 2px; transform: translateY(-4px) rotate(-15deg); }
+    .export-lyrics .inline-breath-after  { margin-left: 2px;  transform: translateY(-4px) rotate(15deg); }
     .export-lyrics .lyric-char:hover { background: inherit; }
     .export-lyrics .lyric-char.mark { box-shadow: inset 0 -0.55em 0 var(--mark-color,transparent); background: transparent; }
     .export-lyrics .lyric-char.mark-start,.export-lyrics .lyric-char.mark-end { border-radius:0; padding-left:2px; padding-right:2px; }
@@ -4218,10 +4232,17 @@
           else span.classList.add('has-note-inner');
         }
         const ulAnnsEx=getCharUlAnns(absIdx);
+        let inlineBefore = false, inlineAfter = false;
         if (ch.trim()) {
           ulAnnsEx.forEach(ua => {
             if (['wavy','solid','dashed','dotted','double'].includes(ua.style)) {
               span.classList.add('ul-'+ua.style);
+            } else if (forExport && ua.style === 'breath-before') {
+              // In export, render breath-before as an inline mark BEFORE the char,
+              // sitting between chars so it's unambiguous which side it belongs to
+              inlineBefore = true;
+            } else if (forExport && ua.style === 'breath') {
+              inlineAfter = true;
             } else {
               const sym=document.createElement('span');
               sym.className='sym-mark sym-'+ua.style;
@@ -4243,7 +4264,19 @@
             wrap.appendChild(tag);
           }
         }
+        if (inlineBefore) {
+          const b=document.createElement('span');
+          b.className='inline-breath inline-breath-before';
+          b.textContent='∨';
+          lineDiv.appendChild(b);
+        }
         lineDiv.appendChild(wrap);
+        if (inlineAfter) {
+          const b=document.createElement('span');
+          b.className='inline-breath inline-breath-after';
+          b.textContent='∨';
+          lineDiv.appendChild(b);
+        }
       });
       gi+=line.length+1;
       rowEl.appendChild(lineDiv);
