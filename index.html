@@ -831,7 +831,7 @@
       display: inline-block;
       vertical-align: middle;
       line-height: 1;
-      padding: 26px 0 38px;
+      padding: 20px 0 30px;
       margin: 0;
     }
     .export-lyrics .lyric-char {
@@ -840,14 +840,12 @@
       vertical-align: middle;
       display: inline-block;
     }
-    /* Stack multiple marks vertically so they don't overlap regardless of which combos are present.
-       Bottom zone (going up from char): dotbelow → triangle → accent.
-       Top zone: slur in the middle, breath marks pinned to corners.
-       Accent sits well below the char (was crowding the baseline). */
+    /* Stack multiple marks vertically so they don't overlap, but keep gaps tight
+       so the symbols read as belonging to the same char rather than floating away. */
     .export-lyrics .char-wrap > .sym-dotbelow   { bottom: 2px;  font-size: 8px; }
-    .export-lyrics .char-wrap > .sym-triangle   { bottom: 12px; font-size: 11px; }
-    .export-lyrics .char-wrap > .sym-accent     { bottom: 24px; font-size: 14px; -webkit-text-stroke: 0.7px currentColor; }
-    .export-lyrics .char-wrap > .sym-slur       { top: 12px; left: 2px; right: 2px; height: 6px; border-width: 1.5px; }
+    .export-lyrics .char-wrap > .sym-triangle   { bottom: 10px; font-size: 10px; }
+    .export-lyrics .char-wrap > .sym-accent     { bottom: 19px; font-size: 13px; -webkit-text-stroke: 0.7px currentColor; }
+    .export-lyrics .char-wrap > .sym-slur       { top: 9px; left: 2px; right: 2px; height: 5px; border-width: 1.5px; }
     /* Inline breath marks: sit BETWEEN char-wraps in export so reader can tell
        which side of the char they belong to. Direction conveyed by position
        (left vs right of the char), not by rotation — mark stays upright. */
