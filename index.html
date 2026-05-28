@@ -819,7 +819,7 @@
       display: inline-block;
       vertical-align: middle;
       line-height: 1;
-      padding: 18px 0 16px;
+      padding: 26px 0 30px;
       margin: 0 1px;
     }
     .export-lyrics .lyric-char {
@@ -828,13 +828,15 @@
       vertical-align: middle;
       display: inline-block;
     }
-    /* Stack multiple bottom marks side-by-side rather than overlapping */
-    .export-lyrics .char-wrap > .sym-accent     { bottom: 0; }
-    .export-lyrics .char-wrap > .sym-triangle   { bottom: 0; }
-    .export-lyrics .char-wrap > .sym-dotbelow   { bottom: 2px; }
-    .export-lyrics .char-wrap > .sym-accent ~ .sym-triangle { bottom: 0; left: calc(50% + 8px); }
-    .export-lyrics .char-wrap > .sym-accent ~ .sym-dotbelow,
-    .export-lyrics .char-wrap > .sym-triangle ~ .sym-dotbelow { left: calc(50% - 8px); }
+    /* Stack multiple marks vertically so they don't overlap regardless of which combos are present.
+       Bottom zone (going up from char): dotbelow → triangle → accent.
+       Top zone: slur in the middle, breath marks pinned to corners. */
+    .export-lyrics .char-wrap > .sym-dotbelow   { bottom: 4px;  font-size: 8px; }
+    .export-lyrics .char-wrap > .sym-triangle   { bottom: 12px; font-size: 11px; }
+    .export-lyrics .char-wrap > .sym-accent     { bottom: 22px; font-size: 13px; }
+    .export-lyrics .char-wrap > .sym-slur       { top: 12px; left: 2px; right: 2px; height: 6px; border-width: 1.5px; }
+    .export-lyrics .char-wrap > .sym-breath     { top: 4px; right: -2px; font-size: 12px; }
+    .export-lyrics .char-wrap > .sym-breath-before { top: 4px; left: -2px; font-size: 12px; }
     .export-lyrics .lyric-char:hover { background: inherit; }
     .export-lyrics .lyric-char.mark { box-shadow: inset 0 -0.55em 0 var(--mark-color,transparent); background: transparent; }
     .export-lyrics .lyric-char.mark-start,.export-lyrics .lyric-char.mark-end { border-radius:0; padding-left:2px; padding-right:2px; }
