@@ -273,6 +273,9 @@
     .lyric-char.mark { background: var(--mark-color, transparent); }
     .lyric-char.mark-start { border-top-left-radius: 6px; border-bottom-left-radius: 6px; padding-left: 3px; }
     .lyric-char.mark-end   { border-top-right-radius: 6px; border-bottom-right-radius: 6px; padding-right: 3px; }
+    /* Space chars get extra horizontal padding so English word gaps don't collapse */
+    .lyric-char.lyric-space { padding-left: 5px; padding-right: 5px; }
+    .export-lyrics .lyric-char.lyric-space { padding-left: 4px; padding-right: 4px; }
 
     /* Note underline (::after) */
     .lyric-char.has-note { position: relative; }
@@ -3449,6 +3452,7 @@
         wrap.className = 'char-wrap';
         const span = document.createElement('span');
         span.className = 'lyric-char';
+        if (ch === ' ') span.classList.add('lyric-space');
         span.dataset.idx = absIdx;
         span.textContent = ch;
 
@@ -4211,7 +4215,7 @@
       chars.forEach((ch,ci) => {
         const absIdx=gi+ci;
         const wrap=document.createElement('div'); wrap.className='char-wrap';
-        const span=document.createElement('span'); span.className='lyric-char'; span.textContent=ch;
+        const span=document.createElement('span'); span.className='lyric-char'; if(ch===' ')span.classList.add('lyric-space'); span.textContent=ch;
         const myAnn=getCharColorAnn(absIdx);
         if (myAnn) {
           span.classList.add('mark'); span.style.setProperty('--mark-color',myAnn.color);
