@@ -831,21 +831,22 @@
       display: inline-block;
       vertical-align: middle;
       line-height: 1;
-      padding: 26px 0 30px;
-      margin: 0 1px;
+      padding: 26px 0 38px;
+      margin: 0;
     }
     .export-lyrics .lyric-char {
       font-size: 22px; line-height: 1; cursor: default; color: var(--export-ink);
-      padding: 1px 2.5px; font-family: 'Noto Serif SC',serif;
+      padding: 2px 2.5px; font-family: 'Noto Serif SC',serif;
       vertical-align: middle;
       display: inline-block;
     }
     /* Stack multiple marks vertically so they don't overlap regardless of which combos are present.
        Bottom zone (going up from char): dotbelow → triangle → accent.
-       Top zone: slur in the middle, breath marks pinned to corners. */
-    .export-lyrics .char-wrap > .sym-dotbelow   { bottom: 4px;  font-size: 8px; }
+       Top zone: slur in the middle, breath marks pinned to corners.
+       Accent sits well below the char (was crowding the baseline). */
+    .export-lyrics .char-wrap > .sym-dotbelow   { bottom: 2px;  font-size: 8px; }
     .export-lyrics .char-wrap > .sym-triangle   { bottom: 12px; font-size: 11px; }
-    .export-lyrics .char-wrap > .sym-accent     { bottom: 22px; font-size: 13px; }
+    .export-lyrics .char-wrap > .sym-accent     { bottom: 24px; font-size: 13px; }
     .export-lyrics .char-wrap > .sym-slur       { top: 12px; left: 2px; right: 2px; height: 6px; border-width: 1.5px; }
     /* Inline breath marks: sit BETWEEN char-wraps in export so reader can tell
        which side of the char they belong to. Direction conveyed by position
@@ -864,8 +865,15 @@
     .export-lyrics .inline-breath-before { margin-right: 3px; margin-left: 1px; }
     .export-lyrics .inline-breath-after  { margin-left: 3px;  margin-right: 1px; }
     .export-lyrics .lyric-char:hover { background: inherit; }
-    .export-lyrics .lyric-char.mark { box-shadow: inset 0 -0.55em 0 var(--mark-color,transparent); background: transparent; }
-    .export-lyrics .lyric-char.mark-start,.export-lyrics .lyric-char.mark-end { border-radius:0; padding-left:2px; padding-right:2px; }
+    /* Highlight: full-height soft fill behind the char text, with the colour pulled
+       to ~70% opacity so the ink stays legible. Adjacent highlighted chars touch
+       cleanly because .char-wrap margin is 0 in export. */
+    .export-lyrics .lyric-char.mark {
+      background: var(--mark-color, transparent);
+      box-shadow: none;
+    }
+    .export-lyrics .lyric-char.mark-start { border-top-left-radius: 5px; border-bottom-left-radius: 5px; padding-left: 4px; }
+    .export-lyrics .lyric-char.mark-end   { border-top-right-radius: 5px; border-bottom-right-radius: 5px; padding-right: 4px; }
     .export-lyrics .lyric-char.has-note::after { border-bottom-color: var(--export-accent); border-bottom-style: solid; border-bottom-width: 1.5px; bottom: -1px; }
     .export-lyrics .note-tag { font-size:11px; padding:1px 0 0 0; border-radius:0; background:transparent; color:var(--export-accent); margin-left:6px; font-weight:500; }
     .export-section-label {
