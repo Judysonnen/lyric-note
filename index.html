@@ -880,51 +880,26 @@
       color: var(--export-accent); margin-bottom: 4px; margin-top: 20px; opacity: 0.75;
     }
     .export-section-label:first-child { margin-top: 0; }
-    /* ── Export two-column layout ──
-       Two-col grid keeps lyrics and notes vertically aligned to the same baseline
-       across all rows, regardless of which rows have notes or how tall the notes get.
-       Border separator only renders on rows that actually have a note, so empty
-       rows stay clean. */
+    /* ── Export two-column layout ── */
     .export-lrow {
-      display: grid;
-      grid-template-columns: 1fr 170px;
-      column-gap: 16px;
-      align-items: start;
-      margin-bottom: 2px;
-      break-inside: avoid; page-break-inside: avoid;
+      display: flex; align-items: stretch;
+      gap: 0; margin-bottom: 0; break-inside: avoid; page-break-inside: avoid;
+      min-height: 42px;
     }
-    .export-sheet.export-image .export-lrow { grid-template-columns: 1fr 210px; column-gap: 22px; }
-    .export-sheet.export-pdf   .export-lrow { grid-template-columns: 1fr 160px; column-gap: 14px; }
-    .export-lrow .lyric-line {
-      margin-bottom: 0; min-width: 0;
-      display: flex; align-items: flex-end; flex-wrap: wrap;
-    }
+    .export-lrow .lyric-line { margin-bottom: 0; flex: 1; min-width: 0; display: flex; align-items: center; flex-wrap: wrap; }
     .export-lnote-col {
-      align-self: stretch;
-      padding: 22px 4px 8px 14px;
+      width: 150px; flex-shrink: 0;
+      border-left: 2px solid var(--export-rule);
+      padding-left: 14px; padding-top: 8px; padding-bottom: 8px;
       font-family: 'Noto Sans SC', sans-serif;
-      font-size: 11px; line-height: 1.6; color: var(--export-ink);
-      word-break: break-word;
-      position: relative;
+      font-size: 10.5px; line-height: 1.75; color: var(--export-muted);
+      font-style: italic; word-break: break-word;
+      display: flex; align-items: center;
     }
-    /* Border + leading marker only show when this row actually has note content */
-    .export-lnote-col:not(:empty) {
-      border-left: 1.5px solid rgba(140,106,67,0.35);
-    }
-    .export-lnote-col:not(:empty)::before {
-      content: '';
-      position: absolute;
-      left: -4px;
-      top: 27px;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--export-accent);
-      opacity: 0.65;
-    }
-    .export-sheet.export-image .export-lnote-col { font-size: 12px; padding: 24px 4px 10px 16px; }
-    .export-sheet.export-pdf   .export-lnote-col { font-size: 10.5px; padding: 22px 4px 8px 13px; }
-    /* hide note col when no notes exist anywhere — lyrics expand to full width */
-    .export-no-linenotes .export-lrow { grid-template-columns: 1fr; column-gap: 0; }
+    .export-lnote-col:not(:empty) { border-left-color: rgba(140,106,67,0.35); }
+    .export-sheet.export-image .export-lnote-col { width: 200px; font-size: 11.5px; }
+    .export-sheet.export-pdf   .export-lnote-col { width: 150px; }
+    /* hide note col when empty (no notes at all) */
     .export-no-linenotes .export-lnote-col { display: none; }
     /* old inline .export-line-note no longer used in main flow */
     .export-footer {
