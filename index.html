@@ -4335,6 +4335,10 @@
     const sheet=document.getElementById('export-sheet'), btn=document.getElementById('preview-confirm-btn');
     btn.disabled=true; btn.textContent='生成中...';
     try {
+      // Wait for webfonts to be loaded so html2canvas doesn't capture with fallback fonts
+      if (document.fonts && document.fonts.ready) {
+        try { await document.fonts.ready; } catch(e) {}
+      }
       const d=new Date(), dstr=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
       const safeTitle=(songTitle||'lyrics').replace(/[\/:*?"<>|]/g,'_').slice(0,40);
       if (exportFormat==='pdf') {
@@ -4346,10 +4350,19 @@
           page.style.cssText='position:fixed;left:-99999px;top:0;opacity:1;pointer-events:none;z-index:-1;';
           document.body.appendChild(page);
           await new Promise(r=>requestAnimationFrame(r));
-          const pc=await html2canvas(page,getCanvasOptions(page,2.5));
-          const rH=(pc.height*pW)/pc.width;
+          const pc=await html2canvas(page,getCanvasOptions(page,3));
+          // Preserve aspect ratio: fit by width, but if that height exceeds the
+          // page, scale BOTH dimensions down so we never distort vertically.
+          let drawW = pW;
+          let drawH = (pc.height * pW) / pc.width;
+          if (drawH > pH) {
+            const k = pH / drawH;
+            drawW *= k;
+            drawH = pH;
+          }
+          const offsetX = (pW - drawW) / 2;
           if (i>0) pdf.addPage();
-          pdf.addImage(pc.toDataURL('image/png'),'PNG',0,0,pW,Math.min(pH,rH));
+          pdf.addImage(pc.toDataURL('image/png'),'PNG', offsetX, 0, drawW, drawH);
           page.remove();
         }
         pdf.save(`LyricNote_${safeTitle}_${dstr}.pdf`);
