@@ -10,6 +10,52 @@
   <!-- Supabase SDK for cloud sync -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
+    /* ════════════════════════════════════════════════════════════════════
+     *  CSS TABLE OF CONTENTS  (search the `── Section ──` markers to jump)
+     *  ───────────────────────────────────────────────────────────────────
+     *  THEME & GLOBALS
+     *     :root variables (colors, fonts, shadows)            ~ line  17
+     *     body, .app, .card                                   ~ line  47
+     *
+     *  HEADER & TOOLBAR
+     *     Header (logo, title, song meta)                     ~ line  75
+     *     Buttons (.btn-*)                                    ~ line 125
+     *     Zoom control                                        ~ line 143
+     *     Section mode button                                 ~ line 163
+     *
+     *  EDITOR (lyrics rendering)
+     *     Lyric scroll container                              ~ line 168
+     *     Section mode layout + picker                        ~ line 179
+     *     Lyric chars (.lyric-char, .char-wrap)               ~ line 252
+     *     Underline + symbol marks (.ul-*, .sym-*)            ~ line 307
+     *
+     *  FLOATING TOOLBAR + ANNOTATION UI
+     *     Float toolbar                                       ~ line 403
+     *     Note editor / popover                               ~ line 498
+     *     Palette + add buttons + color picker                ~ line 1377
+     *     Font picker                                         ~ line 1479
+     *
+     *  MODALS
+     *     Import / edit modal                                 ~ line 557
+     *     Date picker / calendar                              ~ line 688
+     *     Export preview modal                                ~ line 771
+     *
+     *  EXPORT (PDF/image rendering)
+     *     Export sheet & header                               ~ line 802
+     *     Export 2-col layout (lyrics + side notes)           ~ line 870
+     *
+     *  HOME SCREEN
+     *     Empty state + recent items                          ~ line 928
+     *     Student chips filter + search + sort                ~ line 993
+     *
+     *  NOTES (per-line + bottom)
+     *     Notes layout + margin cells                         ~ line 1187
+     *     Bottom notes bar                                    ~ line 1268
+     *
+     *  RESPONSIVE                                              ~ line 1516
+     *  LOGIN / CLOUD                                           ~ line 1547
+     * ════════════════════════════════════════════════════════════════════ */
+
     @import url('https://fonts.googleapis.com/css2?family=ZCOOL+XiaoWei&family=Noto+Sans+SC:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=ZCOOL+KuaiLe&family=ZCOOL+QingKe+HuangYou&family=Ma+Shan+Zheng&family=Liu+Jian+Mao+Cao&family=Long+Cang&family=Zhi+Mang+Xing&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Caveat:wght@400;500&display=swap');
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -2036,6 +2082,65 @@
 </div>
 
 <script>
+  /* ════════════════════════════════════════════════════════════════════
+   *  JS TABLE OF CONTENTS  (search the `// ─── Section ───` markers)
+   *  ───────────────────────────────────────────────────────────────────
+   *  GLOBAL STATE                                            ~ line 2085
+   *     currentProjectId, lyrics, annotations, sections, lineNotes,
+   *     selRange, zoomIndex, isEditMode, palettes, fonts, etc.
+   *
+   *  INIT / BOOT
+   *     init()                                               ~ line 2167
+   *
+   *  EDITOR — TOP-LEVEL UI
+   *     Zoom (adjustZoom, ZOOM_LEVELS)                       ~ line 2196
+   *     Song title / student name inline edit                ~ line 2212
+   *     Speech recognition (voice notes)                     ~ line 2275
+   *     Palette (highlight + text color)                     ~ line 2363
+   *     Custom color picker panel                            ~ line 2442
+   *     Font bar + font picker                               ~ line 2561
+   *     Calendar (date picker)                               ~ line 2664
+   *     Section mode (verse/chorus tags)                     ~ line 2767
+   *
+   *  EDITOR — CORE RENDERING
+   *     renderLyrics, renderLyricsInto                       ~ line 2818
+   *     Bold / italic                                        ~ line 2862
+   *
+   *  STATE PERSISTENCE
+   *     Project Mgmt: getProjectIndex, getAllStudents        ~ line 2892
+   *     Undo stack: snapshotState, pushHistory, undo,
+   *                 saveState, saveStateDirect               ~ line 2912
+   *     Load/Create/Delete project                           ~ line 3023
+   *     File save / open (LyricNote .json export)            ~ line 3321
+   *     Old-format migration                                 ~ line 3441
+   *
+   *  HOME SCREEN (chips + search + sort + recent items)      ~ line 3092
+   *
+   *  ANNOTATION INTERACTION
+   *     Selection (mouse/touch drag to select chars)         ~ line 3701
+   *     Positioning (float toolbar)                          ~ line 3746
+   *     Annotations (color, underline, note, font, etc.)     ~ line 3783
+   *     Note editor (per-char note popover)                  ~ line 3931
+   *     Popover (note display + edit)                        ~ line 3983
+   *
+   *  MODALS
+   *     Import / edit modal + live preview + scroll sync     ~ line 4016
+   *
+   *  EXPORT
+   *     Preview modal (buildExportSheet)                     ~ line 4200
+   *     PDF pagination (buildPdfPages)                       ~ line 4330
+   *     confirmExport (html2canvas + jsPDF)                  ~ line 4380
+   *
+   *  NOTES (per-line + summary)
+   *     Notes state                                          ~ line 4450
+   *     Panel toggles                                        ~ line 4490
+   *     Margin notes (per-line)                              ~ line 4506
+   *     Bottom notes (summary)                               ~ line 4591
+   *     Notes parser (links/timestamps in note text)         ~ line 4627
+   *
+   *  AUTH & CLOUD SYNC (Supabase)                           ~ line 4646
+   * ════════════════════════════════════════════════════════════════════ */
+
   // ─── State ───────────────────────────────────────────
   let currentProjectId = null;
   let lyrics = '';
