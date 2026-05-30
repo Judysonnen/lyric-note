@@ -835,16 +835,15 @@
     .export-date { font-family: 'Noto Sans SC',sans-serif; font-size: 11px; color: var(--export-muted); letter-spacing: 0.18em; }
     .export-lyrics { min-height: 40px; }
     .export-lyrics .lyric-line { margin-bottom: 0; break-inside: avoid; page-break-inside: avoid; padding: 0; }
-    /* Char wrapper inherits the base padding (which scales with --font-scale)
-       so the underline-to-symbol gap matches the editor proportionally. */
+    /* Char wrapper inherits the base padding (scales with --font-scale) so the
+       underline-to-symbol gap matches the editor proportionally. */
     .export-lyrics .char-wrap {
       vertical-align: middle;
-      line-height: 1;
       margin: 0;
     }
     .export-lyrics .lyric-char {
-      font-size: 22px; line-height: 1; cursor: default; color: var(--export-ink);
-      padding: 2px 2.5px; font-family: 'Noto Serif SC',serif;
+      font-size: 22px; line-height: 2.1; cursor: default; color: var(--export-ink);
+      padding: 4px 2.5px; font-family: 'Noto Serif SC',serif;
       vertical-align: middle;
       display: inline-block;
     }
