@@ -256,15 +256,15 @@
     }
     .char-wrap {
       position: relative; display: inline-block; overflow: visible;
-      /* Reserve space below the underline so accent/triangle/dotbelow have room
-         to sit clearly below it instead of crowding the line. */
-      padding: calc(4px * var(--font-scale)) 0 calc(18px * var(--font-scale));
+      /* Small padding-bottom keeps the symbols just clear of the underline
+         without spreading the lines apart. */
+      padding: 0 0 calc(8px * var(--font-scale));
     }
 
     .lyric-char {
       font-family: 'Noto Serif SC', serif;
       font-size: calc(30px * var(--font-scale));
-      line-height: 2.5;
+      line-height: 2.1;
       padding: 6px 2px;
       cursor: default;
       user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: none;
@@ -317,21 +317,20 @@
       display: flex; align-items: center; justify-content: center;
       z-index: 5;
     }
-    /* Bottom symbols sit inside the char-wrap's padding-bottom zone, clearly
-       below where an underline lands. Different bottom values stagger them so
-       multiple marks on one char don't overlap each other. */
+    /* Bottom symbols sit just inside the char-wrap padding zone, clear of the
+       underline but not floated far away from it. */
     .sym-triangle {
       bottom: calc(2px * var(--font-scale)); left: 50%; transform: translateX(-50%);
       font-size: calc(11px * var(--font-scale)); color: #0891B2;
     }
     .sym-triangle::before { content: '▲'; }
     .sym-dotbelow {
-      bottom: calc(10px * var(--font-scale)); left: 50%; transform: translateX(-50%);
+      bottom: calc(3px * var(--font-scale)); left: 50%; transform: translateX(-50%);
       font-size: calc(8px * var(--font-scale)); color: #DB2777;
     }
     .sym-dotbelow::before { content: '●'; }
     .sym-accent {
-      bottom: calc(5px * var(--font-scale)); left: 50%; transform: translateX(-50%);
+      bottom: calc(1px * var(--font-scale)); left: 50%; transform: translateX(-50%);
       font-size: calc(15px * var(--font-scale)); font-weight: 900; color: #B45309; font-style: italic;
     }
     .sym-accent::before { content: '>'; }
