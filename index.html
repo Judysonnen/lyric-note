@@ -835,16 +835,11 @@
     .export-date { font-family: 'Noto Sans SC',sans-serif; font-size: 11px; color: var(--export-muted); letter-spacing: 0.18em; }
     .export-lyrics { min-height: 40px; }
     .export-lyrics .lyric-line { margin-bottom: 0; break-inside: avoid; page-break-inside: avoid; padding: 0; }
-    /* Char wrapper in export inherits same positioning model as editor so symbols
-       (slur, accent, breath, etc.) appear in the same relative spot as the editor.
-       Padding gives line-height headroom equivalent to editor's line-height: 2.1
-       on a 22px char (= ~24px gap → split 10/14 above/below). */
+    /* Char wrapper inherits the base padding (which scales with --font-scale)
+       so the underline-to-symbol gap matches the editor proportionally. */
     .export-lyrics .char-wrap {
-      position: relative;
-      display: inline-block;
       vertical-align: middle;
       line-height: 1;
-      padding: 10px 0 14px;
       margin: 0;
     }
     .export-lyrics .lyric-char {
