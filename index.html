@@ -2865,8 +2865,12 @@
 
   // ── Undo stack ──────────────────────────────────────
   // Snapshot of editable state. Cap stack to keep memory under control.
+  // pushHistory is called from saveState (which fires AFTER each mutation), so
+  // we have to push the PRE-mutation snapshot, not the current state, or undo
+  // would just restore "now" and look like a no-op.
   const HISTORY_MAX = 50;
   let historyStack = [];
+  let lastSnapshot = null;
   let isRestoringHistory = false;
   function snapshotState() {
     return {
@@ -2878,12 +2882,22 @@
       notes: (document.getElementById('notes-textarea') || {}).value || ''
     };
   }
+  function snapEqual(a, b) {
+    if (!a || !b) return false;
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
   function pushHistory() {
     if (isRestoringHistory) return;
     if (!currentProjectId) return;
-    historyStack.push(snapshotState());
-    if (historyStack.length > HISTORY_MAX) historyStack.shift();
-    refreshUndoBtn();
+    const current = snapshotState();
+    // Push the PREVIOUS snapshot (= state before this mutation) so undo can
+    // restore back to it. Skip if nothing actually changed.
+    if (lastSnapshot && !snapEqual(lastSnapshot, current)) {
+      historyStack.push(lastSnapshot);
+      if (historyStack.length > HISTORY_MAX) historyStack.shift();
+      refreshUndoBtn();
+    }
+    lastSnapshot = current;
   }
   function refreshUndoBtn() {
     const b = document.getElementById('undo-btn');
@@ -2906,6 +2920,7 @@
       selRange = null;
       if (typeof renderLyrics === 'function') renderLyrics();
       if (typeof renderSongTitleDisplay === 'function') renderSongTitleDisplay();
+      lastSnapshot = snapshotState();
       saveStateDirect();
       refreshUndoBtn();
     } finally {
@@ -2956,6 +2971,8 @@
     const index = getProjectIndex();
     index.unshift(entry);
     saveProjectIndex(index);
+    // Anchor undo baseline for the new project
+    historyStack = []; lastSnapshot = snapshotState(); refreshUndoBtn();
     return id;
   }
 
@@ -2986,6 +3003,9 @@
       document.getElementById('edit-lyrics-btn').style.display = '';
       showEditorView();
         updateNotesCount();
+      // Anchor undo baseline: project just loaded, no history yet, but the
+      // first change should be undoable back to this loaded state.
+      historyStack = []; lastSnapshot = snapshotState(); refreshUndoBtn();
       return true;
     } catch(e) { return false; }
   }
@@ -3020,7 +3040,7 @@
     document.getElementById('edit-lyrics-btn').style.display = 'none';
     document.documentElement.style.setProperty('--font-scale', 1);
     updateZoomUI(); updateNotesCount();
-    historyStack = []; refreshUndoBtn();
+    historyStack = []; lastSnapshot = null; refreshUndoBtn();
   }
 
   // ─── Home Screen ──────────────────────────────────────
