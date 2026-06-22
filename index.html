@@ -4420,6 +4420,20 @@
   function buildExportSheet() {
     const sheet=document.getElementById('export-sheet');
     sheet.className=`export-sheet ${exportFormat==='pdf'?'export-pdf':'export-image'}`;
+    // Size the export sheet so its lyric content area matches the editor's
+    // lyric container at 100% zoom, regardless of the editor's current zoom
+    // or the user's window size. This is the WYSIWYG guarantee: lines that
+    // fit on one row in the editor will fit on one row in the export.
+    const editorLyrics = document.getElementById('lyric-container');
+    if (editorLyrics && editorLyrics.offsetWidth > 0) {
+      // The lyric container's width is set by its parent (.card) and is
+      // independent of --font-scale, so the same value applies to a 100%-zoom
+      // export. Add the sheet's horizontal padding so the lyric area inside
+      // the sheet ends up exactly as wide as the editor's lyric area.
+      const sheetStyle = getComputedStyle(sheet);
+      const padX = parseFloat(sheetStyle.paddingLeft) + parseFloat(sheetStyle.paddingRight);
+      sheet.style.width = (editorLyrics.offsetWidth + padX) + 'px';
+    }
     const today=new Date();
     const dateStr=`${today.getFullYear()}.${String(today.getMonth()+1).padStart(2,'0')}.${String(today.getDate()).padStart(2,'0')}`;
     const titleHTML=songTitle?`<div class="export-title">${escapeHtml(songTitle)}</div>`:'<div class="export-title">未命名歌词</div>';
