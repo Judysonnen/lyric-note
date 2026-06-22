@@ -948,7 +948,10 @@
       --export-rule: var(--border);
       --export-accent: var(--primary);
       background: var(--export-paper);
-      width: 880px; max-width: 100%;
+      /* No max-width: the sheet width is set dynamically in JS to match the
+         editor's lyric container width; capping at 100% would let the preview
+         modal's narrower body force premature line wrapping in the export. */
+      width: 880px;
       padding: 40px 36px 36px 36px;
       font-family: 'Noto Serif SC', serif;
       position: relative; overflow: hidden; flex-shrink: 0;
