@@ -224,12 +224,12 @@
     .header-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
     .logo-icon {
       width: 40px; height: 40px;
-      background: linear-gradient(135deg, #C76754 0%, #C4924A 100%);
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent-gold) 100%);
       border-radius: 12px;
       display: flex; align-items: center; justify-content: center;
       color: var(--card); font-size: 20px;
       font-family: var(--font-display);
-      box-shadow: 0 4px 14px rgba(199, 103, 84, 0.3);
+      box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 30%, transparent);
       flex-shrink: 0;
     }
     .title-block { min-width: 0; }
@@ -1081,10 +1081,10 @@
     }
     .home-logo {
       width: 64px; height: 64px; border-radius: 18px;
-      background: linear-gradient(135deg, #C76754, #D87E6B);
+      background: linear-gradient(135deg, var(--primary), var(--accent-lavender));
       display: flex; align-items: center; justify-content: center;
       font-size: 28px; color: white;
-      box-shadow: 0 8px 24px rgba(199,103,84,0.3); margin-bottom: 16px;
+      box-shadow: 0 8px 24px color-mix(in srgb, var(--primary) 30%, transparent); margin-bottom: 16px;
     }
     .home-title { font-size: 22px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
     .home-title span { font-weight: 400; font-size: 13px; color: var(--muted); letter-spacing: 0.05em; margin-left: 6px; }
