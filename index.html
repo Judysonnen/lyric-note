@@ -909,7 +909,7 @@
     /* ── Preview ── */
     .preview-modal {
       background: white; border-radius: 22px; padding: 0;
-      width: 720px; max-width: 94vw; max-height: 92vh;
+      width: 980px; max-width: 96vw; max-height: 92vh;
       box-shadow: 0 28px 72px rgba(0,0,0,0.22);
       display: flex; flex-direction: column; overflow: hidden;
     }
@@ -954,10 +954,10 @@
       position: relative; overflow: hidden; flex-shrink: 0;
       color: var(--export-ink);
     }
-    /* Image export: same width as editor card so layout matches editor 1:1. */
-    .export-sheet.export-image { width: 880px; padding: 48px 36px 40px; }
-    /* PDF export: A4 width at 96dpi ≈ 794px. min-height = A4 height (1123px). */
-    .export-sheet.export-pdf   { width: 794px; min-height: 1123px; padding: 56px 48px 48px; }
+    /* Both image and PDF: same width as editor card so layout matches editor 1:1.
+       PDF is a single continuous page (not A4-paginated) — width tracks editor. */
+    .export-sheet.export-image,
+    .export-sheet.export-pdf { width: 880px; padding: 48px 36px 40px; }
     .export-header { text-align: center; padding-bottom: 26px; margin-bottom: 42px; border-bottom: 2px solid var(--export-rule); position: relative; }
     .export-header::after { content:''; position:absolute; bottom:-2px; left:50%; transform:translateX(-50%); width:60px; height:2px; background:var(--export-accent); }
     .export-brand {
@@ -4619,29 +4619,17 @@
       const d=new Date(), dstr=`${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
       const safeTitle=(songTitle||'lyrics').replace(/[\/:*?"<>|]/g,'_').slice(0,40);
       if (exportFormat==='pdf') {
-        const {jsPDF}=window.jspdf, pdf=new jsPDF('p','mm','a4');
-        const pW=pdf.internal.pageSize.getWidth(), pH=pdf.internal.pageSize.getHeight();
-        const pages=buildPdfPages();
-        for (let i=0;i<pages.length;i++) {
-          const page=pages[i];
-          page.style.cssText='position:fixed;left:-99999px;top:0;opacity:1;pointer-events:none;z-index:-1;';
-          document.body.appendChild(page);
-          await new Promise(r=>requestAnimationFrame(r));
-          const pc=await html2canvas(page,getCanvasOptions(page,3));
-          // Preserve aspect ratio: fit by width, but if that height exceeds the
-          // page, scale BOTH dimensions down so we never distort vertically.
-          let drawW = pW;
-          let drawH = (pc.height * pW) / pc.width;
-          if (drawH > pH) {
-            const k = pH / drawH;
-            drawW *= k;
-            drawH = pH;
-          }
-          const offsetX = (pW - drawW) / 2;
-          if (i>0) pdf.addPage();
-          pdf.addImage(pc.toDataURL('image/png'),'PNG', offsetX, 0, drawW, drawH);
-          page.remove();
-        }
+        // Single-page PDF sized to actual content (matches editor view 1:1).
+        // No A4 pagination — page width/height = sheet width/scrollHeight.
+        const {jsPDF}=window.jspdf;
+        const canvas=await html2canvas(sheet,getCanvasOptions(sheet,3));
+        const pdf=new jsPDF({
+          orientation: canvas.height > canvas.width ? 'p' : 'l',
+          unit: 'px',
+          format: [canvas.width, canvas.height],
+          hotfixes: ['px_scaling']
+        });
+        pdf.addImage(canvas.toDataURL('image/png'),'PNG', 0, 0, canvas.width, canvas.height);
         pdf.save(`LyricNote_${safeTitle}_${dstr}.pdf`);
       } else {
         const canvas=await html2canvas(sheet,getCanvasOptions(sheet,3));
