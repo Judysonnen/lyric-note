@@ -939,24 +939,25 @@
 
     /* ── Export sheet ── */
     .export-sheet {
-      /* Pin font-scale so exports stay standard size regardless of editor zoom.
-         Value chosen as 22/30 ≈ 0.73 so that all the calc(Npx * var(--font-scale))
-         expressions in the base sym CSS produce sizes proportional to the export
-         char (22px), matching the editor's symbol-to-char ratio at zoom 1. */
-      --font-scale: 0.73 !important;
-      --export-paper: #F7F2E8;
-      --export-ink: #1F2937;
-      --export-muted: #7C6F64;
-      --export-rule: rgba(124,111,100,0.18);
-      --export-accent: #8C6A43;
+      /* Pin font-scale to 1 so exports always render at 100%, regardless of the
+         editor's current zoom level (WYSIWYG-at-100%). */
+      --font-scale: 1 !important;
+      --export-paper: var(--card);
+      --export-ink: var(--text);
+      --export-muted: var(--muted);
+      --export-rule: var(--border);
+      --export-accent: var(--primary);
       background: var(--export-paper);
-      width: 560px; max-width: 100%;
-      padding: 64px 60px 54px 60px;
+      width: 880px; max-width: 100%;
+      padding: 40px 36px 36px 36px;
       font-family: 'Noto Serif SC', serif;
       position: relative; overflow: hidden; flex-shrink: 0;
+      color: var(--export-ink);
     }
-    .export-sheet.export-image { width: 860px; padding: 84px 80px 72px; }
-    .export-sheet.export-pdf   { width: 680px; min-height: 842px; padding: 78px 64px 70px; }
+    /* Image export: same width as editor card so layout matches editor 1:1. */
+    .export-sheet.export-image { width: 880px; padding: 48px 36px 40px; }
+    /* PDF export: A4 width at 96dpi ≈ 794px. min-height = A4 height (1123px). */
+    .export-sheet.export-pdf   { width: 794px; min-height: 1123px; padding: 56px 48px 48px; }
     .export-header { text-align: center; padding-bottom: 26px; margin-bottom: 42px; border-bottom: 2px solid var(--export-rule); position: relative; }
     .export-header::after { content:''; position:absolute; bottom:-2px; left:50%; transform:translateX(-50%); width:60px; height:2px; background:var(--export-accent); }
     .export-brand {
@@ -979,9 +980,10 @@
       vertical-align: middle;
       margin: 0;
     }
+    /* Match editor exactly at 100% zoom: same font-size, padding, line-height. */
     .export-lyrics .lyric-char {
-      font-size: 22px; line-height: 2.1; cursor: default; color: var(--export-ink);
-      padding: 4px 2.5px; font-family: 'Noto Serif SC',serif;
+      font-size: 30px; line-height: 2.1; cursor: default; color: var(--export-ink);
+      padding: 6px 2px; font-family: 'Noto Serif SC',serif;
       vertical-align: middle;
       display: inline-block;
     }
@@ -1013,17 +1015,17 @@
     }
     .export-lrow .lyric-line { margin-bottom: 0; flex: 1; min-width: 0; display: flex; align-items: center; flex-wrap: wrap; }
     .export-lnote-col {
-      width: 150px; flex-shrink: 0;
+      width: 180px; flex-shrink: 0;
       border-left: 2px solid var(--export-rule);
       padding-left: 14px; padding-top: 8px; padding-bottom: 8px;
       font-family: 'Noto Sans SC', sans-serif;
-      font-size: 10.5px; line-height: 1.75; color: var(--export-muted);
+      font-size: 13px; line-height: 1.75; color: var(--export-muted);
       font-style: italic; word-break: break-word;
       display: flex; align-items: center;
     }
-    .export-lnote-col:not(:empty) { border-left-color: rgba(140,106,67,0.35); }
-    .export-sheet.export-image .export-lnote-col { width: 200px; font-size: 11.5px; }
-    .export-sheet.export-pdf   .export-lnote-col { width: 150px; }
+    .export-lnote-col:not(:empty) { border-left-color: var(--primary); opacity: 0.85; }
+    .export-sheet.export-image .export-lnote-col { width: 220px; font-size: 13.5px; }
+    .export-sheet.export-pdf   .export-lnote-col { width: 180px; }
     /* hide note col when empty (no notes at all) */
     .export-no-linenotes .export-lnote-col { display: none; }
     /* old inline .export-line-note no longer used in main flow */
@@ -4564,7 +4566,8 @@
     const header=sheet.querySelector('.export-header'), footer=sheet.querySelector('.export-footer');
     const notesSectionHTML=notesSection?notesSection.outerHTML:'';
     const sheetStyle=getComputedStyle(sheet);
-    const pageHeight=842;
+    // A4 height at 96dpi ≈ 1123px (matches .export-sheet.export-pdf min-height).
+    const pageHeight=1123;
     const usableH=pageHeight-parseFloat(sheetStyle.paddingTop)-parseFloat(sheetStyle.paddingBottom)-header.offsetHeight-footer.offsetHeight-40;
     const offscreen=(el)=>{el.style.cssText='position:fixed;left:-99999px;top:0;opacity:1;pointer-events:none;z-index:-1;';}
     const clearStage=(el)=>{['position','left','top','opacity','pointerEvents','zIndex','visibility'].forEach(p=>el.style[p]='');}
