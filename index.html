@@ -695,7 +695,7 @@
     .modal-backdrop {
       position: fixed; inset: 0; background: rgba(17,24,39,0.5);
       display: none; align-items: center; justify-content: center;
-      z-index: 300; backdrop-filter: blur(6px);
+      z-index: 9999; backdrop-filter: blur(6px);
     }
     .modal-backdrop.active { display: flex; }
     .modal {
@@ -2195,7 +2195,7 @@
 </div>
 
 <!-- Share Modal -->
-<div class="modal-backdrop" id="share-modal-bg" onclick="if(event.target===this) closeShareModal()" style="display:none;z-index:500;">
+<div class="modal-backdrop" id="share-modal-bg" onclick="if(event.target===this) closeShareModal()" style="display:none;z-index:10000;">
   <div class="modal" style="max-width:480px;padding:28px;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
       <h3 style="margin:0;font-size:18px;font-weight:600;color:var(--text);">分享这条歌词</h3>
