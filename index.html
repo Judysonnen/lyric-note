@@ -1309,14 +1309,23 @@
       font-family: var(--font-latin); font-style: italic;
       font-size: 13px; color: var(--muted); margin-top: 4px; letter-spacing: 0.03em;
     }
-    .recent-item-del {
+    .recent-item-del,
+    .recent-item-share {
       width: 24px; height: 24px; border-radius: 6px; border: none;
       background: transparent; color: var(--muted); cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px; transition: all 0.12s; opacity: 0; flex-shrink: 0;
+      font-size: 14px; transition: all 0.12s; opacity: 0; flex-shrink: 0;
     }
-    .recent-item:hover .recent-item-del { opacity: 1; }
+    .recent-item:hover .recent-item-del,
+    .recent-item:hover .recent-item-share { opacity: 1; }
+    .recent-item-share:hover { background: #F4DCD4; color: var(--primary); }
     .recent-item-del:hover { background: #FEF2F2; color: var(--danger); }
+    .recent-item-shared {
+      display: inline-block; margin-left: 8px; padding: 1px 7px;
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+      background: #EFE7DA; color: var(--primary); border-radius: 8px;
+      vertical-align: middle;
+    }
     .home-empty {
       font-family: var(--font-latin);
       font-style: italic;
@@ -1905,6 +1914,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>
           编辑
         </button>
+        <button class="btn btn-outline" onclick="if(currentProjectId)openShareModal(currentProjectId);else alert('请先打开一首歌');" title="分享给其他用户">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          分享
+        </button>
         <button class="btn btn-outline" onclick="showPreview('pdf')" title="导出 PDF">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           PDF
@@ -2181,6 +2194,17 @@
   </div>
 </div>
 
+<!-- Share Modal -->
+<div class="modal-backdrop" id="share-modal-bg" onclick="if(event.target===this) closeShareModal()" style="display:none;">
+  <div class="modal" style="max-width:480px;padding:28px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <h3 style="margin:0;font-size:18px;font-weight:600;color:var(--text);">分享这条歌词</h3>
+      <button onclick="closeShareModal()" style="background:none;border:none;font-size:20px;color:var(--muted);cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="share-modal-body" style="font-size:13px;color:var(--text-soft);"></div>
+  </div>
+</div>
+
 <!-- Export Preview Modal -->
 <div class="modal-backdrop" id="preview-modal-bg" onclick="closePreviewIfOut(event)">
   <div class="preview-modal">
@@ -2395,6 +2419,8 @@
     // Auth will decide whether to show login or home screen
     initCloudSync();
     document.addEventListener('click', onDocClick);
+    // Handle ?join=<token> shared-project link (after a brief delay so auth has a chance to restore)
+    setTimeout(handleJoinTokenFromUrl, 600);
   }
 
   function onDocClick(e) {
@@ -3491,13 +3517,17 @@
       if (p.createdAt) metaParts.push('创建 ' + fmtDate(p.createdAt));
       if (p.updatedAt && p.updatedAt !== p.createdAt) metaParts.push('修改 ' + fmtDate(p.updatedAt));
       const dotColor = p.studentName ? studentColor(p.studentName) : 'var(--muted)';
+      const sharedBadge = p.isOwner === false
+        ? '<span class="recent-item-shared" title="他人分享给你">⇄</span>' : '';
+      const delTitle = p.isOwner === false ? '退出（不再接收）' : '删除';
       html += `<div class="recent-item" onclick="loadProject('${p.id}')">
         <div class="recent-item-icon" style="color: ${dotColor};">♪</div>
         <div class="recent-item-info">
-          <div class="recent-item-name">${escHtml(p.name || '未命名歌词')}</div>
+          <div class="recent-item-name">${escHtml(p.name || '未命名歌词')}${sharedBadge}</div>
           <div class="recent-item-meta">${escHtml(metaParts.join(' · '))}</div>
         </div>
-        <button class="recent-item-del" onclick="event.stopPropagation();deleteProjectConfirm('${p.id}')" title="删除">×</button>
+        <button class="recent-item-share" onclick="event.stopPropagation();openShareModal('${p.id}')" title="分享">⤴</button>
+        <button class="recent-item-del" onclick="event.stopPropagation();deleteProjectConfirm('${p.id}')" title="${delTitle}">×</button>
       </div>`;
     });
     html += '</div>';
@@ -3524,7 +3554,10 @@
     const index = getProjectIndex();
     const p = index.find(e => e.id === id);
     const name = p ? p.name : '未命名';
-    if (confirm('确定要删除「' + name + '」吗？此操作不可恢复。')) {
+    const msg = (p && p.isOwner === false)
+      ? '退出「' + name + '」？这是别人分享给你的歌词，退出后你将不再看到它（对其他人没影响）。'
+      : '确定要删除「' + name + '」吗？此操作不可恢复，所有协作者都将失去访问。';
+    if (confirm(msg)) {
       deleteProject(id);
       renderHomeScreen();
     }
@@ -4920,6 +4953,12 @@
     pullFromCloud().then(() => {
       if (prevUid === user.id) pushLocalToCloud();
       if (document.getElementById('home-screen').style.display !== 'none') renderHomeScreen();
+      // After auth, if user came from a ?join=<token> link, claim now
+      const pending = sessionStorage.getItem('pending_join_token');
+      if (pending) {
+        sessionStorage.removeItem('pending_join_token');
+        claimSharedProject(pending);
+      }
     });
     startCloudPoll();
     document.getElementById('login-screen').style.display = 'none';
@@ -5160,14 +5199,15 @@
   async function pullFromCloud() {
     if (!supabaseClient || !cloudUser) return;
     try {
+      // RLS gives us: projects we own + projects we're a collaborator on
       const { data, error } = await supabaseClient.from('projects')
-        .select('id, data, updated_at')
-        .eq('user_id', cloudUser.id);
+        .select('id, data, updated_at, share_token, user_id');
       if (error) throw error;
       if (!data) return;
       data.forEach(row => {
         const projData = row.data;
         const id = row.id;
+        const isOwner = row.user_id === cloudUser.id;
         const localRaw = localStorage.getItem('lyricnote_project_' + id);
         const localData = localRaw ? JSON.parse(localRaw) : null;
         if (!localData || (projData.updatedAt || 0) > (localData.updatedAt || 0)) {
@@ -5179,8 +5219,16 @@
             existing.studentName = projData.studentName || '';
             existing.lessonDate = projData.lessonDate || '';
             existing.updatedAt = projData.updatedAt;
+            existing.isOwner = isOwner;
+            existing.ownerId = row.user_id;
+            existing.shareToken = row.share_token || null;
           } else {
-            index.unshift({ id, name: projData.name || projData.songTitle || '未命名', studentName: projData.studentName || '', lessonDate: projData.lessonDate || '', createdAt: projData.createdAt || projData.updatedAt, updatedAt: projData.updatedAt });
+            index.unshift({
+              id, name: projData.name || projData.songTitle || '未命名',
+              studentName: projData.studentName || '', lessonDate: projData.lessonDate || '',
+              createdAt: projData.createdAt || projData.updatedAt, updatedAt: projData.updatedAt,
+              isOwner, ownerId: row.user_id, shareToken: row.share_token || null
+            });
           }
           saveProjectIndex(index);
           if (currentProjectId === id) loadProject(id);
@@ -5226,9 +5274,13 @@
     cloudSyncing = true;
     showCloudSyncing();
     try {
+      // For a project shared with us, we don't own it; UPDATE through RLS will
+      // succeed if we're an editor collaborator. Don't include user_id (RLS rule
+      // would reject INSERT of someone else's row).
+      const ownerId = (getProjectIndex().find(p => p.id === projectId) || {}).ownerId || cloudUser.id;
       const { error } = await supabaseClient.from('projects').upsert({
         id: projectId,
-        user_id: cloudUser.id,
+        user_id: ownerId,
         data: data,
         updated_at: data.updatedAt || now
       });
@@ -5243,11 +5295,142 @@
   async function cloudDeleteProject(projectId) {
     if (!supabaseClient || !cloudUser) return;
     try {
+      const entry = (getProjectIndex().find(p => p.id === projectId)) || {};
+      if (entry.isOwner === false) {
+        // Just leave the shared project (delete our collaborator row)
+        await supabaseClient.from('project_collaborators')
+          .delete()
+          .eq('project_id', projectId)
+          .eq('user_id', cloudUser.id);
+        return;
+      }
+      // Owner delete (existing behavior)
       await supabaseClient.from('projects').delete().eq('id', projectId).eq('user_id', cloudUser.id);
     } catch(e) {
       console.error('Cloud delete error:', e);
     }
   }
+
+  // ─── Project Sharing ────────────────────────────────
+  function randomShareToken() {
+    const chars = 'abcdefghjkmnpqrstuvwxyz23456789';
+    let s = '';
+    const arr = new Uint8Array(10);
+    crypto.getRandomValues(arr);
+    for (let i = 0; i < 10; i++) s += chars[arr[i] % chars.length];
+    return s;
+  }
+
+  async function ensureShareToken(projectId) {
+    const idx = getProjectIndex();
+    const entry = idx.find(p => p.id === projectId);
+    if (entry && entry.shareToken) return entry.shareToken;
+    if (!supabaseClient || !cloudUser) {
+      alert('请先登录云端账户才能分享。');
+      return null;
+    }
+    // Owner only: generate token + save
+    if (entry && entry.isOwner === false) {
+      alert('只有歌词的拥有者可以生成分享链接。');
+      return null;
+    }
+    const token = randomShareToken();
+    const { error } = await supabaseClient.from('projects')
+      .update({ share_token: token })
+      .eq('id', projectId);
+    if (error) {
+      console.error('Share token error:', error);
+      alert('生成分享链接失败：' + (error.message || '未知'));
+      return null;
+    }
+    if (entry) { entry.shareToken = token; saveProjectIndex(idx); }
+    return token;
+  }
+
+  async function openShareModal(projectId) {
+    const bg = document.getElementById('share-modal-bg');
+    const body = document.getElementById('share-modal-body');
+    bg.style.display = 'flex';
+    body.innerHTML = '<div style="padding:20px 0;text-align:center;color:var(--muted);">生成链接中…</div>';
+    const token = await ensureShareToken(projectId);
+    if (!token) { closeShareModal(); return; }
+    const url = location.origin + location.pathname + '?join=' + token;
+    const idx = getProjectIndex();
+    const entry = idx.find(p => p.id === projectId) || {};
+    const songName = entry.name || '未命名歌词';
+    body.innerHTML = `
+      <div style="margin-bottom:14px;line-height:1.6;">
+        把下面这个链接发给对方（微信、邮件都行）。对方点开 → 登录账户 → 「<b>${escHtml(songName)}</b>」就会出现在他的主页里，<b>双方都可以编辑</b>，所有修改实时同步。
+      </div>
+      <div style="background:#FAF5EC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">
+        <input id="share-link-input" readonly value="${url}" style="flex:1;background:transparent;border:none;outline:none;font-family:monospace;font-size:13px;color:var(--text);" onclick="this.select()" />
+        <button onclick="copyShareLink()" id="share-copy-btn" style="background:var(--primary);color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:1px;">复制</button>
+      </div>
+      <div style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.5;">
+        · 链接长期有效, 任何拿到链接的人登录后都能加入<br>
+        · 如果想撤销分享, 删除歌词即可 (或重新生成链接, 老链接会失效)<br>
+        · 协作者可以查看 + 编辑, 但不能删除整个歌词
+      </div>
+    `;
+  }
+
+  function closeShareModal() {
+    document.getElementById('share-modal-bg').style.display = 'none';
+  }
+
+  function copyShareLink() {
+    const inp = document.getElementById('share-link-input');
+    if (!inp) return;
+    inp.select();
+    try {
+      navigator.clipboard.writeText(inp.value).then(() => {
+        const btn = document.getElementById('share-copy-btn');
+        if (btn) { btn.textContent = '已复制'; setTimeout(() => { btn.textContent = '复制'; }, 1500); }
+      });
+    } catch (e) { document.execCommand('copy'); }
+  }
+
+  /// Called once on load: if URL has ?join=<token>, claim it.
+  async function handleJoinTokenFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const token = params.get('join');
+    if (!token) return;
+    // Clean URL immediately
+    history.replaceState({}, '', location.pathname);
+
+    // If not signed in, stash token and prompt sign-in
+    if (!cloudUser) {
+      sessionStorage.setItem('pending_join_token', token);
+      alert('要加入这条歌词请先登录或注册账号。登录后会自动加入。');
+      // Auth UI is in same page; user will sign in and we'll re-run handler
+      return;
+    }
+    await claimSharedProject(token);
+  }
+
+  async function claimSharedProject(token) {
+    if (!supabaseClient || !cloudUser) return;
+    try {
+      const { data, error } = await supabaseClient.rpc('join_project_by_token', { token });
+      if (error) throw error;
+      const row = (data && data[0]) || null;
+      if (!row) { alert('链接无效或已过期。'); return; }
+      if (row.already_member) {
+        alert(`已经在你的库里：「${row.name}」`);
+      } else {
+        alert(`已加入：「${row.name}」`);
+      }
+      await pullFromCloud();
+      if (document.getElementById('home-screen').style.display !== 'none') renderHomeScreen();
+    } catch (e) {
+      console.error('Claim share error:', e);
+      alert('加入失败：' + (e.message || '未知'));
+    }
+  }
+  window.openShareModal = openShareModal;
+  window.closeShareModal = closeShareModal;
+  window.copyShareLink = copyShareLink;
+  // ─── /Project Sharing ──────────────────────────────
 
   async function pushLocalToCloud() {
     if (!supabaseClient || !cloudUser) return;
