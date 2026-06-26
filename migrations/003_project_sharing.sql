@@ -3,6 +3,12 @@
 -- Run after 001 + 002 (or standalone — only depends on `projects` table).
 
 -- ─────────────────────────────────────────
+-- 0. Clean up any half-created state from a failed prior run
+-- ─────────────────────────────────────────
+drop function if exists public.join_project_by_token(text);
+drop table if exists public.project_collaborators cascade;
+
+-- ─────────────────────────────────────────
 -- 1. share_token on projects
 -- ─────────────────────────────────────────
 alter table public.projects
@@ -15,7 +21,7 @@ create index if not exists projects_share_token_idx on public.projects(share_tok
 -- ─────────────────────────────────────────
 create table if not exists public.project_collaborators (
     id          uuid primary key default gen_random_uuid(),
-    project_id  uuid not null references public.projects(id) on delete cascade,
+    project_id  text not null references public.projects(id) on delete cascade,
     user_id     uuid not null references auth.users(id)       on delete cascade,
     role        text not null default 'editor' check (role in ('editor', 'viewer')),
     joined_at   timestamptz default now(),
@@ -32,21 +38,9 @@ drop policy if exists "collab self read" on public.project_collaborators;
 create policy "collab self read" on public.project_collaborators
     for select using (user_id = auth.uid());
 
--- Project owner can read all collaborator rows on their project
-drop policy if exists "collab owner read" on public.project_collaborators;
-create policy "collab owner read" on public.project_collaborators
-    for select using (
-        exists (select 1 from public.projects p
-                where p.id = project_id and p.user_id = auth.uid())
-    );
-
--- Project owner can remove collaborators
+-- (Owner-side collaborator listing / removal goes through RPCs to avoid RLS recursion with projects)
+drop policy if exists "collab owner read"   on public.project_collaborators;
 drop policy if exists "collab owner delete" on public.project_collaborators;
-create policy "collab owner delete" on public.project_collaborators
-    for delete using (
-        exists (select 1 from public.projects p
-                where p.id = project_id and p.user_id = auth.uid())
-    );
 
 -- Collaborator can leave themselves
 drop policy if exists "collab self delete" on public.project_collaborators;
@@ -77,18 +71,18 @@ create policy "projects owner all" on public.projects
 create policy "projects collab select" on public.projects
     for select using (
         exists (select 1 from public.project_collaborators c
-                where c.project_id = id and c.user_id = auth.uid())
+                where c.project_id = projects.id and c.user_id = auth.uid())
     );
 
 -- Collaborator can UPDATE shared project (editor role)
 create policy "projects collab update" on public.projects
     for update using (
         exists (select 1 from public.project_collaborators c
-                where c.project_id = id and c.user_id = auth.uid() and c.role = 'editor')
+                where c.project_id = projects.id and c.user_id = auth.uid() and c.role = 'editor')
     )
     with check (
         exists (select 1 from public.project_collaborators c
-                where c.project_id = id and c.user_id = auth.uid() and c.role = 'editor')
+                where c.project_id = projects.id and c.user_id = auth.uid() and c.role = 'editor')
     );
 
 -- (Collaborators cannot DELETE — only owner can)
@@ -99,13 +93,13 @@ create policy "projects collab update" on public.projects
 -- Returns the project row so client can immediately show it.
 -- ─────────────────────────────────────────
 create or replace function public.join_project_by_token(token text)
-returns table(project_id uuid, name text, already_member boolean)
+returns table(project_id text, name text, already_member boolean)
 language plpgsql
 security definer
 set search_path = public
 as $$
 declare
-    p_id   uuid;
+    p_id   text;
     p_owner uuid;
     p_name text;
     existing_id uuid;

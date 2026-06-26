@@ -5360,7 +5360,7 @@
     const songName = entry.name || '未命名歌词';
     body.innerHTML = `
       <div style="margin-bottom:14px;line-height:1.6;">
-        把下面这个链接发给对方（微信、邮件都行）。对方点开 → 登录账户 → 「<b>${escHtml(songName)}</b>」就会出现在他的主页里，<b>双方都可以编辑</b>，所有修改实时同步。
+        把下面这个链接发给对方（微信、邮件都行）。对方点开链接 → 登录账户后，「<b>${escHtml(songName)}</b>」这首歌就会自动加进他的歌词列表，可以打开编辑。<b>双方编辑的是同一份歌词</b>，谁改了对方刷新就能看到。
       </div>
       <div style="background:#FAF5EC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">
         <input id="share-link-input" readonly value="${url}" style="flex:1;background:transparent;border:none;outline:none;font-family:monospace;font-size:13px;color:var(--text);" onclick="this.select()" />
