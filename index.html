@@ -1996,6 +1996,10 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
           导入新歌词
         </button>
+        <button class="btn btn-outline home-btn" id="home-assign-hw-btn" onclick="openCreateHomeworkPicker()" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          布置作业
+        </button>
       </div>
       <div id="recent-projects" class="recent-section"></div>
       <div id="student-homework-section" class="hw-section" style="display:none;">
@@ -5958,6 +5962,9 @@
   function renderTeacherStudentsSection() {
     const sec = document.getElementById('teacher-students-section');
     const list = document.getElementById('teacher-students-list');
+    const assignBtn = document.getElementById('home-assign-hw-btn');
+    const linkedCount = myStudents.filter(s => s.id).length;
+    if (assignBtn) assignBtn.style.display = linkedCount > 0 ? '' : 'none';
     if (!myStudents.length) {
       sec.style.display = 'none';
       return;
@@ -6057,14 +6064,16 @@
   // ── Create homework ──────────────────────────────────────────────
   let pendingStudentForHomework = null;
   function openCreateHomeworkPicker() {
-    if (!myStudents.length) {
-      alert('你还没有学生。请先用「分享」按钮把一首歌词分享给你的学生，对方点链接加入后会出现在这里。');
+    const linked = myStudents.filter(s => s.id);
+    if (!linked.length) {
+      alert('还没有已关联账号的学生。先用「分享」按钮把一首歌词分享给你的学生，对方注册并加入后才能给 ta 布置在线作业。');
       return;
     }
     const list = document.getElementById('hw-pickstudent-list');
-    list.innerHTML = myStudents.map(s => `
+    list.innerHTML = linked.map(s => `
       <button class="hw-student-card" style="text-align:left;border-style:solid;" onclick="pickStudentForHomework('${s.id}','${escHtml(s.displayName).replace(/'/g, "\\'")}')">
         <div class="hw-student-name">${escHtml(s.displayName)}</div>
+        <div class="hw-student-meta">${s.songCount} 首歌</div>
       </button>`).join('');
     document.getElementById('hw-pickstudent-bg').style.display = 'flex';
   }
