@@ -122,9 +122,9 @@ begin
     end if;
 
     -- Check if already a collaborator
-    select id into existing_id
-      from public.project_collaborators
-     where project_id = p_id and user_id = auth.uid()
+    select pc.id into existing_id
+      from public.project_collaborators pc
+     where pc.project_id = p_id and pc.user_id = auth.uid()
      limit 1;
 
     if existing_id is not null then
