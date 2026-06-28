@@ -2003,10 +2003,7 @@
         <div id="student-homework-list" class="hw-today-list"></div>
       </div>
       <div id="teacher-students-section" class="hw-section" style="display:none;">
-        <div class="hw-section-title">
-          <span>我的学生</span>
-          <button class="hw-add" onclick="openCreateHomeworkPicker()">+ 布置作业</button>
-        </div>
+        <div class="hw-section-title"><span>我的学生</span></div>
         <div id="teacher-students-list" class="hw-students-grid"></div>
       </div>
       <button class="home-fab" onclick="openModal(false)" title="导入新歌词" aria-label="导入新歌词">
@@ -5902,17 +5899,49 @@
 
   async function loadMyStudents() {
     if (!supabaseClient || !cloudUser) return;
-    try {
-      const { data, error } = await supabaseClient.rpc('list_my_students');
-      if (error) throw error;
-      myStudents = await Promise.all((data || []).map(async row => ({
-        id: row.student_id,
-        displayName: await lookupUsername(row.student_id)
-      })));
-    } catch(e) {
-      console.error('loadMyStudents failed', e);
-      myStudents = [];
+    // Students = distinct studentName values across my OWNED projects (local index).
+    // Each student may or may not have a linked cloud account; we match by username (case-insensitive).
+    const index = getProjectIndex();
+    const ownedProjects = index.filter(p => p.isOwner !== false);
+    const byName = new Map();
+    for (const p of ownedProjects) {
+      const name = (p.studentName || '').trim();
+      if (!name) continue;
+      const key = name.toLowerCase();
+      if (!byName.has(key)) byName.set(key, { displayName: name, songCount: 0, projectIds: [] });
+      const entry = byName.get(key);
+      entry.songCount += 1;
+      entry.projectIds.push(p.id);
     }
+
+    // Try to attach a user_id by matching to collaborators on my owned projects
+    let collabUsersByName = {};
+    try {
+      const ownedIds = ownedProjects.map(p => p.id);
+      if (ownedIds.length) {
+        const { data: collabs, error } = await supabaseClient
+          .from('project_collaborators')
+          .select('user_id, project_id')
+          .in('project_id', ownedIds);
+        if (error) throw error;
+        const uniqueUids = [...new Set((collabs || []).map(c => c.user_id))];
+        for (const uid of uniqueUids) {
+          const uname = await lookupUsername(uid);
+          if (uname) collabUsersByName[uname.toLowerCase().trim()] = uid;
+        }
+      }
+    } catch(e) { console.error('match collaborators failed', e); }
+
+    myStudents = [];
+    for (const [key, entry] of byName.entries()) {
+      myStudents.push({
+        id: collabUsersByName[key] || null,
+        displayName: entry.displayName,
+        songCount: entry.songCount,
+        projectIds: entry.projectIds
+      });
+    }
+    myStudents.sort((a, b) => b.songCount - a.songCount);
   }
 
   async function refreshHomeworkUI() {
@@ -5935,7 +5964,8 @@
     }
     sec.style.display = '';
     list.innerHTML = myStudents.map(s => {
-      const studentHomework = homeworkAsTeacher.filter(h => h.student_id === s.id);
+      const linked = !!s.id;
+      const studentHomework = linked ? homeworkAsTeacher.filter(h => h.student_id === s.id) : [];
       const activeCount = studentHomework.filter(h => h.end_date >= todayDateStr()).length;
       let totalDays = 0, doneDays = 0;
       studentHomework.forEach(h => {
@@ -5945,12 +5975,26 @@
         doneDays += days.filter(d => checks[d] && checks[d].completed).length;
       });
       const pct = totalDays ? Math.round((doneDays / totalDays) * 100) : 0;
+      const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
+      const assignBtn = linked
+        ? `<button class="hw-add" onclick="event.stopPropagation();openCreateHomework('${s.id}','${nameJs}')" title="给这个学生布置作业">+ 作业</button>`
+        : `<button class="hw-add" style="opacity:.6;" onclick="event.stopPropagation();alert('需要这个学生注册账号并通过你的「分享链接」加入过你的歌词，才能给 ta 布置作业。')" title="未关联账号">未关联</button>`;
+      const progressLine = linked
+        ? `<div class="hw-student-meta">${studentHomework.length} 份作业 · ${activeCount} 份进行中</div>
+           <div class="hw-student-meta">完成 ${doneDays}/${totalDays} 天 · ${pct}%</div>
+           <div class="hw-student-progress"><div style="width:${pct}%"></div></div>`
+        : `<div class="hw-student-meta" style="font-style:italic;">未关联账号（无法布置在线作业）</div>`;
+      const click = linked
+        ? `onclick="openStudentDrawer('${s.id}')"`
+        : `onclick="alert('需要学生先注册账号并通过你的分享链接加入歌词，才能查看 ta 的打卡。')"`;
       return `
-        <div class="hw-student-card" onclick="openStudentDrawer('${s.id}')">
-          <div class="hw-student-name">${escHtml(s.displayName)}</div>
-          <div class="hw-student-meta">${studentHomework.length} 份作业 · ${activeCount} 份进行中</div>
-          <div class="hw-student-meta">完成 ${doneDays}/${totalDays} 天 · ${pct}%</div>
-          <div class="hw-student-progress"><div style="width:${pct}%"></div></div>
+        <div class="hw-student-card" ${click}>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+            <div class="hw-student-name">${escHtml(s.displayName)}</div>
+            ${assignBtn}
+          </div>
+          <div class="hw-student-meta">${s.songCount} 首歌</div>
+          ${progressLine}
         </div>`;
     }).join('');
   }
