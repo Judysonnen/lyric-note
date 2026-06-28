@@ -1996,7 +1996,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
           导入新歌词
         </button>
-        <button class="btn btn-outline home-btn" id="home-assign-hw-btn" onclick="openCreateHomeworkPicker()" style="display:none;">
+        <button class="btn btn-outline home-btn" id="home-assign-hw-btn" onclick="openCreateHomeworkPicker()">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
           布置作业
         </button>
@@ -5962,9 +5962,6 @@
   function renderTeacherStudentsSection() {
     const sec = document.getElementById('teacher-students-section');
     const list = document.getElementById('teacher-students-list');
-    const assignBtn = document.getElementById('home-assign-hw-btn');
-    const linkedCount = myStudents.filter(s => s.id).length;
-    if (assignBtn) assignBtn.style.display = linkedCount > 0 ? '' : 'none';
     if (!myStudents.length) {
       sec.style.display = 'none';
       return;
