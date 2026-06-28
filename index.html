@@ -1806,6 +1806,145 @@
     }
     .home-cloud-status.offline { color: var(--muted); }
     .home-cloud-status.offline .cloud-dot { background: #D1D5DB; }
+
+    /* ── Homework sections ── */
+    .hw-section { margin-top: 36px; }
+    .hw-section-title {
+      font-size: 13px; color: var(--text-soft); letter-spacing: 0.22em;
+      text-transform: uppercase; font-weight: 600;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border);
+      margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .hw-section-title .hw-add {
+      font-size: 12px; color: var(--primary); cursor: pointer;
+      background: none; border: 1px solid var(--border); padding: 4px 10px; border-radius: 6px;
+      letter-spacing: 0.1em; transition: all .15s;
+    }
+    .hw-section-title .hw-add:hover { background: var(--primary-light); border-color: var(--primary); }
+
+    .hw-students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .hw-student-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px; cursor: pointer; transition: all .15s;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .hw-student-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-float); }
+    .hw-student-name { font-size: 15px; font-weight: 600; color: var(--text); }
+    .hw-student-meta { font-size: 12px; color: var(--muted); }
+    .hw-student-progress {
+      height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; margin-top: 4px;
+    }
+    .hw-student-progress > div { height: 100%; background: var(--primary); transition: width .3s; }
+
+    .hw-today-list { display: flex; flex-direction: column; gap: 10px; }
+    .hw-today-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    }
+    .hw-today-check {
+      width: 24px; height: 24px; border: 2px solid var(--border); border-radius: 50%;
+      cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+      transition: all .15s;
+    }
+    .hw-today-check.done { background: var(--primary); border-color: var(--primary); color: white; }
+    .hw-today-check.done::after { content: "✓"; font-size: 14px; font-weight: 700; }
+    .hw-today-info { flex: 1; min-width: 0; }
+    .hw-today-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .hw-today-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .hw-today-expand {
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      padding: 5px 11px; font-size: 12px; color: var(--text-soft); cursor: pointer;
+    }
+    .hw-today-expand:hover { background: var(--primary-light); color: var(--primary); border-color: var(--primary); }
+
+    /* ── Homework drawer ── */
+    .hw-drawer-modal {
+      background: var(--card); border-radius: 18px; padding: 0;
+      width: 720px; max-width: 96vw; max-height: 90vh;
+      display: flex; flex-direction: column; overflow: hidden;
+      box-shadow: 0 28px 72px rgba(120, 80, 50, 0.22);
+    }
+    .hw-drawer-header {
+      padding: 22px 26px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+    }
+    .hw-drawer-title { font-size: 18px; font-weight: 600; color: var(--text); }
+    .hw-drawer-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .hw-drawer-close {
+      background: none; border: none; font-size: 22px; color: var(--muted); cursor: pointer; line-height: 1;
+    }
+    .hw-drawer-body { padding: 18px 26px; overflow-y: auto; flex: 1; }
+    .hw-drawer-footer {
+      padding: 14px 26px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end;
+    }
+
+    .hw-day-row {
+      border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px;
+      margin-bottom: 8px; transition: all .15s;
+    }
+    .hw-day-row.done { border-color: var(--primary); background: var(--primary-light); }
+    .hw-day-row.past:not(.done) { opacity: 0.55; }
+    .hw-day-row.future { opacity: 0.45; }
+    .hw-day-header {
+      display: flex; align-items: center; gap: 10px; cursor: pointer;
+    }
+    .hw-day-date { font-size: 13px; font-weight: 600; color: var(--text); min-width: 90px; }
+    .hw-day-date .hw-day-weekday { font-weight: 400; color: var(--muted); margin-left: 4px; font-size: 12px; }
+    .hw-day-status { font-size: 12px; color: var(--muted); flex: 1; }
+    .hw-day-status.done { color: var(--primary); font-weight: 500; }
+    .hw-day-expand-icon { color: var(--muted); font-size: 14px; transition: transform .15s; }
+    .hw-day-row.expanded .hw-day-expand-icon { transform: rotate(90deg); }
+    .hw-day-detail { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+    .hw-day-row.expanded .hw-day-detail { display: block; }
+    .hw-day-field-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+    .hw-day-textarea {
+      width: 100%; border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 10px; font-size: 13px; font-family: inherit; resize: vertical; min-height: 56px;
+      background: white; color: var(--text); outline: none;
+    }
+    .hw-day-textarea:focus { border-color: var(--primary); }
+    .hw-day-section + .hw-day-section { margin-top: 12px; }
+
+    .hw-audio-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .hw-rec-btn {
+      background: white; border: 1px solid var(--border); border-radius: 999px;
+      padding: 7px 14px; font-size: 12px; color: var(--text); cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; transition: all .15s;
+    }
+    .hw-rec-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .hw-rec-btn.recording { background: #FEE2E2; border-color: #DC2626; color: #DC2626; }
+    .hw-rec-btn .hw-rec-dot {
+      width: 8px; height: 8px; border-radius: 50%; background: #DC2626; display: inline-block;
+    }
+    .hw-rec-btn.recording .hw-rec-dot { animation: hwPulse 1s infinite; }
+    @keyframes hwPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+    .hw-audio-player { flex: 1; min-width: 220px; height: 32px; }
+    .hw-audio-delete {
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      padding: 5px 10px; font-size: 11px; color: var(--muted); cursor: pointer;
+    }
+    .hw-audio-delete:hover { color: #DC2626; border-color: #FCA5A5; }
+
+    .hw-teacher-comment {
+      background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 8px;
+      padding: 8px 12px; font-size: 13px; color: #78350F; margin-top: 8px;
+      line-height: 1.5;
+    }
+    .hw-teacher-comment.empty { background: transparent; border-style: dashed; color: var(--muted); font-style: italic; }
+
+    .hw-empty { text-align: center; padding: 30px 20px; color: var(--muted); font-size: 13px; }
+
+    /* ── Homework create form ── */
+    .hw-form-row { margin-bottom: 14px; }
+    .hw-form-row label { display: block; font-size: 12px; color: var(--text-soft); margin-bottom: 5px; font-weight: 500; }
+    .hw-form-row input, .hw-form-row textarea {
+      width: 100%; border: 1px solid var(--border); border-radius: 8px;
+      padding: 9px 12px; font-size: 13px; font-family: inherit; outline: none; background: white;
+    }
+    .hw-form-row input:focus, .hw-form-row textarea:focus { border-color: var(--primary); }
+    .hw-form-row textarea { resize: vertical; min-height: 72px; }
+    .hw-form-row.two-col { display: flex; gap: 12px; }
+    .hw-form-row.two-col > div { flex: 1; }
   </style>
 </head>
 <body>
@@ -1859,6 +1998,17 @@
         </button>
       </div>
       <div id="recent-projects" class="recent-section"></div>
+      <div id="student-homework-section" class="hw-section" style="display:none;">
+        <div class="hw-section-title"><span>我的练习 · 今日打卡</span></div>
+        <div id="student-homework-list" class="hw-today-list"></div>
+      </div>
+      <div id="teacher-students-section" class="hw-section" style="display:none;">
+        <div class="hw-section-title">
+          <span>我的学生</span>
+          <button class="hw-add" onclick="openCreateHomeworkPicker()">+ 布置作业</button>
+        </div>
+        <div id="teacher-students-list" class="hw-students-grid"></div>
+      </div>
       <button class="home-fab" onclick="openModal(false)" title="导入新歌词" aria-label="导入新歌词">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       </button>
@@ -2250,6 +2400,67 @@
       <button class="btn btn-ghost" onclick="closePreview()">取消</button>
       <button class="btn btn-primary" id="preview-confirm-btn" onclick="confirmExport()">下载</button>
     </div>
+  </div>
+</div>
+
+<!-- Homework Drawer -->
+<div class="modal-backdrop" id="hw-drawer-bg" onclick="if(event.target===this) closeHomeworkDrawer()" style="display:none;z-index:9000;">
+  <div class="hw-drawer-modal">
+    <div class="hw-drawer-header">
+      <div>
+        <div class="hw-drawer-title" id="hw-drawer-title">作业</div>
+        <div class="hw-drawer-sub" id="hw-drawer-sub"></div>
+      </div>
+      <button class="hw-drawer-close" onclick="closeHomeworkDrawer()" title="关闭">×</button>
+    </div>
+    <div class="hw-drawer-body" id="hw-drawer-body"></div>
+    <div class="hw-drawer-footer" id="hw-drawer-footer"></div>
+  </div>
+</div>
+
+<!-- Create Homework Modal -->
+<div class="modal-backdrop" id="hw-create-bg" onclick="if(event.target===this) closeCreateHomework()" style="display:none;z-index:9100;">
+  <div class="modal" style="max-width:520px;padding:26px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <h3 style="margin:0;font-size:17px;font-weight:600;color:var(--text);" id="hw-create-title">布置作业</h3>
+      <button onclick="closeCreateHomework()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="hw-create-student-label" style="font-size:13px;color:var(--text-soft);margin-bottom:14px;"></div>
+    <div class="hw-form-row">
+      <label>标题</label>
+      <input id="hw-form-title" type="text" placeholder="如：每天练习 30 分钟" maxlength="80" />
+    </div>
+    <div class="hw-form-row">
+      <label>描述（可选）</label>
+      <textarea id="hw-form-desc" placeholder="如：先开嗓 5 分钟，然后从主歌反复练 5 遍，最后通唱一遍。" maxlength="600"></textarea>
+    </div>
+    <div class="hw-form-row two-col">
+      <div>
+        <label>开始日期</label>
+        <input id="hw-form-start" type="date" />
+      </div>
+      <div>
+        <label>截止日期</label>
+        <input id="hw-form-end" type="date" />
+      </div>
+    </div>
+    <div id="hw-create-error" style="color:#DC2626;font-size:12px;min-height:16px;margin-bottom:8px;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeCreateHomework()">取消</button>
+      <button class="btn btn-primary" id="hw-create-confirm" onclick="submitCreateHomework()">布置</button>
+    </div>
+  </div>
+</div>
+
+<!-- Pick Student Modal -->
+<div class="modal-backdrop" id="hw-pickstudent-bg" onclick="if(event.target===this) closePickStudent()" style="display:none;z-index:9100;">
+  <div class="modal" style="max-width:460px;padding:24px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <h3 style="margin:0;font-size:17px;font-weight:600;color:var(--text);">选择学生</h3>
+      <button onclick="closePickStudent()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;">学生需要先通过你的「歌词分享链接」加入过你的歌词，才会出现在这里。</div>
+    <div id="hw-pickstudent-list" style="display:flex;flex-direction:column;gap:8px;max-height:50vh;overflow-y:auto;"></div>
   </div>
 </div>
 
@@ -3360,6 +3571,7 @@
     document.getElementById('home-screen').style.display = '';
     document.getElementById('editor-view').style.display = 'none';
     renderHomeScreen();
+    if (typeof refreshHomeworkUI === 'function') refreshHomeworkUI();
   }
   function showEditorView() {
     document.getElementById('home-screen').style.display = 'none';
@@ -5310,6 +5522,12 @@
         .on('postgres_changes',
             { event: 'INSERT', schema: 'public', table: 'projects' },
             payload => applyRemoteProjectUpdate(payload.new))
+        .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'homework' },
+            () => { if (typeof refreshHomeworkUI === 'function' && document.getElementById('home-screen').style.display !== 'none') refreshHomeworkUI(); })
+        .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'homework_check' },
+            () => { if (typeof refreshHomeworkUI === 'function' && document.getElementById('home-screen').style.display !== 'none') refreshHomeworkUI(); })
         .subscribe();
     } catch(e) { console.error('Realtime subscribe failed:', e); }
   }
@@ -5575,6 +5793,596 @@
     el.className = 'cloud-status syncing show';
     el.innerHTML = '<span class="cloud-dot"></span> 同步中…';
   }
+
+  // ════════════════════════════════════════════════════════════════════
+  //  HOMEWORK SYSTEM
+  //  Teacher (project owner) assigns daily homework to students
+  //  (collaborators of her shared projects). Each day: check-off,
+  //  optional student note, optional audio recording, optional teacher
+  //  comment. All cloud-synced via Supabase.
+  // ════════════════════════════════════════════════════════════════════
+
+  let homeworkAsTeacher = [];   // array of homework rows where I'm the teacher
+  let homeworkAsStudent = [];   // array of homework rows where I'm the student
+  let homeworkChecksByHw = {};  // { homework_id: { 'YYYY-MM-DD': checkRow } }
+  let myStudents = [];          // array of {id, displayName}
+  const usernameCache = {};
+
+  function todayDateStr() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function dateRangeDays(start, end) {
+    const out = [];
+    const s = new Date(start + 'T00:00:00');
+    const e = new Date(end + 'T00:00:00');
+    for (let d = new Date(s); d <= e; d.setDate(d.getDate() + 1)) {
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      out.push(y + '-' + m + '-' + day);
+    }
+    return out;
+  }
+  function weekdayShort(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    return ['周日','周一','周二','周三','周四','周五','周六'][d.getDay()];
+  }
+  function isFutureDate(dateStr) { return dateStr > todayDateStr(); }
+  function isPastDate(dateStr) { return dateStr < todayDateStr(); }
+
+  async function lookupUsername(uid) {
+    if (!uid) return '未知用户';
+    if (usernameCache[uid]) return usernameCache[uid];
+    if (cloudUser && uid === cloudUser.id) {
+      usernameCache[uid] = '我自己';
+      return '我自己';
+    }
+    try {
+      const { data, error } = await supabaseClient.rpc('lookup_username_by_id', { uid });
+      if (error) throw error;
+      let name = data || uid.slice(0, 8);
+      // Try decode if hex-encoded (u_<hex>)
+      if (/^u_[0-9a-f]+$/.test(name)) {
+        try {
+          const hex = name.slice(2);
+          const bytes = new Uint8Array(hex.length / 2);
+          for (let i = 0; i < bytes.length; i++) bytes[i] = parseInt(hex.substr(i * 2, 2), 16);
+          name = new TextDecoder().decode(bytes);
+        } catch(_) {}
+      }
+      usernameCache[uid] = name;
+      return name;
+    } catch(e) {
+      console.error('lookupUsername failed', e);
+      return uid.slice(0, 8);
+    }
+  }
+
+  async function loadHomeworkAll() {
+    if (!supabaseClient || !cloudUser) return;
+    try {
+      const { data: hw, error } = await supabaseClient
+        .from('homework')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      homeworkAsTeacher = (hw || []).filter(h => h.teacher_id === cloudUser.id);
+      homeworkAsStudent = (hw || []).filter(h => h.student_id === cloudUser.id);
+
+      // Load checks for all homework I can see
+      homeworkChecksByHw = {};
+      const allIds = (hw || []).map(h => h.id);
+      if (allIds.length) {
+        const { data: checks, error: ce } = await supabaseClient
+          .from('homework_check')
+          .select('*')
+          .in('homework_id', allIds);
+        if (ce) throw ce;
+        for (const c of (checks || [])) {
+          if (!homeworkChecksByHw[c.homework_id]) homeworkChecksByHw[c.homework_id] = {};
+          homeworkChecksByHw[c.homework_id][c.check_date] = c;
+        }
+      }
+    } catch(e) {
+      console.error('loadHomeworkAll failed', e);
+    }
+  }
+
+  async function loadMyStudents() {
+    if (!supabaseClient || !cloudUser) return;
+    try {
+      const { data, error } = await supabaseClient.rpc('list_my_students');
+      if (error) throw error;
+      myStudents = await Promise.all((data || []).map(async row => ({
+        id: row.student_id,
+        displayName: await lookupUsername(row.student_id)
+      })));
+    } catch(e) {
+      console.error('loadMyStudents failed', e);
+      myStudents = [];
+    }
+  }
+
+  async function refreshHomeworkUI() {
+    if (!cloudUser) {
+      document.getElementById('teacher-students-section').style.display = 'none';
+      document.getElementById('student-homework-section').style.display = 'none';
+      return;
+    }
+    await Promise.all([loadHomeworkAll(), loadMyStudents()]);
+    renderTeacherStudentsSection();
+    renderStudentHomeworkSection();
+  }
+
+  function renderTeacherStudentsSection() {
+    const sec = document.getElementById('teacher-students-section');
+    const list = document.getElementById('teacher-students-list');
+    if (!myStudents.length) {
+      sec.style.display = 'none';
+      return;
+    }
+    sec.style.display = '';
+    list.innerHTML = myStudents.map(s => {
+      const studentHomework = homeworkAsTeacher.filter(h => h.student_id === s.id);
+      const activeCount = studentHomework.filter(h => h.end_date >= todayDateStr()).length;
+      let totalDays = 0, doneDays = 0;
+      studentHomework.forEach(h => {
+        const days = dateRangeDays(h.start_date, h.end_date);
+        totalDays += days.length;
+        const checks = homeworkChecksByHw[h.id] || {};
+        doneDays += days.filter(d => checks[d] && checks[d].completed).length;
+      });
+      const pct = totalDays ? Math.round((doneDays / totalDays) * 100) : 0;
+      return `
+        <div class="hw-student-card" onclick="openStudentDrawer('${s.id}')">
+          <div class="hw-student-name">${escHtml(s.displayName)}</div>
+          <div class="hw-student-meta">${studentHomework.length} 份作业 · ${activeCount} 份进行中</div>
+          <div class="hw-student-meta">完成 ${doneDays}/${totalDays} 天 · ${pct}%</div>
+          <div class="hw-student-progress"><div style="width:${pct}%"></div></div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderStudentHomeworkSection() {
+    const sec = document.getElementById('student-homework-section');
+    const list = document.getElementById('student-homework-list');
+    const today = todayDateStr();
+    const activeHw = homeworkAsStudent.filter(h => h.start_date <= today && h.end_date >= today);
+    if (!activeHw.length) {
+      sec.style.display = 'none';
+      return;
+    }
+    sec.style.display = '';
+    list.innerHTML = activeHw.map(h => {
+      const check = (homeworkChecksByHw[h.id] || {})[today];
+      const done = check && check.completed;
+      const teacherComment = check && check.teacher_comment;
+      return `
+        <div class="hw-today-card">
+          <div class="hw-today-check ${done ? 'done' : ''}" onclick="toggleTodayCheck('${h.id}')"></div>
+          <div class="hw-today-info">
+            <div class="hw-today-title">${escHtml(h.title)}</div>
+            <div class="hw-today-sub">${h.start_date} → ${h.end_date}${teacherComment ? ' · 老师留言' : ''}</div>
+          </div>
+          <button class="hw-today-expand" onclick="openHomeworkDrawerForStudent('${h.id}')">详情</button>
+        </div>`;
+    }).join('');
+  }
+
+  async function toggleTodayCheck(homeworkId) {
+    const today = todayDateStr();
+    const existing = (homeworkChecksByHw[homeworkId] || {})[today];
+    const nextDone = !(existing && existing.completed);
+    await upsertCheck(homeworkId, today, { completed: nextDone, completed_at: nextDone ? new Date().toISOString() : null });
+    await loadHomeworkAll();
+    renderStudentHomeworkSection();
+  }
+
+  async function upsertCheck(homeworkId, date, fields) {
+    if (!supabaseClient || !cloudUser) return null;
+    const existing = (homeworkChecksByHw[homeworkId] || {})[date];
+    try {
+      if (existing) {
+        const { error } = await supabaseClient.from('homework_check')
+          .update({ ...fields, updated_at: new Date().toISOString() })
+          .eq('id', existing.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabaseClient.from('homework_check')
+          .insert({ homework_id: homeworkId, check_date: date, ...fields });
+        if (error) throw error;
+      }
+    } catch(e) {
+      console.error('upsertCheck failed', e);
+      alert('保存失败：' + (e.message || '未知'));
+    }
+  }
+
+  // ── Create homework ──────────────────────────────────────────────
+  let pendingStudentForHomework = null;
+  function openCreateHomeworkPicker() {
+    if (!myStudents.length) {
+      alert('你还没有学生。请先用「分享」按钮把一首歌词分享给你的学生，对方点链接加入后会出现在这里。');
+      return;
+    }
+    const list = document.getElementById('hw-pickstudent-list');
+    list.innerHTML = myStudents.map(s => `
+      <button class="hw-student-card" style="text-align:left;border-style:solid;" onclick="pickStudentForHomework('${s.id}','${escHtml(s.displayName).replace(/'/g, "\\'")}')">
+        <div class="hw-student-name">${escHtml(s.displayName)}</div>
+      </button>`).join('');
+    document.getElementById('hw-pickstudent-bg').style.display = 'flex';
+  }
+  function closePickStudent() { document.getElementById('hw-pickstudent-bg').style.display = 'none'; }
+  function pickStudentForHomework(sid, name) {
+    closePickStudent();
+    openCreateHomework(sid, name);
+  }
+  function openCreateHomework(studentId, studentName) {
+    pendingStudentForHomework = studentId;
+    document.getElementById('hw-create-student-label').textContent = '给「' + studentName + '」布置作业';
+    document.getElementById('hw-form-title').value = '';
+    document.getElementById('hw-form-desc').value = '';
+    document.getElementById('hw-form-start').value = todayDateStr();
+    const d = new Date(); d.setDate(d.getDate() + 6);
+    document.getElementById('hw-form-end').value = d.toISOString().slice(0, 10);
+    document.getElementById('hw-create-error').textContent = '';
+    document.getElementById('hw-create-bg').style.display = 'flex';
+    setTimeout(() => document.getElementById('hw-form-title').focus(), 50);
+  }
+  function closeCreateHomework() { document.getElementById('hw-create-bg').style.display = 'none'; }
+  async function submitCreateHomework() {
+    const title = document.getElementById('hw-form-title').value.trim();
+    const desc = document.getElementById('hw-form-desc').value.trim();
+    const start = document.getElementById('hw-form-start').value;
+    const end = document.getElementById('hw-form-end').value;
+    const err = document.getElementById('hw-create-error');
+    if (!title) { err.textContent = '请填标题'; return; }
+    if (!start || !end) { err.textContent = '请选日期'; return; }
+    if (end < start) { err.textContent = '截止日期不能早于开始日期'; return; }
+    if (!pendingStudentForHomework) { err.textContent = '没选学生'; return; }
+    const btn = document.getElementById('hw-create-confirm');
+    btn.disabled = true; btn.textContent = '提交中…';
+    try {
+      const { error } = await supabaseClient.from('homework').insert({
+        teacher_id: cloudUser.id,
+        student_id: pendingStudentForHomework,
+        title, description: desc || null,
+        start_date: start, end_date: end
+      });
+      if (error) throw error;
+      closeCreateHomework();
+      await refreshHomeworkUI();
+    } catch(e) {
+      err.textContent = '失败：' + (e.message || '未知');
+    } finally {
+      btn.disabled = false; btn.textContent = '布置';
+    }
+  }
+
+  // ── Homework drawer ──────────────────────────────────────────────
+  let drawerHomeworkId = null;
+  let drawerStudentId = null;
+  let drawerRole = null; // 'teacher' | 'student'
+
+  function openStudentDrawer(studentId) {
+    drawerStudentId = studentId;
+    drawerRole = 'teacher';
+    drawerHomeworkId = null;
+    const student = myStudents.find(s => s.id === studentId);
+    document.getElementById('hw-drawer-title').textContent = student ? student.displayName : '学生';
+    document.getElementById('hw-drawer-sub').textContent = '点击作业查看每日打卡';
+    renderDrawerTeacherView();
+    document.getElementById('hw-drawer-footer').innerHTML = `
+      <button class="btn btn-ghost" onclick="closeHomeworkDrawer()">关闭</button>
+      <button class="btn btn-primary" onclick="openCreateHomework('${studentId}','${escHtml(student.displayName).replace(/'/g, "\\'")}')">+ 新建作业</button>
+    `;
+    document.getElementById('hw-drawer-bg').style.display = 'flex';
+  }
+
+  function openHomeworkDrawerForStudent(homeworkId) {
+    drawerHomeworkId = homeworkId;
+    drawerRole = 'student';
+    const hw = homeworkAsStudent.find(h => h.id === homeworkId);
+    if (!hw) return;
+    document.getElementById('hw-drawer-title').textContent = hw.title;
+    document.getElementById('hw-drawer-sub').textContent = (hw.description ? hw.description + ' · ' : '') + hw.start_date + ' → ' + hw.end_date;
+    renderDrawerDayList(hw, 'student');
+    document.getElementById('hw-drawer-footer').innerHTML = `<button class="btn btn-ghost" onclick="closeHomeworkDrawer()">关闭</button>`;
+    document.getElementById('hw-drawer-bg').style.display = 'flex';
+  }
+
+  function openHomeworkDrawerForTeacher(homeworkId) {
+    drawerHomeworkId = homeworkId;
+    drawerRole = 'teacher';
+    const hw = homeworkAsTeacher.find(h => h.id === homeworkId);
+    if (!hw) return;
+    document.getElementById('hw-drawer-title').textContent = hw.title;
+    document.getElementById('hw-drawer-sub').textContent = (hw.description ? hw.description + ' · ' : '') + hw.start_date + ' → ' + hw.end_date;
+    renderDrawerDayList(hw, 'teacher');
+    document.getElementById('hw-drawer-footer').innerHTML = `
+      <button class="btn btn-ghost" onclick="confirmDeleteHomework('${hw.id}')" style="color:#DC2626;">删除作业</button>
+      <button class="btn btn-ghost" style="margin-left:auto;" onclick="renderDrawerTeacherView()">← 学生作业列表</button>
+      <button class="btn btn-ghost" onclick="closeHomeworkDrawer()">关闭</button>
+    `;
+    document.getElementById('hw-drawer-bg').style.display = 'flex';
+  }
+
+  function renderDrawerTeacherView() {
+    const studentHw = homeworkAsTeacher.filter(h => h.student_id === drawerStudentId);
+    const body = document.getElementById('hw-drawer-body');
+    if (!studentHw.length) {
+      body.innerHTML = '<div class="hw-empty">这个学生还没有作业，点右下的「新建作业」开始。</div>';
+      return;
+    }
+    body.innerHTML = studentHw.map(h => {
+      const days = dateRangeDays(h.start_date, h.end_date);
+      const checks = homeworkChecksByHw[h.id] || {};
+      const doneDays = days.filter(d => checks[d] && checks[d].completed).length;
+      const today = todayDateStr();
+      const status = h.end_date < today ? '已结束' : (h.start_date > today ? '未开始' : '进行中');
+      return `
+        <div class="hw-day-row" onclick="openHomeworkDrawerForTeacher('${h.id}')" style="cursor:pointer;">
+          <div class="hw-day-header">
+            <div style="flex:1;">
+              <div style="font-size:14px;font-weight:600;color:var(--text);">${escHtml(h.title)}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:3px;">${h.start_date} → ${h.end_date} · ${status} · 完成 ${doneDays}/${days.length}</div>
+            </div>
+            <span class="hw-day-expand-icon">›</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function renderDrawerDayList(hw, role) {
+    const days = dateRangeDays(hw.start_date, hw.end_date);
+    const checks = homeworkChecksByHw[hw.id] || {};
+    const today = todayDateStr();
+    const body = document.getElementById('hw-drawer-body');
+    body.innerHTML = days.map(d => {
+      const c = checks[d] || {};
+      const done = !!c.completed;
+      const isFuture = isFutureDate(d);
+      const isPast = isPastDate(d);
+      const cls = (done ? 'done ' : '') + (isFuture ? 'future ' : '') + (isPast && !done ? 'past' : '');
+      return `
+        <div class="hw-day-row ${cls}" id="hw-day-${hw.id}-${d}">
+          <div class="hw-day-header" onclick="toggleDayExpand('${hw.id}','${d}')">
+            <div class="hw-day-date">${d.slice(5)}<span class="hw-day-weekday">${weekdayShort(d)}</span></div>
+            <div class="hw-day-status ${done ? 'done' : ''}">${done ? '✓ 已完成' : (isFuture ? '未到' : (isPast ? '未完成' : '今天'))}</div>
+            <span class="hw-day-expand-icon">›</span>
+          </div>
+          <div class="hw-day-detail" id="hw-day-detail-${hw.id}-${d}"></div>
+        </div>`;
+    }).join('');
+  }
+
+  function toggleDayExpand(hwId, date) {
+    const row = document.getElementById('hw-day-' + hwId + '-' + date);
+    const detail = document.getElementById('hw-day-detail-' + hwId + '-' + date);
+    if (row.classList.contains('expanded')) {
+      row.classList.remove('expanded');
+      detail.innerHTML = '';
+      return;
+    }
+    row.classList.add('expanded');
+    renderDayDetail(hwId, date);
+  }
+
+  async function renderDayDetail(hwId, date) {
+    const detail = document.getElementById('hw-day-detail-' + hwId + '-' + date);
+    const c = (homeworkChecksByHw[hwId] || {})[date] || {};
+    const isStudent = drawerRole === 'student';
+    const isTeacher = drawerRole === 'teacher';
+    const done = !!c.completed;
+
+    let audioBlock = '';
+    let audioUrl = null;
+    if (c.audio_path) {
+      audioUrl = await getAudioSignedUrl(c.audio_path);
+    }
+    if (isStudent) {
+      audioBlock = `
+        <div class="hw-day-section">
+          <div class="hw-day-field-label">录音</div>
+          <div class="hw-audio-row">
+            <button class="hw-rec-btn" id="hw-rec-btn-${hwId}-${date}" onclick="toggleRecording('${hwId}','${date}')">
+              <span class="hw-rec-dot"></span><span class="hw-rec-label">${c.audio_path ? '重新录制' : '开始录音'}</span>
+            </button>
+            ${audioUrl ? `<audio class="hw-audio-player" controls src="${audioUrl}"></audio>` : ''}
+            ${c.audio_path ? `<button class="hw-audio-delete" onclick="deleteHomeworkAudio('${hwId}','${date}','${c.audio_path}')">删除</button>` : ''}
+          </div>
+        </div>`;
+    } else if (audioUrl) {
+      audioBlock = `
+        <div class="hw-day-section">
+          <div class="hw-day-field-label">学生录音</div>
+          <audio class="hw-audio-player" controls src="${audioUrl}" style="width:100%;"></audio>
+        </div>`;
+    }
+
+    let comment = '';
+    if (isTeacher) {
+      comment = `
+        <div class="hw-day-section">
+          <div class="hw-day-field-label">我的批注（学生可见）</div>
+          <textarea class="hw-day-textarea" id="hw-tc-${hwId}-${date}" placeholder="鼓励或纠正" onblur="saveTeacherComment('${hwId}','${date}')">${escHtml(c.teacher_comment || '')}</textarea>
+        </div>`;
+    } else if (c.teacher_comment) {
+      comment = `<div class="hw-teacher-comment">老师：${escHtml(c.teacher_comment)}</div>`;
+    }
+
+    let checkAction = '';
+    if (isStudent) {
+      checkAction = `
+        <div class="hw-day-section" style="display:flex;align-items:center;gap:10px;">
+          <div class="hw-today-check ${done ? 'done' : ''}" onclick="toggleDayCheck('${hwId}','${date}')"></div>
+          <div style="font-size:13px;color:var(--text);">${done ? '已完成今日' : '点这里标记完成'}</div>
+        </div>`;
+    }
+
+    let note = '';
+    if (isStudent) {
+      note = `
+        <div class="hw-day-section">
+          <div class="hw-day-field-label">我的感想 / 问题</div>
+          <textarea class="hw-day-textarea" id="hw-note-${hwId}-${date}" placeholder="今天练得怎么样？有什么想问老师的？" onblur="saveStudentNote('${hwId}','${date}')">${escHtml(c.student_note || '')}</textarea>
+        </div>`;
+    } else if (c.student_note) {
+      note = `
+        <div class="hw-day-section">
+          <div class="hw-day-field-label">学生感想</div>
+          <div style="font-size:13px;color:var(--text);background:#FAF5EC;border:1px solid var(--border);border-radius:8px;padding:8px 12px;">${escHtml(c.student_note)}</div>
+        </div>`;
+    }
+
+    detail.innerHTML = checkAction + note + audioBlock + comment;
+  }
+
+  async function toggleDayCheck(hwId, date) {
+    const c = (homeworkChecksByHw[hwId] || {})[date] || {};
+    const next = !c.completed;
+    await upsertCheck(hwId, date, { completed: next, completed_at: next ? new Date().toISOString() : null });
+    await loadHomeworkAll();
+    const hw = homeworkAsStudent.find(h => h.id === hwId);
+    if (hw) renderDrawerDayList(hw, 'student');
+    renderStudentHomeworkSection();
+  }
+
+  async function saveStudentNote(hwId, date) {
+    const el = document.getElementById('hw-note-' + hwId + '-' + date);
+    if (!el) return;
+    const val = el.value;
+    await upsertCheck(hwId, date, { student_note: val || null });
+    await loadHomeworkAll();
+  }
+  async function saveTeacherComment(hwId, date) {
+    const el = document.getElementById('hw-tc-' + hwId + '-' + date);
+    if (!el) return;
+    const val = el.value;
+    await upsertCheck(hwId, date, { teacher_comment: val || null });
+    await loadHomeworkAll();
+  }
+
+  async function confirmDeleteHomework(hwId) {
+    if (!confirm('删除这份作业及全部打卡记录？这个操作无法撤销。')) return;
+    try {
+      const { error } = await supabaseClient.from('homework').delete().eq('id', hwId);
+      if (error) throw error;
+      closeHomeworkDrawer();
+      await refreshHomeworkUI();
+    } catch(e) { alert('删除失败：' + (e.message || '未知')); }
+  }
+
+  function closeHomeworkDrawer() {
+    document.getElementById('hw-drawer-bg').style.display = 'none';
+    drawerHomeworkId = null; drawerStudentId = null; drawerRole = null;
+  }
+
+  // ── Audio recording ──────────────────────────────────────────────
+  let _mediaRecorder = null;
+  let _recordingChunks = [];
+  let _recordingFor = null; // { hwId, date }
+
+  async function toggleRecording(hwId, date) {
+    const btn = document.getElementById('hw-rec-btn-' + hwId + '-' + date);
+    if (!btn) return;
+    if (_mediaRecorder && _mediaRecorder.state === 'recording' && _recordingFor && _recordingFor.hwId === hwId && _recordingFor.date === date) {
+      _mediaRecorder.stop();
+      return;
+    }
+    if (_mediaRecorder && _mediaRecorder.state === 'recording') {
+      alert('你正在录另一段，先停下来再开始新的。');
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      _recordingChunks = [];
+      _recordingFor = { hwId, date };
+      const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : '';
+      _mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      _mediaRecorder.ondataavailable = e => { if (e.data && e.data.size) _recordingChunks.push(e.data); };
+      _mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach(t => t.stop());
+        const blob = new Blob(_recordingChunks, { type: _mediaRecorder.mimeType || 'audio/webm' });
+        await uploadRecording(hwId, date, blob);
+        _mediaRecorder = null; _recordingChunks = []; _recordingFor = null;
+      };
+      _mediaRecorder.start();
+      btn.classList.add('recording');
+      btn.querySelector('.hw-rec-label').textContent = '停止录音';
+    } catch(e) {
+      alert('录音失败：' + (e.message || '无法访问麦克风。请检查浏览器权限。'));
+    }
+  }
+
+  async function uploadRecording(hwId, date, blob) {
+    const btn = document.getElementById('hw-rec-btn-' + hwId + '-' + date);
+    if (btn) { btn.classList.remove('recording'); btn.querySelector('.hw-rec-label').textContent = '上传中…'; }
+    try {
+      // Delete old audio if exists
+      const existing = (homeworkChecksByHw[hwId] || {})[date] || {};
+      if (existing.audio_path) {
+        try { await supabaseClient.storage.from('homework-audio').remove([existing.audio_path]); } catch(_) {}
+      }
+      const path = hwId + '/' + date + '-' + Date.now() + '.webm';
+      const { error } = await supabaseClient.storage.from('homework-audio').upload(path, blob, {
+        contentType: blob.type, upsert: true
+      });
+      if (error) throw error;
+      await upsertCheck(hwId, date, { audio_path: path });
+      await loadHomeworkAll();
+      // Re-render this day's detail
+      const detail = document.getElementById('hw-day-detail-' + hwId + '-' + date);
+      if (detail) renderDayDetail(hwId, date);
+    } catch(e) {
+      alert('上传录音失败：' + (e.message || '未知'));
+      if (btn) btn.querySelector('.hw-rec-label').textContent = '开始录音';
+    }
+  }
+
+  async function deleteHomeworkAudio(hwId, date, path) {
+    if (!confirm('删除这段录音？')) return;
+    try {
+      try { await supabaseClient.storage.from('homework-audio').remove([path]); } catch(_) {}
+      await upsertCheck(hwId, date, { audio_path: null });
+      await loadHomeworkAll();
+      const detail = document.getElementById('hw-day-detail-' + hwId + '-' + date);
+      if (detail) renderDayDetail(hwId, date);
+    } catch(e) { alert('删除录音失败：' + (e.message || '未知')); }
+  }
+
+  async function getAudioSignedUrl(path) {
+    try {
+      const { data, error } = await supabaseClient.storage.from('homework-audio').createSignedUrl(path, 3600);
+      if (error) throw error;
+      return data && data.signedUrl;
+    } catch(e) {
+      console.error('signed url failed', e); return null;
+    }
+  }
+
+  // Expose to global
+  window.openCreateHomeworkPicker = openCreateHomeworkPicker;
+  window.closePickStudent = closePickStudent;
+  window.pickStudentForHomework = pickStudentForHomework;
+  window.openCreateHomework = openCreateHomework;
+  window.closeCreateHomework = closeCreateHomework;
+  window.submitCreateHomework = submitCreateHomework;
+  window.openStudentDrawer = openStudentDrawer;
+  window.openHomeworkDrawerForStudent = openHomeworkDrawerForStudent;
+  window.openHomeworkDrawerForTeacher = openHomeworkDrawerForTeacher;
+  window.renderDrawerTeacherView = renderDrawerTeacherView;
+  window.toggleDayExpand = toggleDayExpand;
+  window.toggleDayCheck = toggleDayCheck;
+  window.toggleTodayCheck = toggleTodayCheck;
+  window.saveStudentNote = saveStudentNote;
+  window.saveTeacherComment = saveTeacherComment;
+  window.confirmDeleteHomework = confirmDeleteHomework;
+  window.closeHomeworkDrawer = closeHomeworkDrawer;
+  window.toggleRecording = toggleRecording;
+  window.deleteHomeworkAudio = deleteHomeworkAudio;
+  window.refreshHomeworkUI = refreshHomeworkUI;
 
   init();
 </script>
