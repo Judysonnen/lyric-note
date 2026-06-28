@@ -1326,6 +1326,17 @@
       background: #EFE7DA; color: var(--primary); border-radius: 8px;
       vertical-align: middle;
     }
+    .home-fab {
+      position: fixed; bottom: 28px; right: 28px;
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--primary); color: white; border: none;
+      box-shadow: 0 8px 22px rgba(168, 77, 53, 0.35);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; z-index: 200;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .home-fab:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(168, 77, 53, 0.45); }
+    .home-fab svg { width: 24px; height: 24px; }
     .home-empty {
       font-family: var(--font-latin);
       font-style: italic;
@@ -1836,6 +1847,9 @@
         </button>
       </div>
       <div id="recent-projects" class="recent-section"></div>
+      <button class="home-fab" onclick="openModal(false)" title="导入新歌词" aria-label="导入新歌词">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
     </div>
 
     <!-- Editor view (shown when a project is open) -->
