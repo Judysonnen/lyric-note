@@ -4941,7 +4941,15 @@
   }
 
   function toEmail(username) {
-    return username.toLowerCase().trim() + '@lyricnote.app';
+    const trimmed = (username || '').trim();
+    // ASCII-only names keep the original form so legacy accounts still log in
+    if (/^[\x21-\x7E]+$/.test(trimmed)) {
+      return trimmed.toLowerCase() + '@lyricnote.app';
+    }
+    // Non-ASCII (e.g. Chinese): hex-encode UTF-8 bytes so Supabase accepts it
+    const bytes = new TextEncoder().encode(trimmed);
+    const hex = Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('');
+    return 'u_' + hex + '@lyricnote.app';
   }
 
   function initCloudSync() {
