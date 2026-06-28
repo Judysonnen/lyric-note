@@ -4959,6 +4959,7 @@
           cloudUser = null;
           cloudConnected = false;
           stopCloudPoll();
+          stopRealtimeSync();
           updateCloudDot();
           showLoginScreen();
         }
@@ -4989,6 +4990,7 @@
       }
     });
     startCloudPoll();
+    startRealtimeSync();
     document.getElementById('login-screen').style.display = 'none';
     showHomeScreen();
   }
@@ -5285,6 +5287,62 @@
   }
   function stopCloudPoll() {
     if (cloudPollTimer) { clearInterval(cloudPollTimer); cloudPollTimer = null; }
+  }
+
+  let realtimeChannel = null;
+  function startRealtimeSync() {
+    stopRealtimeSync();
+    if (!supabaseClient || !cloudUser) return;
+    try {
+      realtimeChannel = supabaseClient
+        .channel('projects-realtime-' + cloudUser.id)
+        .on('postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'projects' },
+            payload => applyRemoteProjectUpdate(payload.new))
+        .on('postgres_changes',
+            { event: 'INSERT', schema: 'public', table: 'projects' },
+            payload => applyRemoteProjectUpdate(payload.new))
+        .subscribe();
+    } catch(e) { console.error('Realtime subscribe failed:', e); }
+  }
+  function stopRealtimeSync() {
+    if (realtimeChannel) {
+      try { supabaseClient.removeChannel(realtimeChannel); } catch(e) {}
+      realtimeChannel = null;
+    }
+  }
+
+  function applyRemoteProjectUpdate(row) {
+    if (!row || !row.id || !row.data) return;
+    // Echo suppression: skip if this update is our own write (within last 2s)
+    const ts = typeof row.updated_at === 'number' ? row.updated_at : Date.parse(row.updated_at);
+    if (ts && Math.abs(ts - lastCloudWrite) < 2000) return;
+
+    const projectId = row.id;
+    const data = row.data;
+    localStorage.setItem('lyricnote_project_' + projectId, JSON.stringify(data));
+
+    // Update home index entry
+    const idx = getProjectIndex();
+    let entry = idx.find(p => p.id === projectId);
+    const isOwner = row.user_id === cloudUser.id;
+    if (!entry) {
+      entry = { id: projectId };
+      idx.push(entry);
+    }
+    entry.name = data.songTitle || data.name || entry.name || '未命名';
+    entry.updatedAt = data.updatedAt || ts || Date.now();
+    entry.isOwner = isOwner;
+    entry.ownerId = row.user_id;
+    if (row.share_token) entry.shareToken = row.share_token;
+    saveProjectIndex(idx);
+
+    // If currently editing this project, refresh editor (last-write-wins)
+    if (currentProjectId === projectId && document.getElementById('editor-view').style.display !== 'none') {
+      try { loadProject(projectId); } catch(e) { console.error('Realtime refresh editor failed:', e); }
+    } else if (document.getElementById('home-screen').style.display !== 'none') {
+      renderHomeScreen();
+    }
   }
 
   async function cloudSaveProject(projectId) {
