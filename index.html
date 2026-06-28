@@ -5600,6 +5600,7 @@
       showCloudSynced();
     } catch(e) {
       console.error('Cloud save error:', e);
+      showCloudError(e && e.message ? e.message : '保存失败');
     }
     cloudSyncing = false;
   }
@@ -5792,6 +5793,16 @@
     clearTimeout(_cloudIndicatorTimer);
     el.className = 'cloud-status syncing show';
     el.innerHTML = '<span class="cloud-dot"></span> 同步中…';
+  }
+  function showCloudError(msg) {
+    const el = document.getElementById('cloud-indicator');
+    if (!el) return;
+    clearTimeout(_cloudIndicatorTimer);
+    el.className = 'cloud-status show';
+    el.style.color = '#DC2626';
+    el.innerHTML = '<span class="cloud-dot" style="background:#DC2626;"></span> 同步失败';
+    el.title = msg || '';
+    _cloudIndicatorTimer = setTimeout(() => { el.classList.remove('show'); el.style.color = ''; el.title = ''; }, 5000);
   }
 
   // ════════════════════════════════════════════════════════════════════
