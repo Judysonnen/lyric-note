@@ -2102,8 +2102,7 @@
           <span class="hw-rail-count" id="hw-rail-count"></span>
         </div>
         <div id="teacher-students-list" class="hw-rail-body"></div>
-        <button class="hw-rail-add" onclick="openCreateHomeworkPicker()" title="给学生布置作业">+ 布置作业</button>
-        <button class="hw-rail-invite" onclick="openInviteStudentPickerOrNew()">+ 邀请学生</button>
+        <button class="hw-rail-add" onclick="openInviteStudentPickerOrNew()" title="给已有学生发邀请链接">+ 邀请学生</button>
       </aside>
       <div class="home-main">
         <div class="home-logo">🎵</div>
@@ -2117,7 +2116,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
             导入新歌词
           </button>
-          <button class="btn btn-outline home-btn" id="home-assign-hw-btn" onclick="openCreateHomeworkPicker()" style="display:none;">
+          <button class="btn btn-primary home-btn" id="home-assign-hw-btn" onclick="openCreateHomeworkPicker()" style="display:none;background:var(--card);color:var(--primary);border:1px solid var(--primary);">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
             布置作业
           </button>
@@ -6698,7 +6697,7 @@
     if (userRole === 'teacher') {
       badge.textContent = '老师'; badge.style.display = '';
       if (subtitle) subtitle.textContent = '给学生标注、留作业';
-      if (assignBtn) assignBtn.style.display = 'none';
+      if (assignBtn) assignBtn.style.display = '';
       if (studentTeachersSec) studentTeachersSec.style.display = 'none';
       if (studentHwSec) studentHwSec.style.display = 'none';
     } else if (userRole === 'student') {
@@ -6757,19 +6756,14 @@
         <div style="margin-bottom:14px;line-height:1.6;">
           下面是给 <b>${escHtml(label)}</b> 的邀请链接。ta 点开 → 注册账号 → 自动关联，<b>从此你给 ta 建的所有歌词都会自动出现在 ta 的主页</b>。
         </div>
-        <div style="background:#FAF5EC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <div style="background:#FAF5EC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">
           <input id="student-invite-input" readonly value="${url}" style="flex:1;background:transparent;border:none;outline:none;font-family:monospace;font-size:12px;color:var(--text);" onclick="this.select()" />
+          <button onclick="copyStudentInviteLink()" id="student-invite-copy-btn" style="background:var(--primary);color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:1px;">复制</button>
         </div>
-        <div style="display:flex;gap:8px;">
-          <button onclick="copyStudentInviteLink()" id="student-invite-copy-btn" style="flex:1;background:var(--primary);color:white;border:none;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">复制带文字</button>
-          <button onclick="copyStudentInviteLinkOnly()" id="student-invite-copy-url-btn" style="background:transparent;color:var(--text-soft);border:1px solid var(--border);padding:9px 14px;border-radius:8px;font-size:13px;cursor:pointer;">只复制链接</button>
-        </div>
-        <div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.7;background:#FAF5EC;border-radius:8px;padding:10px 12px;">
-          <div style="color:var(--text-soft);font-weight:600;margin-bottom:4px;">关于这个邀请链接</div>
-          · 学生注册时用什么用户名都行，不需要跟你这边写的名字一致<br>
-          · 一个邀请链接只能被一个账号认领，认领后即永久关联<br>
-          · 学生自己创建的歌词默认你看不到，ta 想给你看时单独「分享」给你<br>
-          · 「复制带文字」会把链接 + 说明一起复制，直接粘贴到微信发给学生即可
+        <div style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.6;">
+          · 学生注册时用什么用户名都行<br>
+          · 一个邀请链接只能被一个账号认领<br>
+          · 学生自己的歌词默认你看不到，ta 想给你看会单独分享
         </div>
       `;
     } catch(e) {
@@ -6790,24 +6784,13 @@
     const btn = document.getElementById('student-invite-copy-btn');
     try {
       navigator.clipboard.writeText(text).then(() => {
-        if (btn) { btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = '复制带文字', 1800); }
+        if (btn) { btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = '复制', 1800); }
       });
     } catch(_) {
       inp.select();
       document.execCommand && document.execCommand('copy');
     }
   }
-  function copyStudentInviteLinkOnly() {
-    const inp = document.getElementById('student-invite-input');
-    if (!inp) return;
-    try {
-      navigator.clipboard.writeText(inp.value).then(() => {
-        const btn = document.getElementById('student-invite-copy-url-btn');
-        if (btn) { btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = '只复制链接', 1800); }
-      });
-    } catch(_) { inp.select(); document.execCommand && document.execCommand('copy'); }
-  }
-  window.copyStudentInviteLinkOnly = copyStudentInviteLinkOnly;
 
   async function handleStudentInviteFromUrl() {
     const params = new URLSearchParams(location.search);
