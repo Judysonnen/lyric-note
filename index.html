@@ -1850,62 +1850,62 @@
 
     .hw-students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
 
-    /* ── Teacher Students sidebar (fixed, left of viewport) ── */
-    .hw-students-sidebar {
-      position: fixed; top: 50%; left: 24px; transform: translateY(-50%);
-      width: 240px; max-height: 70vh; overflow-y: auto;
-      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
-      padding: 14px; box-shadow: 0 8px 28px rgba(120, 80, 50, 0.10);
-      z-index: 50;
+    /* ── Teacher: horizontal student avatar strip (inline at top of home) ── */
+    .hw-students-strip {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 4px; margin: 4px 0 8px;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
     }
-    .hw-students-sidebar::-webkit-scrollbar { width: 4px; }
-    .hw-students-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-    .hw-students-sidebar-head {
-      display: flex; align-items: baseline; justify-content: space-between;
-      margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    .hw-students-strip-label {
+      font-size: 11px; color: var(--text-soft); letter-spacing: 0.18em;
+      text-transform: uppercase; font-weight: 600; flex-shrink: 0;
     }
-    .hw-students-sidebar-title {
-      font-size: 11px; color: var(--text-soft); letter-spacing: 0.22em;
-      text-transform: uppercase; font-weight: 600;
+    .hw-students-strip-track {
+      flex: 1; min-width: 0; display: flex; gap: 10px; overflow-x: auto;
+      padding: 2px 2px 8px;
     }
-    .hw-students-sidebar-count { font-size: 11px; color: var(--muted); }
-    .hw-students-sidebar-list { display: flex; flex-direction: column; gap: 4px; }
-    .hw-students-sidebar-list .hw-student-card { padding: 6px 8px; min-height: 40px; gap: 8px; border-color: transparent; }
-    .hw-students-sidebar-list .hw-student-card:hover { border-color: var(--primary); }
-    .hw-students-sidebar-list .hw-student-avatar { width: 26px; height: 26px; font-size: 11px; }
-    .hw-students-sidebar-list .hw-student-name { font-size: 13px; }
-    .hw-students-sidebar-list .hw-student-meta { font-size: 10px; }
-    .hw-students-sidebar-list .hw-student-progress { width: 28px; }
-
-    /* Floating toggle button for narrow viewports */
-    .hw-students-toggle {
-      position: fixed; left: 18px; bottom: 28px;
-      width: 48px; height: 48px; border-radius: 50%;
-      background: var(--card); border: 1px solid var(--border);
-      color: var(--text); cursor: pointer; z-index: 51;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 6px 18px rgba(120, 80, 50, 0.18);
-      transition: all .15s;
+    .hw-students-strip-track::-webkit-scrollbar { height: 4px; }
+    .hw-students-strip-track::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .hw-stu-pill {
+      position: relative; flex-shrink: 0;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      padding: 4px 6px; border-radius: 10px;
+      cursor: pointer; transition: all .12s;
+      max-width: 64px;
     }
-    .hw-students-toggle:hover { border-color: var(--primary); color: var(--primary); }
-    .hw-students-toggle svg { width: 20px; height: 20px; }
-    .hw-students-toggle-count {
-      position: absolute; top: -4px; right: -4px;
-      min-width: 18px; height: 18px; border-radius: 9px;
+    .hw-stu-pill:hover { background: var(--primary-light); }
+    .hw-stu-pill-avatar {
+      width: 40px; height: 40px; border-radius: 50%;
       background: var(--primary); color: white;
-      font-size: 10px; font-weight: 600;
       display: flex; align-items: center; justify-content: center;
-      padding: 0 5px;
+      font-size: 16px; font-weight: 600;
+      box-shadow: 0 2px 6px rgba(0,0,0,.08);
+      position: relative;
     }
-
-    /* Hide sidebar on narrow viewports, show toggle instead */
-    @media (max-width: 1320px) {
-      .hw-students-sidebar:not(.open) { display: none !important; }
-      .hw-students-sidebar.open {
-        position: fixed; top: 24px; left: 24px; bottom: 24px; max-height: none; transform: none;
-        z-index: 200;
-      }
+    .hw-stu-pill.unlinked .hw-stu-pill-avatar { background: #C9B5A0; }
+    .hw-stu-pill-name {
+      font-size: 11px; color: var(--text); font-weight: 500;
+      max-width: 56px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-align: center;
     }
+    .hw-stu-pill-badge {
+      position: absolute; top: -2px; right: -2px;
+      min-width: 16px; height: 16px; border-radius: 8px;
+      background: var(--primary); color: white;
+      font-size: 9px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 4px; border: 2px solid var(--card);
+    }
+    .hw-stu-pill-dot {
+      position: absolute; bottom: 0; right: 0;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #DC2626; border: 2px solid var(--card);
+    }
+    .hw-stu-pill-progress {
+      position: absolute; bottom: -2px; left: 4px; right: 4px;
+      height: 2px; background: rgba(0,0,0,.08); border-radius: 1px; overflow: hidden;
+    }
+    .hw-stu-pill-progress > div { height: 100%; background: var(--primary); }
     .hw-student-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
       padding: 8px 10px; cursor: pointer; transition: all .12s;
@@ -2116,6 +2116,10 @@
           布置作业
         </button>
       </div>
+      <div id="teacher-students-section" class="hw-students-strip" style="display:none;">
+        <span class="hw-students-strip-label">学生</span>
+        <div class="hw-students-strip-track" id="teacher-students-list"></div>
+      </div>
       <div id="student-homework-section" class="hw-section" style="display:none;margin-top:0;">
         <div class="hw-section-title"><span>我的练习 · 今日打卡</span></div>
         <div id="student-homework-list" class="hw-today-list"></div>
@@ -2266,18 +2270,6 @@
   </div>
 </div>
 
-<!-- Teacher: My Students sidebar (fixed, visible only on home + role=teacher + students>0) -->
-<aside id="teacher-students-section" class="hw-students-sidebar" style="display:none;">
-  <div class="hw-students-sidebar-head">
-    <span class="hw-students-sidebar-title">我的学生</span>
-    <span class="hw-students-sidebar-count" id="hw-students-count"></span>
-  </div>
-  <div id="teacher-students-list" class="hw-students-sidebar-list"></div>
-</aside>
-<button id="teacher-students-toggle" class="hw-students-toggle" style="display:none;" onclick="toggleStudentsSidebar()" title="我的学生">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 11a4 4 0 0 0 0-8"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
-  <span class="hw-students-toggle-count" id="hw-students-toggle-count"></span>
-</button>
 
 <!-- Float Toolbar -->
 <div id="float-toolbar">
@@ -3736,22 +3728,8 @@
   }
   function hideTeacherStudentsSidebar() {
     const sec = document.getElementById('teacher-students-section');
-    const toggle = document.getElementById('teacher-students-toggle');
-    if (sec) { sec.style.display = 'none'; sec.classList.remove('open'); }
-    if (toggle) toggle.style.display = 'none';
+    if (sec) sec.style.display = 'none';
   }
-  function toggleStudentsSidebar() {
-    const sec = document.getElementById('teacher-students-section');
-    if (!sec) return;
-    if (sec.classList.contains('open')) {
-      sec.classList.remove('open');
-      sec.style.display = 'none';
-    } else {
-      sec.classList.add('open');
-      sec.style.display = '';
-    }
-  }
-  window.toggleStudentsSidebar = toggleStudentsSidebar;
   function showEditorView() {
     document.getElementById('home-screen').style.display = 'none';
     const ev = document.getElementById('editor-view');
@@ -6166,23 +6144,16 @@
   function renderTeacherStudentsSection() {
     const sec = document.getElementById('teacher-students-section');
     const list = document.getElementById('teacher-students-list');
-    const toggle = document.getElementById('teacher-students-toggle');
-    const countEl = document.getElementById('hw-students-count');
-    const toggleCount = document.getElementById('hw-students-toggle-count');
     if (!myStudents.length) {
       sec.style.display = 'none';
-      if (toggle) toggle.style.display = 'none';
       return;
     }
-    if (countEl) countEl.textContent = myStudents.length;
-    if (toggleCount) toggleCount.textContent = myStudents.length;
-    const onHome = document.getElementById('home-screen').style.display !== 'none';
-    sec.style.display = onHome ? '' : 'none';
-    if (toggle) toggle.style.display = onHome ? '' : 'none';
+    sec.style.display = '';
     const studentColors = ['#A84D35','#7C3AED','#5C7A4E','#0F766E','#B45309','#BE185D','#1D4ED8','#9333EA'];
     list.innerHTML = myStudents.map((s, idx) => {
       const linked = !!s.id;
       const studentHomework = linked ? homeworkAsTeacher.filter(h => h.student_id === s.id) : [];
+      const activeCount = studentHomework.filter(h => h.end_date >= todayDateStr()).length;
       let totalDays = 0, doneDays = 0;
       studentHomework.forEach(h => {
         const days = dateRangeDays(h.start_date, h.end_date);
@@ -6197,22 +6168,18 @@
       const click = linked
         ? `onclick="openStudentDrawer('${s.id}')"`
         : `onclick="openStudentInviteModal('${nameJs}')"`;
-      const meta = linked
-        ? `${s.songCount} 首 · ${studentHomework.length} 作业`
-        : `${s.songCount} 首 · 未关联`;
-      const tail = linked && totalDays
-        ? `<div class="hw-student-progress"><div style="width:${pct}%"></div></div><div class="hw-student-pct">${pct}%</div>`
-        : (linked
-            ? `<button class="hw-add" onclick="event.stopPropagation();openCreateHomework('${s.id}','${nameJs}')" title="布置作业">+ 作业</button>`
-            : `<button class="hw-add" onclick="event.stopPropagation();openStudentInviteModal('${nameJs}')" title="邀请加入">邀请</button>`);
+      const titleText = linked
+        ? `${s.displayName} · ${s.songCount} 首歌 · ${studentHomework.length} 份作业${totalDays ? ' · ' + pct + '%' : ''}`
+        : `${s.displayName} · ${s.songCount} 首歌 · 未关联账号（点击邀请）`;
+      const badge = activeCount > 0 ? `<span class="hw-stu-pill-badge">${activeCount}</span>` : '';
+      const progressBar = (linked && totalDays)
+        ? `<div class="hw-stu-pill-progress"><div style="width:${pct}%"></div></div>` : '';
       return `
-        <div class="hw-student-card ${linked ? '' : 'unlinked'}" ${click} title="${escHtml(s.displayName)}">
-          <div class="hw-student-avatar" style="background:${linked ? avatarColor : '#C9B5A0'};">${escHtml(initial)}</div>
-          <div class="hw-student-body">
-            <div class="hw-student-name">${escHtml(s.displayName)}</div>
-            <div class="hw-student-meta">${meta}</div>
+        <div class="hw-stu-pill ${linked ? '' : 'unlinked'}" ${click} title="${escHtml(titleText)}">
+          <div class="hw-stu-pill-avatar" style="background:${linked ? avatarColor : '#C9B5A0'};">
+            ${escHtml(initial)}${badge}${progressBar}
           </div>
-          <div class="hw-student-tail">${tail}</div>
+          <div class="hw-stu-pill-name">${escHtml(s.displayName)}</div>
         </div>`;
     }).join('');
   }
