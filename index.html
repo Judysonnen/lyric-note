@@ -1897,9 +1897,9 @@
     .hw-rail-add:hover, .hw-rail-invite:hover { color: var(--primary); background: var(--primary-light); }
     .hw-rail-add { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); border-radius: 0; }
 
-    /* Hide student filter UI when current user is a student */
-    body.role-student .home-toolbar,
-    body.role-student .student-chips { display: none !important; }
+    /* Hide the legacy student-filter chips + toolbar (replaced by left sidebar) */
+    .home-toolbar,
+    .student-chips { display: none !important; }
 
     /* Student main view */
     .sv-back {
