@@ -2453,6 +2453,17 @@
   </div>
 </div>
 
+<!-- Student Invite Modal -->
+<div class="modal-backdrop" id="student-invite-bg" onclick="if(event.target===this) closeStudentInviteModal()" style="display:none;z-index:9100;">
+  <div class="modal" style="max-width:500px;padding:26px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+      <h3 style="margin:0;font-size:17px;font-weight:600;color:var(--text);" id="student-invite-title">邀请学生加入</h3>
+      <button onclick="closeStudentInviteModal()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="student-invite-body" style="font-size:13px;color:var(--text-soft);"></div>
+  </div>
+</div>
+
 <!-- Pick Student Modal -->
 <div class="modal-backdrop" id="hw-pickstudent-bg" onclick="if(event.target===this) closePickStudent()" style="display:none;z-index:9100;">
   <div class="modal" style="max-width:460px;padding:24px;">
@@ -2661,6 +2672,7 @@
     document.addEventListener('click', onDocClick);
     // Handle ?join=<token> shared-project link (after a brief delay so auth has a chance to restore)
     setTimeout(handleJoinTokenFromUrl, 600);
+    setTimeout(handleStudentInviteFromUrl, 600);
   }
 
   function onDocClick(e) {
@@ -5209,6 +5221,11 @@
         sessionStorage.removeItem('pending_join_token');
         claimSharedProject(pending);
       }
+      const pendingInvite = sessionStorage.getItem('pending_student_invite');
+      if (pendingInvite) {
+        sessionStorage.removeItem('pending_student_invite');
+        claimStudentInvite(pendingInvite);
+      }
     });
     startCloudPoll();
     startRealtimeSync();
@@ -5903,8 +5920,6 @@
 
   async function loadMyStudents() {
     if (!supabaseClient || !cloudUser) return;
-    // Students = distinct studentName values across my OWNED projects (local index).
-    // Each student may or may not have a linked cloud account; we match by username (case-insensitive).
     const index = getProjectIndex();
     const ownedProjects = index.filter(p => p.isOwner !== false);
     const byName = new Map();
@@ -5918,31 +5933,35 @@
       entry.projectIds.push(p.id);
     }
 
-    // Try to attach a user_id by matching to collaborators on my owned projects
-    let collabUsersByName = {};
+    // Fetch teacher_student links (where I'm the teacher)
+    let linksByLabel = {};
     try {
-      const ownedIds = ownedProjects.map(p => p.id);
-      if (ownedIds.length) {
-        const { data: collabs, error } = await supabaseClient
-          .from('project_collaborators')
-          .select('user_id, project_id')
-          .in('project_id', ownedIds);
-        if (error) throw error;
-        const uniqueUids = [...new Set((collabs || []).map(c => c.user_id))];
-        for (const uid of uniqueUids) {
-          const uname = await lookupUsername(uid);
-          if (uname) collabUsersByName[uname.toLowerCase().trim()] = uid;
+      const { data: links, error } = await supabaseClient
+        .from('teacher_student')
+        .select('id, student_label, student_id, invite_token, joined_at')
+        .eq('teacher_id', cloudUser.id);
+      if (error) throw error;
+      for (const lk of (links || [])) {
+        linksByLabel[lk.student_label.toLowerCase().trim()] = lk;
+        // Add students who have a link row but no project yet (rare, but include them)
+        const key = lk.student_label.toLowerCase().trim();
+        if (!byName.has(key)) {
+          byName.set(key, { displayName: lk.student_label, songCount: 0, projectIds: [] });
         }
       }
-    } catch(e) { console.error('match collaborators failed', e); }
+    } catch(e) { console.error('load teacher_student failed', e); }
 
     myStudents = [];
     for (const [key, entry] of byName.entries()) {
+      const link = linksByLabel[key] || null;
       myStudents.push({
-        id: collabUsersByName[key] || null,
+        id: link && link.student_id ? link.student_id : null,
         displayName: entry.displayName,
         songCount: entry.songCount,
-        projectIds: entry.projectIds
+        projectIds: entry.projectIds,
+        inviteToken: link ? link.invite_token : null,
+        linkId: link ? link.id : null,
+        joinedAt: link ? link.joined_at : null
       });
     }
     myStudents.sort((a, b) => b.songCount - a.songCount);
@@ -5980,17 +5999,17 @@
       });
       const pct = totalDays ? Math.round((doneDays / totalDays) * 100) : 0;
       const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
-      const assignBtn = linked
+      const rightBtn = linked
         ? `<button class="hw-add" onclick="event.stopPropagation();openCreateHomework('${s.id}','${nameJs}')" title="给这个学生布置作业">+ 作业</button>`
-        : `<button class="hw-add" style="opacity:.6;" onclick="event.stopPropagation();alert('需要这个学生注册账号并通过你的「分享链接」加入过你的歌词，才能给 ta 布置作业。')" title="未关联账号">未关联</button>`;
+        : `<button class="hw-add" onclick="event.stopPropagation();openStudentInviteModal('${nameJs}')" title="生成邀请链接发给学生">邀请加入</button>`;
       const progressLine = linked
         ? `<div class="hw-student-meta">${studentHomework.length} 份作业 · ${activeCount} 份进行中</div>
            <div class="hw-student-meta">完成 ${doneDays}/${totalDays} 天 · ${pct}%</div>
            <div class="hw-student-progress"><div style="width:${pct}%"></div></div>`
-        : `<div class="hw-student-meta" style="font-style:italic;">未关联账号（无法布置在线作业）</div>`;
+        : `<div class="hw-student-meta" style="font-style:italic;color:var(--muted);">还没关联账号</div>`;
       const click = linked
         ? `onclick="openStudentDrawer('${s.id}')"`
-        : `onclick="alert('需要学生先注册账号并通过你的分享链接加入歌词，才能查看 ta 的打卡。')"`;
+        : `onclick="openStudentInviteModal('${nameJs}')"`;
       return `
         <div class="hw-student-card" ${click}>
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
@@ -6423,7 +6442,97 @@
     }
   }
 
+  // ── Student invite (per-student persistent link) ────────────────
+  async function openStudentInviteModal(label) {
+    if (!supabaseClient || !cloudUser) { alert('请先登录'); return; }
+    const bg = document.getElementById('student-invite-bg');
+    const body = document.getElementById('student-invite-body');
+    document.getElementById('student-invite-title').textContent = '邀请「' + label + '」加入';
+    body.innerHTML = '<div style="padding:20px 0;text-align:center;color:var(--muted);">生成邀请链接中…</div>';
+    bg.style.display = 'flex';
+    try {
+      const { data, error } = await supabaseClient.rpc('gen_or_get_student_invite', { label });
+      if (error) throw error;
+      const token = data;
+      const url = location.origin + location.pathname + '?invite=' + token;
+      body.innerHTML = `
+        <div style="margin-bottom:14px;line-height:1.6;">
+          把链接发给 <b>${escHtml(label)}</b>（微信、邮件都可以）。ta 点开 → 注册账号 → 自动关联，<b>从此你在 ta 名下创建的所有歌词都会自动出现在 ta 的主页</b>。链接长期有效，关联一次就够了。
+        </div>
+        <div style="background:#FAF5EC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">
+          <input id="student-invite-input" readonly value="${url}" style="flex:1;background:transparent;border:none;outline:none;font-family:monospace;font-size:13px;color:var(--text);" onclick="this.select()" />
+          <button onclick="copyStudentInviteLink()" id="student-invite-copy-btn" style="background:var(--primary);color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:1px;">复制</button>
+        </div>
+        <div style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.6;">
+          · 学生注册时用什么用户名都行，不需要跟你这边写的名字一致<br>
+          · 一个邀请链接只能被一个账号认领，认领后即永久关联<br>
+          · 学生自己创建的歌词默认你看不到，ta 想给你看时单独「分享」给你
+        </div>
+      `;
+    } catch(e) {
+      body.innerHTML = '<div style="color:#DC2626;padding:14px 0;">生成失败：' + (e.message || '未知') + '</div>';
+    }
+  }
+  function closeStudentInviteModal() { document.getElementById('student-invite-bg').style.display = 'none'; }
+  function copyStudentInviteLink() {
+    const inp = document.getElementById('student-invite-input');
+    if (!inp) return;
+    inp.select();
+    try {
+      navigator.clipboard.writeText(inp.value).then(() => {
+        const btn = document.getElementById('student-invite-copy-btn');
+        if (btn) { const old = btn.textContent; btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = old, 1500); }
+      });
+    } catch(_) { document.execCommand && document.execCommand('copy'); }
+  }
+
+  async function handleStudentInviteFromUrl() {
+    const params = new URLSearchParams(location.search);
+    const token = params.get('invite');
+    if (!token) return;
+    history.replaceState({}, '', location.pathname);
+    if (!cloudUser) {
+      sessionStorage.setItem('pending_student_invite', token);
+      alert('请先登录或注册账号，之后会自动关联你的老师。');
+      return;
+    }
+    await claimStudentInvite(token);
+  }
+  async function claimStudentInvite(token) {
+    if (!supabaseClient || !cloudUser) return;
+    try {
+      const { data, error } = await supabaseClient.rpc('claim_student_invite', { token });
+      if (error) throw error;
+      const row = (data && data[0]) || null;
+      if (!row) { alert('邀请链接无效。'); return; }
+      const teacherName = await lookupUsername(row.teacher_id);
+      if (row.already_claimed) {
+        alert(`已经关联过老师「${teacherName}」`);
+      } else {
+        alert(`已关联老师「${teacherName}」！老师在你名下创建的所有歌词会自动出现在主页。`);
+      }
+      await pullFromCloud();
+      await refreshHomeworkUI();
+      if (document.getElementById('home-screen').style.display !== 'none') renderHomeScreen();
+    } catch(e) {
+      console.error('Claim student invite error:', e);
+      const msg = e.message || '未知';
+      if (msg.includes('already_claimed_by_other')) {
+        alert('这个邀请链接已经被别人认领了。请向老师重新索取。');
+      } else if (msg.includes('invalid_token')) {
+        alert('邀请链接无效。');
+      } else {
+        alert('关联失败：' + msg);
+      }
+    }
+  }
+
   // Expose to global
+  window.openStudentInviteModal = openStudentInviteModal;
+  window.closeStudentInviteModal = closeStudentInviteModal;
+  window.copyStudentInviteLink = copyStudentInviteLink;
+  window.handleStudentInviteFromUrl = handleStudentInviteFromUrl;
+  window.claimStudentInvite = claimStudentInvite;
   window.openCreateHomeworkPicker = openCreateHomeworkPicker;
   window.closePickStudent = closePickStudent;
   window.pickStudentForHomework = pickStudentForHomework;
