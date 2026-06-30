@@ -6837,11 +6837,13 @@
       </div>
     `;
 
-    const tabActionBtn = currentStudentViewTab === 'homework'
-      ? (linked
-          ? `<button class="sv-tab-action" onclick="openCreateHomework('${s.id}','${nameJs}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>布置作业</button>`
-          : '')
-      : `<button class="sv-tab-action" onclick="openModalForStudent('${nameJs}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新歌词</button>`;
+    // Top-right tab action only shows when the list has items; empty state has its own centered CTA
+    let tabActionBtn = '';
+    if (currentStudentViewTab === 'homework' && linked && studentHw.length) {
+      tabActionBtn = `<button class="sv-tab-action" onclick="openCreateHomework('${s.id}','${nameJs}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>布置作业</button>`;
+    } else if (currentStudentViewTab === 'songs' && songs.length) {
+      tabActionBtn = `<button class="sv-tab-action" onclick="openModalForStudent('${nameJs}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新歌词</button>`;
+    }
 
     const tabsHtml = `
       <div class="sv-tabbar">
