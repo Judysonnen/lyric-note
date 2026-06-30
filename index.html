@@ -1872,6 +1872,13 @@
     .hw-rail-title { font-size: 11px; color: var(--text-soft); letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600; }
     .hw-rail-count { font-size: 11px; color: var(--muted); }
     .hw-rail-body { flex: 1; min-height: 0; }
+    .hw-rail-search {
+      width: 100%; padding: 7px 10px; font-size: 12px; font-family: inherit;
+      border: 1px solid var(--border); border-radius: 8px; background: white;
+      color: var(--text); outline: none; margin-bottom: 12px;
+    }
+    .hw-rail-search:focus { border-color: var(--primary); }
+    .hw-rail-search::placeholder { color: var(--muted); }
     .hw-rail-group { margin-bottom: 14px; }
     .hw-rail-group-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; padding: 0 6px 6px; display: flex; align-items: center; gap: 6px; }
     .hw-rail-group-label .hw-rail-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--primary); }
@@ -2152,6 +2159,7 @@
           <span class="hw-rail-title">我的学生</span>
           <span class="hw-rail-count" id="hw-rail-count"></span>
         </div>
+        <input id="hw-rail-search" class="hw-rail-search" placeholder="搜索学生…" autocomplete="off" oninput="filterStudentRail(this.value)" />
         <div id="teacher-students-list" class="hw-rail-body"></div>
         <button class="hw-rail-add" onclick="openInviteStudentPickerOrNew()" title="给已有学生发邀请链接">+ 邀请学生</button>
       </aside>
@@ -6198,12 +6206,21 @@
     }
   }
 
+  let railSearchQuery = '';
+  function filterStudentRail(q) {
+    railSearchQuery = (q || '').trim().toLowerCase();
+    renderTeacherStudentsSection();
+  }
+  window.filterStudentRail = filterStudentRail;
+
   function renderTeacherStudentsSection() {
     const sec = document.getElementById('teacher-students-section');
     const list = document.getElementById('teacher-students-list');
     const cntEl = document.getElementById('hw-rail-count');
+    const searchEl = document.getElementById('hw-rail-search');
     sec.style.display = '';
     if (cntEl) cntEl.textContent = myStudents.length || '';
+    if (searchEl) searchEl.style.display = myStudents.length >= 5 ? '' : 'none';
     if (!myStudents.length) {
       list.innerHTML = `
         <div style="padding:14px 8px;font-size:12px;color:var(--muted);line-height:1.7;">
@@ -6231,10 +6248,10 @@
       const studentHomework = linked ? homeworkAsTeacher.filter(h => h.student_id === s.id) : [];
       const today = todayDateStr();
       const activeHw = studentHomework.filter(h => h.start_date <= today && h.end_date >= today);
-      const initial = (s.displayName || '?').charAt(0);
+      const initial = (s.displayName || '?').charAt(0).toUpperCase();
       const avatarColor = linked ? studentColors[idx % studentColors.length] : '#C9B5A0';
       return { ...s, linked, studentHomework, activeCount: activeHw.length, initial, avatarColor };
-    });
+    }).filter(s => !railSearchQuery || s.displayName.toLowerCase().includes(railSearchQuery));
 
     const active   = enriched.filter(s => s.linked && s.activeCount > 0);
     const linked   = enriched.filter(s => s.linked && s.activeCount === 0);
@@ -6291,7 +6308,7 @@
     const list = document.getElementById('hw-pickstudent-list');
     list.innerHTML = unlinked.map(s => `
       <button class="hw-rail-row" style="background:white;border:1px solid var(--border);text-align:left;cursor:pointer;width:100%;" onclick="closePickStudent();openStudentInviteModal('${escHtml(s.displayName).replace(/'/g, "\\'")}')">
-        <div class="hw-stu-pill-avatar unlinked" style="background:#C9B5A0;">${escHtml((s.displayName || '?').charAt(0))}</div>
+        <div class="hw-stu-pill-avatar unlinked" style="background:#C9B5A0;">${escHtml((s.displayName || '?').charAt(0).toUpperCase())}</div>
         <span class="hw-rail-name">${escHtml(s.displayName)}</span>
         <span class="hw-rail-meta">${s.songCount} 首</span>
       </button>`).join('');
@@ -6672,7 +6689,7 @@
     const studentColors = ['#A84D35','#7C3AED','#5C7A4E','#0F766E','#B45309','#BE185D','#1D4ED8','#9333EA'];
     const idx = myStudents.indexOf(s);
     const avatarColor = studentColors[idx % studentColors.length];
-    const initial = (s.displayName || '?').charAt(0);
+    const initial = (s.displayName || '?').charAt(0).toUpperCase();
     const songs = getProjectIndex().filter(p => p.isOwner !== false && (p.studentName || '').trim().toLowerCase() === s.displayName.toLowerCase());
     const studentHw = homeworkAsTeacher.filter(h => h.student_id === s.id);
     const today = todayDateStr();
