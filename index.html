@@ -6194,11 +6194,22 @@
       const click = s.linked
         ? `onclick="openStudentDrawer('${s.id}')"`
         : `onclick="openStudentInviteModal('${nameJs}')"`;
-      const meta = s.linked
-        ? (s.studentHomework.length ? `${s.studentHomework.length}作业` : `${s.songCount}首`)
-        : `邀请`;
+      let meta;
+      if (!s.linked) {
+        meta = '邀请';
+      } else if (s.studentHomework.length) {
+        meta = s.studentHomework.length + ' 作业';
+      } else if (s.songCount > 0) {
+        meta = s.songCount + ' 首歌';
+      } else {
+        meta = '刚加入';
+      }
+      const titleParts = [s.displayName];
+      titleParts.push(s.songCount + ' 首歌');
+      if (s.studentHomework.length) titleParts.push(s.studentHomework.length + ' 份作业');
+      if (!s.linked) titleParts.push('未关联');
       return `
-        <div class="hw-rail-row ${s.linked ? '' : 'unlinked'}" ${click} title="${escHtml(s.displayName + ' · ' + s.songCount + '首')}">
+        <div class="hw-rail-row ${s.linked ? '' : 'unlinked'}" ${click} title="${escHtml(titleParts.join(' · '))}">
           <div class="hw-stu-pill-avatar" style="background:${s.avatarColor};">${escHtml(s.initial)}</div>
           <span class="hw-rail-name">${escHtml(s.displayName)}</span>
           <span class="hw-rail-meta">${meta}</span>
