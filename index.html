@@ -1092,8 +1092,13 @@
 
     /* ── Home screen ── */
     .home-screen {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      flex: 1; padding: 36px 24px; text-align: center; min-height: 0; overflow-y: auto;
+      display: flex; flex-direction: row; align-items: stretch; gap: 18px;
+      flex: 1; padding: 18px; min-height: 0; overflow: hidden;
+    }
+    .home-main {
+      flex: 1; min-width: 0;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 18px 12px 24px; text-align: center; overflow-y: auto;
     }
     .home-logo {
       width: 64px; height: 64px; border-radius: 18px;
@@ -1850,62 +1855,51 @@
 
     .hw-students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
 
-    /* ── Teacher: horizontal student avatar strip (inline at top of home) ── */
-    .hw-students-strip {
-      display: flex; align-items: center; gap: 14px;
-      padding: 12px 4px; margin: 4px 0 8px;
-      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    /* ── Teacher: left student rail (M1 design) ── */
+    .hw-rail {
+      width: 230px; flex-shrink: 0; align-self: stretch;
+      background: rgba(255,255,255,0.4); border: 1px solid var(--border); border-radius: 16px;
+      padding: 16px 12px; display: flex; flex-direction: column;
+      max-height: 100%; overflow-y: auto;
     }
-    .hw-students-strip-label {
-      font-size: 11px; color: var(--text-soft); letter-spacing: 0.18em;
-      text-transform: uppercase; font-weight: 600; flex-shrink: 0;
+    .hw-rail::-webkit-scrollbar { width: 4px; }
+    .hw-rail::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .hw-rail-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding-bottom: 10px; border-bottom: 1px solid var(--border); margin-bottom: 12px;
     }
-    .hw-students-strip-track {
-      flex: 1; min-width: 0; display: flex; gap: 10px; overflow-x: auto;
-      padding: 2px 2px 8px;
-    }
-    .hw-students-strip-track::-webkit-scrollbar { height: 4px; }
-    .hw-students-strip-track::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-    .hw-stu-pill {
-      position: relative; flex-shrink: 0;
-      display: flex; flex-direction: column; align-items: center; gap: 4px;
-      padding: 4px 6px; border-radius: 10px;
-      cursor: pointer; transition: all .12s;
-      max-width: 64px;
-    }
-    .hw-stu-pill:hover { background: var(--primary-light); }
-    .hw-stu-pill-avatar {
-      width: 40px; height: 40px; border-radius: 50%;
+    .hw-rail-title { font-size: 11px; color: var(--text-soft); letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600; }
+    .hw-rail-count { font-size: 11px; color: var(--muted); }
+    .hw-rail-body { flex: 1; min-height: 0; }
+    .hw-rail-group { margin-bottom: 14px; }
+    .hw-rail-group-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; padding: 0 6px 6px; display: flex; align-items: center; gap: 6px; }
+    .hw-rail-group-label .hw-rail-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--primary); }
+    .hw-rail-group-label.dim .hw-rail-dot { background: #C9B5A0; }
+    .hw-rail-row { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: 8px; cursor: pointer; transition: background .12s; }
+    .hw-rail-row:hover { background: var(--primary-light); }
+    .hw-rail-row .hw-stu-pill-avatar {
+      width: 32px; height: 32px; border-radius: 50%;
       background: var(--primary); color: white;
       display: flex; align-items: center; justify-content: center;
-      font-size: 16px; font-weight: 600;
-      box-shadow: 0 2px 6px rgba(0,0,0,.08);
-      position: relative;
+      font-size: 13px; font-weight: 600;
+      flex-shrink: 0;
     }
-    .hw-stu-pill.unlinked .hw-stu-pill-avatar { background: #C9B5A0; }
-    .hw-stu-pill-name {
-      font-size: 11px; color: var(--text); font-weight: 500;
-      max-width: 56px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      text-align: center;
+    .hw-rail-row.unlinked .hw-stu-pill-avatar { background: #C9B5A0; }
+    .hw-rail-row .hw-rail-name { flex: 1; font-size: 13px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+    .hw-rail-row .hw-rail-meta { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+    .hw-rail-add, .hw-rail-invite {
+      margin-top: 8px; padding: 9px; font-size: 12px; color: var(--text-soft);
+      border: 1px dashed var(--border); border-radius: 10px; text-align: center;
+      cursor: pointer; background: transparent; font-family: inherit; transition: all .12s;
     }
-    .hw-stu-pill-badge {
-      position: absolute; top: -2px; right: -2px;
-      min-width: 16px; height: 16px; border-radius: 8px;
-      background: var(--primary); color: white;
-      font-size: 9px; font-weight: 700;
-      display: flex; align-items: center; justify-content: center;
-      padding: 0 4px; border: 2px solid var(--card);
+    .hw-rail-add:hover, .hw-rail-invite:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .hw-rail-add { margin-top: auto; }
+
+    @media (max-width: 900px) {
+      .home-screen { flex-direction: column; }
+      .hw-rail { width: 100%; max-height: 280px; }
+      .hw-rail-add { margin-top: 8px; }
     }
-    .hw-stu-pill-dot {
-      position: absolute; bottom: 0; right: 0;
-      width: 10px; height: 10px; border-radius: 50%;
-      background: #DC2626; border: 2px solid var(--card);
-    }
-    .hw-stu-pill-progress {
-      position: absolute; bottom: -2px; left: 4px; right: 4px;
-      height: 2px; background: rgba(0,0,0,.08); border-radius: 1px; overflow: hidden;
-    }
-    .hw-stu-pill-progress > div { height: 100%; background: var(--primary); }
     .hw-student-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
       padding: 8px 10px; cursor: pointer; transition: all .12s;
@@ -2100,38 +2094,45 @@
 
     <!-- Home screen (shown when no project is open) -->
     <div id="home-screen" class="home-screen" style="display:none">
-      <div class="home-logo">🎵</div>
-      <div class="home-title">标唱 <span>LyricNote</span><span id="home-role-badge" class="home-role-badge" style="display:none;"></span></div>
-      <div class="home-subtitle" id="home-subtitle">歌词标注练唱工具</div>
-      <div class="home-cloud-status" id="home-cloud-status">
-        <span class="cloud-dot"></span> <span id="home-cloud-text">已连接云端</span>
-      </div>
-      <div class="home-actions">
-        <button class="btn btn-primary home-btn" onclick="openModal(false)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
-          导入新歌词
+      <aside id="teacher-students-section" class="hw-rail" style="display:none;">
+        <div class="hw-rail-head">
+          <span class="hw-rail-title">我的学生</span>
+          <span class="hw-rail-count" id="hw-rail-count"></span>
+        </div>
+        <div id="teacher-students-list" class="hw-rail-body"></div>
+        <button class="hw-rail-add" onclick="openCreateHomeworkPicker()" title="给学生布置作业">+ 布置作业</button>
+        <button class="hw-rail-invite" onclick="openInviteStudentPickerOrNew()">+ 邀请学生</button>
+      </aside>
+      <div class="home-main">
+        <div class="home-logo">🎵</div>
+        <div class="home-title">标唱 <span>LyricNote</span><span id="home-role-badge" class="home-role-badge" style="display:none;"></span></div>
+        <div class="home-subtitle" id="home-subtitle">歌词标注练唱工具</div>
+        <div class="home-cloud-status" id="home-cloud-status">
+          <span class="cloud-dot"></span> <span id="home-cloud-text">已连接云端</span>
+        </div>
+        <div class="home-actions">
+          <button class="btn btn-primary home-btn" onclick="openModal(false)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
+            导入新歌词
+          </button>
+          <button class="btn btn-outline home-btn" id="home-assign-hw-btn" onclick="openCreateHomeworkPicker()" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            布置作业
+          </button>
+        </div>
+        <div id="student-homework-section" class="hw-section" style="display:none;margin-top:0;">
+          <div class="hw-section-title"><span>我的练习 · 今日打卡</span></div>
+          <div id="student-homework-list" class="hw-today-list"></div>
+        </div>
+        <div id="student-teachers-section" class="hw-section" style="display:none;margin-top:0;">
+          <div class="hw-section-title"><span>我的老师</span></div>
+          <div id="student-teachers-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+        <div id="recent-projects" class="recent-section"></div>
+        <button class="home-fab" onclick="openModal(false)" title="导入新歌词" aria-label="导入新歌词">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         </button>
-        <button class="btn btn-outline home-btn" id="home-assign-hw-btn" onclick="openCreateHomeworkPicker()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-          布置作业
-        </button>
       </div>
-      <div id="teacher-students-section" class="hw-students-strip" style="display:none;">
-        <span class="hw-students-strip-label">学生</span>
-        <div class="hw-students-strip-track" id="teacher-students-list"></div>
-      </div>
-      <div id="student-homework-section" class="hw-section" style="display:none;margin-top:0;">
-        <div class="hw-section-title"><span>我的练习 · 今日打卡</span></div>
-        <div id="student-homework-list" class="hw-today-list"></div>
-      </div>
-      <div id="student-teachers-section" class="hw-section" style="display:none;margin-top:0;">
-        <div class="hw-section-title"><span>我的老师</span></div>
-        <div id="student-teachers-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-      </div>
-      <div id="recent-projects" class="recent-section"></div>
-      <button class="home-fab" onclick="openModal(false)" title="导入新歌词" aria-label="导入新歌词">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      </button>
     </div>
 
     <!-- Editor view (shown when a project is open) -->
@@ -6144,45 +6145,75 @@
   function renderTeacherStudentsSection() {
     const sec = document.getElementById('teacher-students-section');
     const list = document.getElementById('teacher-students-list');
+    const cntEl = document.getElementById('hw-rail-count');
     if (!myStudents.length) {
       sec.style.display = 'none';
       return;
     }
     sec.style.display = '';
+    if (cntEl) cntEl.textContent = myStudents.length;
     const studentColors = ['#A84D35','#7C3AED','#5C7A4E','#0F766E','#B45309','#BE185D','#1D4ED8','#9333EA'];
-    list.innerHTML = myStudents.map((s, idx) => {
+
+    const enriched = myStudents.map((s, idx) => {
       const linked = !!s.id;
       const studentHomework = linked ? homeworkAsTeacher.filter(h => h.student_id === s.id) : [];
-      const activeCount = studentHomework.filter(h => h.end_date >= todayDateStr()).length;
-      let totalDays = 0, doneDays = 0;
-      studentHomework.forEach(h => {
-        const days = dateRangeDays(h.start_date, h.end_date);
-        totalDays += days.length;
-        const checks = homeworkChecksByHw[h.id] || {};
-        doneDays += days.filter(d => checks[d] && checks[d].completed).length;
-      });
-      const pct = totalDays ? Math.round((doneDays / totalDays) * 100) : 0;
-      const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
+      const today = todayDateStr();
+      const activeHw = studentHomework.filter(h => h.start_date <= today && h.end_date >= today);
       const initial = (s.displayName || '?').charAt(0);
-      const avatarColor = studentColors[idx % studentColors.length];
-      const click = linked
+      const avatarColor = linked ? studentColors[idx % studentColors.length] : '#C9B5A0';
+      return { ...s, linked, studentHomework, activeCount: activeHw.length, initial, avatarColor };
+    });
+
+    const active   = enriched.filter(s => s.linked && s.activeCount > 0);
+    const linked   = enriched.filter(s => s.linked && s.activeCount === 0);
+    const unlinked = enriched.filter(s => !s.linked);
+
+    function row(s) {
+      const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
+      const click = s.linked
         ? `onclick="openStudentDrawer('${s.id}')"`
         : `onclick="openStudentInviteModal('${nameJs}')"`;
-      const titleText = linked
-        ? `${s.displayName} · ${s.songCount} 首歌 · ${studentHomework.length} 份作业${totalDays ? ' · ' + pct + '%' : ''}`
-        : `${s.displayName} · ${s.songCount} 首歌 · 未关联账号（点击邀请）`;
-      const badge = activeCount > 0 ? `<span class="hw-stu-pill-badge">${activeCount}</span>` : '';
-      const progressBar = (linked && totalDays)
-        ? `<div class="hw-stu-pill-progress"><div style="width:${pct}%"></div></div>` : '';
+      const meta = s.linked
+        ? (s.studentHomework.length ? `${s.studentHomework.length}作业` : `${s.songCount}首`)
+        : `邀请`;
       return `
-        <div class="hw-stu-pill ${linked ? '' : 'unlinked'}" ${click} title="${escHtml(titleText)}">
-          <div class="hw-stu-pill-avatar" style="background:${linked ? avatarColor : '#C9B5A0'};">
-            ${escHtml(initial)}${badge}${progressBar}
-          </div>
-          <div class="hw-stu-pill-name">${escHtml(s.displayName)}</div>
+        <div class="hw-rail-row ${s.linked ? '' : 'unlinked'}" ${click} title="${escHtml(s.displayName + ' · ' + s.songCount + '首')}">
+          <div class="hw-stu-pill-avatar" style="background:${s.avatarColor};">${escHtml(s.initial)}</div>
+          <span class="hw-rail-name">${escHtml(s.displayName)}</span>
+          <span class="hw-rail-meta">${meta}</span>
         </div>`;
-    }).join('');
+    }
+    function group(label, dim, items) {
+      if (!items.length) return '';
+      return `<div class="hw-rail-group">
+        <div class="hw-rail-group-label ${dim ? 'dim' : ''}"><span class="hw-rail-dot"></span>${label} · ${items.length}</div>
+        ${items.map(row).join('')}
+      </div>`;
+    }
+    list.innerHTML =
+      group('进行中作业', false, active) +
+      group('已关联', true, linked) +
+      group('未关联', true, unlinked);
   }
+
+  function openInviteStudentPickerOrNew() {
+    const unlinked = myStudents.filter(s => !s.id);
+    if (unlinked.length === 0) {
+      alert('当前每个学生都已关联。\n\n要给新学生发邀请：先创建一首歌词，在「学生」字段填新学生名字。保存后那个学生会出现在左侧列表（灰色），点 ta 就能生成邀请链接。');
+      return;
+    }
+    if (unlinked.length === 1) {
+      openStudentInviteModal(unlinked[0].displayName);
+      return;
+    }
+    const name = prompt('给哪个学生发邀请？\n\n未关联的学生：\n' + unlinked.map(s => '· ' + s.displayName).join('\n') + '\n\n输入学生名字（区分大小写）：');
+    if (name && unlinked.find(s => s.displayName === name.trim())) {
+      openStudentInviteModal(name.trim());
+    } else if (name) {
+      alert('没找到这个学生。');
+    }
+  }
+  window.openInviteStudentPickerOrNew = openInviteStudentPickerOrNew;
 
   function renderStudentHomeworkSection() {
     const sec = document.getElementById('student-homework-section');
@@ -6649,7 +6680,7 @@
     if (userRole === 'teacher') {
       badge.textContent = '老师'; badge.style.display = '';
       if (subtitle) subtitle.textContent = '给学生标注、留作业';
-      if (assignBtn) assignBtn.style.display = '';
+      if (assignBtn) assignBtn.style.display = 'none';
       if (studentTeachersSec) studentTeachersSec.style.display = 'none';
       if (studentHwSec) studentHwSec.style.display = 'none';
     } else if (userRole === 'student') {
