@@ -6738,7 +6738,7 @@
       const url = location.origin + location.pathname + '?invite=' + token;
       body.innerHTML = `
         <div style="margin-bottom:14px;line-height:1.6;">
-          把链接发给 <b>${escHtml(label)}</b>（微信、邮件都可以）。ta 点开 → 注册账号 → 自动关联，<b>从此你在 ta 名下创建的所有歌词都会自动出现在 ta 的主页</b>。链接长期有效，关联一次就够了。
+          把链接发给 <b>${escHtml(label)}</b>。ta 点开 → 注册账号 → 自动关联，<b>从此你在 ta 名下创建的所有歌词都会自动出现在 ta 的主页</b>。链接长期有效，关联一次就够了。
         </div>
         <div style="background:#FAF5EC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">
           <input id="student-invite-input" readonly value="${url}" style="flex:1;background:transparent;border:none;outline:none;font-family:monospace;font-size:13px;color:var(--text);" onclick="this.select()" />
