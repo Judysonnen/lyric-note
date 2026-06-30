@@ -6148,12 +6148,28 @@
     const sec = document.getElementById('teacher-students-section');
     const list = document.getElementById('teacher-students-list');
     const cntEl = document.getElementById('hw-rail-count');
+    sec.style.display = '';
+    if (cntEl) cntEl.textContent = myStudents.length || '';
     if (!myStudents.length) {
-      sec.style.display = 'none';
+      list.innerHTML = `
+        <div style="padding:14px 8px;font-size:12px;color:var(--muted);line-height:1.7;">
+          <div style="color:var(--text-soft);font-weight:600;margin-bottom:8px;font-size:12px;">怎么开始</div>
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <span style="color:var(--primary);font-weight:600;flex-shrink:0;">①</span>
+            <span>右边 <b>「导入新歌词」</b> 创建一首歌</span>
+          </div>
+          <div style="display:flex;gap:6px;margin-bottom:8px;">
+            <span style="color:var(--primary);font-weight:600;flex-shrink:0;">②</span>
+            <span>歌词顶部 <b>「+ 学生」</b> 字段写学生的名字</span>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <span style="color:var(--primary);font-weight:600;flex-shrink:0;">③</span>
+            <span>学生名会自动出现在这里，<br>点 ta → 「邀请加入」发链接</span>
+          </div>
+        </div>
+      `;
       return;
     }
-    sec.style.display = '';
-    if (cntEl) cntEl.textContent = myStudents.length;
     const studentColors = ['#A84D35','#7C3AED','#5C7A4E','#0F766E','#B45309','#BE185D','#1D4ED8','#9333EA'];
 
     const enriched = myStudents.map((s, idx) => {
@@ -6726,6 +6742,7 @@
   // ── Student invite (per-student persistent link) ────────────────
   async function openStudentInviteModal(label) {
     if (!supabaseClient || !cloudUser) { alert('请先登录'); return; }
+    window._currentInviteLabel = label;
     const bg = document.getElementById('student-invite-bg');
     const body = document.getElementById('student-invite-body');
     document.getElementById('student-invite-title').textContent = '邀请「' + label + '」加入';
@@ -6738,16 +6755,21 @@
       const url = location.origin + location.pathname + '?invite=' + token;
       body.innerHTML = `
         <div style="margin-bottom:14px;line-height:1.6;">
-          把链接发给 <b>${escHtml(label)}</b>。ta 点开 → 注册账号 → 自动关联，<b>从此你在 ta 名下创建的所有歌词都会自动出现在 ta 的主页</b>。链接长期有效，关联一次就够了。
+          下面是给 <b>${escHtml(label)}</b> 的邀请链接。ta 点开 → 注册账号 → 自动关联，<b>从此你给 ta 建的所有歌词都会自动出现在 ta 的主页</b>。
         </div>
-        <div style="background:#FAF5EC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;">
-          <input id="student-invite-input" readonly value="${url}" style="flex:1;background:transparent;border:none;outline:none;font-family:monospace;font-size:13px;color:var(--text);" onclick="this.select()" />
-          <button onclick="copyStudentInviteLink()" id="student-invite-copy-btn" style="background:var(--primary);color:white;border:none;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:1px;">复制</button>
+        <div style="background:#FAF5EC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <input id="student-invite-input" readonly value="${url}" style="flex:1;background:transparent;border:none;outline:none;font-family:monospace;font-size:12px;color:var(--text);" onclick="this.select()" />
         </div>
-        <div style="margin-top:14px;font-size:12px;color:var(--muted);line-height:1.6;">
+        <div style="display:flex;gap:8px;">
+          <button onclick="copyStudentInviteLink()" id="student-invite-copy-btn" style="flex:1;background:var(--primary);color:white;border:none;padding:9px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">复制带文字</button>
+          <button onclick="copyStudentInviteLinkOnly()" id="student-invite-copy-url-btn" style="background:transparent;color:var(--text-soft);border:1px solid var(--border);padding:9px 14px;border-radius:8px;font-size:13px;cursor:pointer;">只复制链接</button>
+        </div>
+        <div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.7;background:#FAF5EC;border-radius:8px;padding:10px 12px;">
+          <div style="color:var(--text-soft);font-weight:600;margin-bottom:4px;">关于这个邀请链接</div>
           · 学生注册时用什么用户名都行，不需要跟你这边写的名字一致<br>
           · 一个邀请链接只能被一个账号认领，认领后即永久关联<br>
-          · 学生自己创建的歌词默认你看不到，ta 想给你看时单独「分享」给你
+          · 学生自己创建的歌词默认你看不到，ta 想给你看时单独「分享」给你<br>
+          · 「复制带文字」会把链接 + 说明一起复制，直接粘贴到微信发给学生即可
         </div>
       `;
     } catch(e) {
@@ -6758,14 +6780,34 @@
   function copyStudentInviteLink() {
     const inp = document.getElementById('student-invite-input');
     if (!inp) return;
-    inp.select();
+    const url = inp.value;
+    const teacherName = (cloudUser && cloudUser.user_metadata && cloudUser.user_metadata.display_name) || '你的老师';
+    const studentLabel = window._currentInviteLabel || '同学';
+    const text =
+      `${studentLabel} 你好，我是 ${teacherName}。\n\n` +
+      `点这个链接注册标唱 LyricNote 账号（用户名随便填），关联后我给你建的所有歌词会自动出现在你的主页，可以打卡、录音，看我的批注。\n\n` +
+      `链接（专属你的，长期有效，只能用一次）：\n${url}`;
+    const btn = document.getElementById('student-invite-copy-btn');
+    try {
+      navigator.clipboard.writeText(text).then(() => {
+        if (btn) { btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = '复制带文字', 1800); }
+      });
+    } catch(_) {
+      inp.select();
+      document.execCommand && document.execCommand('copy');
+    }
+  }
+  function copyStudentInviteLinkOnly() {
+    const inp = document.getElementById('student-invite-input');
+    if (!inp) return;
     try {
       navigator.clipboard.writeText(inp.value).then(() => {
-        const btn = document.getElementById('student-invite-copy-btn');
-        if (btn) { const old = btn.textContent; btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = old, 1500); }
+        const btn = document.getElementById('student-invite-copy-url-btn');
+        if (btn) { btn.textContent = '已复制 ✓'; setTimeout(() => btn.textContent = '只复制链接', 1800); }
       });
-    } catch(_) { document.execCommand && document.execCommand('copy'); }
+    } catch(_) { inp.select(); document.execCommand && document.execCommand('copy'); }
   }
+  window.copyStudentInviteLinkOnly = copyStudentInviteLinkOnly;
 
   async function handleStudentInviteFromUrl() {
     const params = new URLSearchParams(location.search);
@@ -6787,14 +6829,10 @@
       const row = (data && data[0]) || null;
       if (!row) { alert('邀请链接无效。'); return; }
       const teacherName = await lookupUsername(row.teacher_id);
-      if (row.already_claimed) {
-        alert(`已经关联过老师「${teacherName}」`);
-      } else {
-        alert(`已关联老师「${teacherName}」！老师在你名下创建的所有歌词会自动出现在主页。`);
-      }
       await pullFromCloud();
       await refreshHomeworkUI();
       if (document.getElementById('home-screen').style.display !== 'none') renderHomeScreen();
+      showStudentWelcomeModal(teacherName, row.already_claimed);
     } catch(e) {
       console.error('Claim student invite error:', e);
       const msg = e.message || '未知';
@@ -6807,6 +6845,43 @@
       }
     }
   }
+
+  function showStudentWelcomeModal(teacherName, alreadyClaimed) {
+    const bg = document.getElementById('student-invite-bg');
+    const body = document.getElementById('student-invite-body');
+    document.getElementById('student-invite-title').textContent = alreadyClaimed ? `你和老师「${teacherName}」` : `欢迎！已关联老师「${teacherName}」`;
+    body.innerHTML = `
+      <div style="line-height:1.7;color:var(--text);">
+        ${alreadyClaimed
+          ? `你之前已经关联过 <b>${escHtml(teacherName)}</b>，重复点链接不影响。`
+          : `从现在起，<b>${escHtml(teacherName)}</b> 给你建的所有歌词会自动出现在你的主页。`}
+      </div>
+      <div style="margin-top:16px;font-size:12px;color:var(--muted);line-height:1.8;background:#FAF5EC;border-radius:10px;padding:14px;">
+        <div style="color:var(--text-soft);font-weight:600;margin-bottom:6px;font-size:13px;">怎么用</div>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <span style="color:var(--primary);font-weight:600;">①</span>
+          <span>主页能看到老师给你建的歌词，<b>都可以打开看 + 编辑标注</b></span>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <span style="color:var(--primary);font-weight:600;">②</span>
+          <span>老师布置作业时，主页顶部会出现「<b>今日打卡</b>」<br>每天点圆圈打卡，还能录音 + 写感想给老师</span>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:6px;">
+          <span style="color:var(--primary);font-weight:600;">③</span>
+          <span>你自己创建的歌词<b>默认私有</b>，老师看不到</span>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <span style="color:var(--primary);font-weight:600;">④</span>
+          <span>想给老师看某首自己的歌？打开那首歌 → 顶部「分享」按钮 → 发链接给老师</span>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:14px;">
+        <button onclick="closeStudentInviteModal()" style="background:var(--primary);color:white;border:none;padding:9px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">开始使用</button>
+      </div>
+    `;
+    bg.style.display = 'flex';
+  }
+  window.showStudentWelcomeModal = showStudentWelcomeModal;
 
   // Expose to global
   window.pickRegisterRole = pickRegisterRole;
