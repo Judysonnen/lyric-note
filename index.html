@@ -1897,6 +1897,10 @@
     .hw-rail-add:hover, .hw-rail-invite:hover { color: var(--primary); background: var(--primary-light); }
     .hw-rail-add { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); border-radius: 0; }
 
+    /* Hide student filter UI when current user is a student */
+    body.role-student .home-toolbar,
+    body.role-student .student-chips { display: none !important; }
+
     @media (max-width: 900px) {
       .home-screen { flex-direction: column; }
       .hw-rail { width: 100%; max-height: 280px; }
@@ -3759,7 +3763,7 @@
       _searchBound = false;
       container.innerHTML = `
         <div class="recent-header">我的歌词集 <span class="project-group-count" id="project-count">${allIndex.length}</span></div>
-        <input class="project-search" id="project-search" placeholder="搜索歌曲、学生…">
+        <input class="project-search" id="project-search" placeholder="搜索歌曲…">
         <div class="home-toolbar">
           <div class="home-toolbar-label">学生筛选 · Filter by student</div>
           <div class="home-toolbar-controls">
@@ -6700,6 +6704,11 @@
     const studentTeachersSec = document.getElementById('student-teachers-section');
     const studentHwSec = document.getElementById('student-homework-section');
     const assignBtn = document.getElementById('home-assign-hw-btn');
+    document.body.classList.toggle('role-student', userRole === 'student');
+    document.body.classList.toggle('role-teacher', userRole === 'teacher');
+    // Tweak the song-search placeholder for students (no other students concept)
+    const searchEl = document.getElementById('project-search');
+    if (searchEl) searchEl.placeholder = userRole === 'student' ? '搜索歌曲…' : '搜索歌曲、学生…';
     if (userRole === 'teacher') {
       badge.textContent = '老师'; badge.style.display = '';
       if (subtitle) subtitle.textContent = '给学生标注、留作业';
