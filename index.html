@@ -1848,22 +1848,36 @@
     }
     .hw-add:hover { color: var(--primary); background: var(--primary-light); }
 
-    .hw-students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+    .hw-students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
     .hw-student-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-      padding: 14px 16px; cursor: pointer; transition: all .15s;
-      display: flex; flex-direction: column; gap: 4px;
-      text-align: left;
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 8px 10px; cursor: pointer; transition: all .12s;
+      display: flex; align-items: center; gap: 10px;
+      text-align: left; min-height: 48px;
     }
-    .hw-student-card:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: var(--shadow-float); }
+    .hw-student-card:hover { border-color: var(--primary); background: var(--primary-light); }
     .hw-student-card:hover .hw-add { opacity: 1; }
-    .hw-student-card .hw-add { opacity: 0.55; }
-    .hw-student-name { font-size: 15px; font-weight: 600; color: var(--text); }
-    .hw-student-meta { font-size: 12px; color: var(--muted); text-align: left; }
+    .hw-student-card .hw-add { opacity: 0; transition: opacity .15s; }
+    .hw-student-avatar {
+      width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+      background: var(--primary); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 600; letter-spacing: 0;
+      font-family: var(--font-display, inherit);
+    }
+    .hw-student-card.unlinked .hw-student-avatar { background: #C9B5A0; }
+    .hw-student-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+    .hw-student-name { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .hw-student-meta { font-size: 11px; color: var(--muted); line-height: 1.2; }
     .hw-student-progress {
-      height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; margin-top: 4px;
+      width: 36px; height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; flex-shrink: 0;
     }
     .hw-student-progress > div { height: 100%; background: var(--primary); transition: width .3s; }
+    .hw-student-tail { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+    .hw-student-pct { font-size: 10px; color: var(--muted); min-width: 26px; text-align: right; letter-spacing: 0; }
+    .hw-student-dotbadge {
+      width: 6px; height: 6px; border-radius: 50%; background: #DC2626; flex-shrink: 0;
+    }
 
     .hw-today-list { display: flex; flex-direction: column; gap: 10px; }
     .hw-today-card {
@@ -6073,10 +6087,10 @@
       return;
     }
     sec.style.display = '';
-    list.innerHTML = myStudents.map(s => {
+    const studentColors = ['#A84D35','#7C3AED','#5C7A4E','#0F766E','#B45309','#BE185D','#1D4ED8','#9333EA'];
+    list.innerHTML = myStudents.map((s, idx) => {
       const linked = !!s.id;
       const studentHomework = linked ? homeworkAsTeacher.filter(h => h.student_id === s.id) : [];
-      const activeCount = studentHomework.filter(h => h.end_date >= todayDateStr()).length;
       let totalDays = 0, doneDays = 0;
       studentHomework.forEach(h => {
         const days = dateRangeDays(h.start_date, h.end_date);
@@ -6086,25 +6100,27 @@
       });
       const pct = totalDays ? Math.round((doneDays / totalDays) * 100) : 0;
       const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
-      const rightBtn = linked
-        ? `<button class="hw-add" onclick="event.stopPropagation();openCreateHomework('${s.id}','${nameJs}')" title="给这个学生布置作业">+ 作业</button>`
-        : `<button class="hw-add" onclick="event.stopPropagation();openStudentInviteModal('${nameJs}')" title="生成邀请链接发给学生">邀请加入</button>`;
-      const progressLine = linked
-        ? `<div class="hw-student-meta">${studentHomework.length} 份作业 · ${activeCount} 份进行中</div>
-           <div class="hw-student-meta">完成 ${doneDays}/${totalDays} 天 · ${pct}%</div>
-           <div class="hw-student-progress"><div style="width:${pct}%"></div></div>`
-        : `<div class="hw-student-meta" style="font-style:italic;color:var(--muted);">还没关联账号</div>`;
+      const initial = (s.displayName || '?').charAt(0);
+      const avatarColor = studentColors[idx % studentColors.length];
       const click = linked
         ? `onclick="openStudentDrawer('${s.id}')"`
         : `onclick="openStudentInviteModal('${nameJs}')"`;
+      const meta = linked
+        ? `${s.songCount} 首 · ${studentHomework.length} 作业`
+        : `${s.songCount} 首 · 未关联`;
+      const tail = linked && totalDays
+        ? `<div class="hw-student-progress"><div style="width:${pct}%"></div></div><div class="hw-student-pct">${pct}%</div>`
+        : (linked
+            ? `<button class="hw-add" onclick="event.stopPropagation();openCreateHomework('${s.id}','${nameJs}')" title="布置作业">+ 作业</button>`
+            : `<button class="hw-add" onclick="event.stopPropagation();openStudentInviteModal('${nameJs}')" title="邀请加入">邀请</button>`);
       return `
-        <div class="hw-student-card" ${click}>
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <div class="hw-student-card ${linked ? '' : 'unlinked'}" ${click} title="${escHtml(s.displayName)}">
+          <div class="hw-student-avatar" style="background:${linked ? avatarColor : '#C9B5A0'};">${escHtml(initial)}</div>
+          <div class="hw-student-body">
             <div class="hw-student-name">${escHtml(s.displayName)}</div>
-            ${rightBtn}
+            <div class="hw-student-meta">${meta}</div>
           </div>
-          <div class="hw-student-meta">${s.songCount} 首歌</div>
-          ${progressLine}
+          <div class="hw-student-tail">${tail}</div>
         </div>`;
     }).join('');
   }
