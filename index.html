@@ -6187,7 +6187,7 @@
       document.getElementById('student-homework-section').style.display = 'none';
       const stSec = document.getElementById('student-teachers-section');
       if (stSec) stSec.style.display = 'none';
-      if (currentStudentViewId) renderStudentMainView();
+      if (currentStudentViewLabel) renderStudentMainView();
     } else if (userRole === 'student') {
       hideTeacherStudentsSidebar();
       renderStudentHomeworkSection();
@@ -6242,9 +6242,7 @@
 
     function row(s) {
       const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
-      const click = s.linked
-        ? `onclick="openStudentMainView('${s.id}')"`
-        : `onclick="openStudentInviteModal('${nameJs}')"`;
+      const click = `onclick="openStudentMainViewByName('${nameJs}')"`;
       let meta;
       if (!s.linked) {
         meta = '邀请';
@@ -6642,11 +6640,15 @@
   }
 
   // ── Student main view (replace home page main area with student detail) ──
-  let currentStudentViewId = null;
+  let currentStudentViewLabel = null;
   let currentStudentViewTab = 'homework';
 
-  async function openStudentMainView(studentId) {
-    currentStudentViewId = studentId;
+  function openStudentMainView(studentId) {
+    const s = myStudents.find(x => x.id === studentId);
+    if (s) openStudentMainViewByName(s.displayName);
+  }
+  function openStudentMainViewByName(label) {
+    currentStudentViewLabel = label;
     currentStudentViewTab = 'homework';
     document.getElementById('home-default-view').style.display = 'none';
     const view = document.getElementById('student-main-view');
@@ -6654,7 +6656,7 @@
     renderStudentMainView();
   }
   function closeStudentMainView() {
-    currentStudentViewId = null;
+    currentStudentViewLabel = null;
     document.getElementById('home-default-view').style.display = '';
     document.getElementById('student-main-view').style.display = 'none';
   }
@@ -6663,8 +6665,8 @@
     renderStudentMainView();
   }
   function renderStudentMainView() {
-    if (!currentStudentViewId) return;
-    const s = myStudents.find(x => x.id === currentStudentViewId);
+    if (!currentStudentViewLabel) return;
+    const s = myStudents.find(x => x.displayName.toLowerCase() === currentStudentViewLabel.toLowerCase());
     if (!s) { closeStudentMainView(); return; }
     const view = document.getElementById('student-main-view');
     const studentColors = ['#A84D35','#7C3AED','#5C7A4E','#0F766E','#B45309','#BE185D','#1D4ED8','#9333EA'];
@@ -6677,27 +6679,34 @@
     const activeHw = studentHw.filter(h => h.start_date <= today && h.end_date >= today);
 
     const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
+    const linked = !!s.id;
+    const subText = linked
+      ? `${songs.length} 首歌 · ${studentHw.length} 份作业${activeHw.length ? ' · ' + activeHw.length + ' 进行中' : ''}`
+      : `${songs.length} 首歌 · 未关联账号（点右侧邀请加入后才能布置作业）`;
+    const actionBtn = linked
+      ? `<button class="btn btn-primary" onclick="openCreateHomework('${s.id}','${nameJs}')">+ 布置作业</button>`
+      : `<button class="btn btn-primary" onclick="openStudentInviteModal('${nameJs}')">邀请加入</button>`;
     const headerHtml = `
       <button class="sv-back" onclick="closeStudentMainView()">← 全部学生</button>
       <div class="sv-header">
-        <div class="sv-avatar" style="background:${avatarColor};">${escHtml(initial)}</div>
+        <div class="sv-avatar ${linked ? '' : 'unlinked'}" style="background:${linked ? avatarColor : '#C9B5A0'};">${escHtml(initial)}</div>
         <div>
           <div class="sv-name">${escHtml(s.displayName)}</div>
-          <div class="sv-sub">${songs.length} 首歌 · ${studentHw.length} 份作业${activeHw.length ? ' · ' + activeHw.length + ' 进行中' : ''}</div>
+          <div class="sv-sub">${subText}</div>
         </div>
-        <div class="sv-actions">
-          <button class="btn btn-primary" onclick="openCreateHomework('${s.id}','${nameJs}')">+ 布置作业</button>
-        </div>
+        <div class="sv-actions">${actionBtn}</div>
       </div>
       <div class="sv-tabs">
-        <div class="sv-tab ${currentStudentViewTab==='homework'?'active':''}" onclick="setStudentViewTab('homework')">作业 <span class="num">${studentHw.length}</span></div>
+        <div class="sv-tab ${currentStudentViewTab==='homework'?'active':''}" onclick="setStudentViewTab('homework')">作业 <span class="num">${linked ? studentHw.length : 0}</span></div>
         <div class="sv-tab ${currentStudentViewTab==='songs'?'active':''}" onclick="setStudentViewTab('songs')">歌词 <span class="num">${songs.length}</span></div>
       </div>
     `;
 
     let bodyHtml = '';
     if (currentStudentViewTab === 'homework') {
-      if (!studentHw.length) {
+      if (!linked) {
+        bodyHtml = `<div class="sv-empty">这个学生还没关联账号，无法在线布置作业。<br>点右上「邀请加入」生成链接发给 ta 即可。</div>`;
+      } else if (!studentHw.length) {
         bodyHtml = `<div class="sv-empty">还没给 ta 布置作业。点右上「+ 布置作业」开始。</div>`;
       } else {
         const sortedHw = [...studentHw].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
@@ -6744,6 +6753,7 @@
   }
 
   window.openStudentMainView = openStudentMainView;
+  window.openStudentMainViewByName = openStudentMainViewByName;
   window.closeStudentMainView = closeStudentMainView;
   window.setStudentViewTab = setStudentViewTab;
 
