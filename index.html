@@ -6795,23 +6795,16 @@
     if (c.audio_path) {
       audioUrl = await getAudioSignedUrl(c.audio_path);
     }
-    if (isStudent) {
+    // Recording UI temporarily removed to keep storage manageable.
+    // Existing audio is still played back so historical recordings aren't lost.
+    if (audioUrl) {
       audioBlock = `
         <div class="hw-day-section">
-          <div class="hw-day-field-label">录音</div>
+          <div class="hw-day-field-label">${isStudent ? '我的录音（旧）' : '学生录音（旧）'}</div>
           <div class="hw-audio-row">
-            <button class="hw-rec-btn" id="hw-rec-btn-${hwId}-${date}" onclick="toggleRecording('${hwId}','${date}')">
-              <span class="hw-rec-dot"></span><span class="hw-rec-label">${c.audio_path ? '重新录制' : '开始录音'}</span>
-            </button>
-            ${audioUrl ? `<audio class="hw-audio-player" controls src="${audioUrl}"></audio>` : ''}
-            ${c.audio_path ? `<button class="hw-audio-delete" onclick="deleteHomeworkAudio('${hwId}','${date}','${c.audio_path}')">删除</button>` : ''}
+            <audio class="hw-audio-player" controls src="${audioUrl}" style="flex:1;"></audio>
+            ${isStudent && c.audio_path ? `<button class="hw-audio-delete" onclick="deleteHomeworkAudio('${hwId}','${date}','${c.audio_path}')">删除</button>` : ''}
           </div>
-        </div>`;
-    } else if (audioUrl) {
-      audioBlock = `
-        <div class="hw-day-section">
-          <div class="hw-day-field-label">学生录音</div>
-          <audio class="hw-audio-player" controls src="${audioUrl}" style="width:100%;"></audio>
         </div>`;
     }
 
