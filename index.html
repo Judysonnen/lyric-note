@@ -2099,6 +2099,19 @@
     .hw-form-row textarea { resize: vertical; min-height: 72px; }
     .hw-form-row.two-col { display: flex; gap: 12px; }
     .hw-form-row.two-col > div { flex: 1; }
+    .hw-date-input {
+      font-family: inherit; color: var(--text); cursor: pointer;
+    }
+    .hw-date-input::-webkit-calendar-picker-indicator {
+      opacity: 0.5; cursor: pointer; filter: invert(0.3);
+    }
+    .hw-date-input::-webkit-calendar-picker-indicator:hover { opacity: 1; }
+    .hw-date-preset {
+      font-size: 12px; padding: 4px 10px; border-radius: 999px;
+      background: white; border: 1px solid var(--border); color: var(--text-soft);
+      cursor: pointer; font-family: inherit; transition: all .12s;
+    }
+    .hw-date-preset:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
   </style>
 </head>
 <body>
@@ -2619,15 +2632,28 @@
       <label>描述（可选）</label>
       <textarea id="hw-form-desc" placeholder="如：先开嗓 5 分钟，然后从主歌反复练 5 遍，最后通唱一遍。" maxlength="600"></textarea>
     </div>
+    <div class="hw-form-row">
+      <label>建议每天花多少时间（可选）</label>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <input id="hw-form-minutes" type="number" min="1" max="600" placeholder="如 30" style="width:120px;" />
+        <span style="font-size:13px;color:var(--muted);">分钟</span>
+      </div>
+    </div>
     <div class="hw-form-row two-col">
       <div>
         <label>开始日期</label>
-        <input id="hw-form-start" type="date" />
+        <input id="hw-form-start" type="date" class="hw-date-input" />
       </div>
       <div>
         <label>截止日期</label>
-        <input id="hw-form-end" type="date" />
+        <input id="hw-form-end" type="date" class="hw-date-input" />
       </div>
+    </div>
+    <div class="hw-form-row" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:-8px;">
+      <button type="button" class="hw-date-preset" onclick="setHwDurationPreset(7)">7 天</button>
+      <button type="button" class="hw-date-preset" onclick="setHwDurationPreset(14)">14 天</button>
+      <button type="button" class="hw-date-preset" onclick="setHwDurationPreset(30)">30 天</button>
+      <button type="button" class="hw-date-preset" onclick="setHwDurationPreset(60)">60 天</button>
     </div>
     <div id="hw-create-error" style="color:#DC2626;font-size:12px;min-height:16px;margin-bottom:8px;"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
@@ -6333,12 +6359,13 @@
       const check = (homeworkChecksByHw[h.id] || {})[today];
       const done = check && check.completed;
       const teacherComment = check && check.teacher_comment;
+      const minutesLabel = h.daily_minutes ? ` · 建议 ${h.daily_minutes} 分钟` : '';
       return `
         <div class="hw-today-card">
           <div class="hw-today-check ${done ? 'done' : ''}" onclick="toggleTodayCheck('${h.id}')"></div>
           <div class="hw-today-info">
             <div class="hw-today-title">${escHtml(h.title)}</div>
-            <div class="hw-today-sub">${h.start_date} → ${h.end_date}${teacherComment ? ' · 老师留言' : ''}</div>
+            <div class="hw-today-sub">${h.start_date} → ${h.end_date}${minutesLabel}${teacherComment ? ' · 老师留言' : ''}</div>
           </div>
           <button class="hw-today-expand" onclick="openHomeworkDrawerForStudent('${h.id}')">详情</button>
         </div>`;
@@ -6400,6 +6427,8 @@
     document.getElementById('hw-create-student-label').textContent = '给「' + studentName + '」布置作业';
     document.getElementById('hw-form-title').value = '';
     document.getElementById('hw-form-desc').value = '';
+    const minutesEl = document.getElementById('hw-form-minutes');
+    if (minutesEl) minutesEl.value = '';
     document.getElementById('hw-form-start').value = todayDateStr();
     const d = new Date(); d.setDate(d.getDate() + 6);
     document.getElementById('hw-form-end').value = d.toISOString().slice(0, 10);
@@ -6407,6 +6436,15 @@
     document.getElementById('hw-create-bg').style.display = 'flex';
     setTimeout(() => document.getElementById('hw-form-title').focus(), 50);
   }
+  function setHwDurationPreset(days) {
+    const startEl = document.getElementById('hw-form-start');
+    const endEl = document.getElementById('hw-form-end');
+    const start = startEl.value ? new Date(startEl.value + 'T00:00:00') : new Date();
+    if (!startEl.value) startEl.value = todayDateStr();
+    const end = new Date(start); end.setDate(end.getDate() + days - 1);
+    endEl.value = end.getFullYear() + '-' + String(end.getMonth()+1).padStart(2,'0') + '-' + String(end.getDate()).padStart(2,'0');
+  }
+  window.setHwDurationPreset = setHwDurationPreset;
   function closeCreateHomework() { document.getElementById('hw-create-bg').style.display = 'none'; }
   async function submitCreateHomework() {
     const title = document.getElementById('hw-form-title').value.trim();
@@ -6421,11 +6459,14 @@
     const btn = document.getElementById('hw-create-confirm');
     btn.disabled = true; btn.textContent = '提交中…';
     try {
+      const minutesRaw = document.getElementById('hw-form-minutes').value;
+      const minutes = minutesRaw ? parseInt(minutesRaw, 10) : null;
       const { error } = await supabaseClient.from('homework').insert({
         teacher_id: cloudUser.id,
         student_id: pendingStudentForHomework,
         title, description: desc || null,
-        start_date: start, end_date: end
+        start_date: start, end_date: end,
+        daily_minutes: (minutes && !isNaN(minutes)) ? minutes : null
       });
       if (error) throw error;
       closeCreateHomework();
@@ -6463,7 +6504,7 @@
     const hw = homeworkAsStudent.find(h => h.id === homeworkId);
     if (!hw) return;
     document.getElementById('hw-drawer-title').textContent = hw.title;
-    document.getElementById('hw-drawer-sub').textContent = (hw.description ? hw.description + ' · ' : '') + hw.start_date + ' → ' + hw.end_date;
+    document.getElementById('hw-drawer-sub').textContent = (hw.description ? hw.description + ' · ' : '') + hw.start_date + ' → ' + hw.end_date + (hw.daily_minutes ? ' · 每天 ' + hw.daily_minutes + ' 分钟' : '');
     renderDrawerDayList(hw, 'student');
     document.getElementById('hw-drawer-footer').innerHTML = `<button class="btn btn-ghost" onclick="closeHomeworkDrawer()">关闭</button>`;
     document.getElementById('hw-drawer-bg').style.display = 'flex';
@@ -6475,7 +6516,7 @@
     const hw = homeworkAsTeacher.find(h => h.id === homeworkId);
     if (!hw) return;
     document.getElementById('hw-drawer-title').textContent = hw.title;
-    document.getElementById('hw-drawer-sub').textContent = (hw.description ? hw.description + ' · ' : '') + hw.start_date + ' → ' + hw.end_date;
+    document.getElementById('hw-drawer-sub').textContent = (hw.description ? hw.description + ' · ' : '') + hw.start_date + ' → ' + hw.end_date + (hw.daily_minutes ? ' · 每天 ' + hw.daily_minutes + ' 分钟' : '');
     renderDrawerDayList(hw, 'teacher');
     document.getElementById('hw-drawer-footer').innerHTML = `
       <button class="btn btn-ghost" onclick="confirmDeleteHomework('${hw.id}')" style="color:#DC2626;">删除作业</button>
@@ -6674,7 +6715,7 @@
   }
   function closeStudentMainView() {
     currentStudentViewLabel = null;
-    document.getElementById('home-default-view').style.display = '';
+    document.getElementById('home-default-view').style.display = 'contents';
     document.getElementById('student-main-view').style.display = 'none';
   }
   function setStudentViewTab(tab) {
@@ -6736,12 +6777,13 @@
           if (h.end_date < today) { statusLabel = '已结束'; statusCls = 'done'; }
           else if (h.start_date > today) { statusLabel = '未开始'; statusCls = 'future'; }
           else { statusLabel = '进行中'; statusCls = 'active'; }
+          const minutesLabel = h.daily_minutes ? ` · 每天 ${h.daily_minutes} 分钟` : '';
           return `
             <div class="sv-hw-card" onclick="openHomeworkDrawerForTeacher('${h.id}')">
               <div class="sv-hw-card-head">
                 <div>
                   <div class="sv-hw-card-title">${escHtml(h.title)}</div>
-                  <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date} · 完成 ${doneDays}/${days.length} (${pct}%)</div>
+                  <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date}${minutesLabel} · 完成 ${doneDays}/${days.length} (${pct}%)</div>
                 </div>
                 <span class="sv-hw-card-status ${statusCls}">${statusLabel}</span>
               </div>
