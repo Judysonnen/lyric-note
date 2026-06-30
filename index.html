@@ -1857,9 +1857,10 @@
 
     /* ── Teacher: left student rail (M1 design) ── */
     .hw-rail {
-      width: 230px; flex-shrink: 0; align-self: stretch;
-      background: rgba(255,255,255,0.4); border: 1px solid var(--border); border-radius: 16px;
-      padding: 16px 12px; display: flex; flex-direction: column;
+      width: 220px; flex-shrink: 0; align-self: stretch;
+      background: transparent; border: none;
+      border-right: 1px solid var(--border);
+      padding: 18px 16px 18px 6px; display: flex; flex-direction: column;
       max-height: 100%; overflow-y: auto;
     }
     .hw-rail::-webkit-scrollbar { width: 4px; }
@@ -1888,12 +1889,13 @@
     .hw-rail-row .hw-rail-name { flex: 1; font-size: 13px; font-weight: 500; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
     .hw-rail-row .hw-rail-meta { font-size: 10px; color: var(--muted); flex-shrink: 0; }
     .hw-rail-add, .hw-rail-invite {
-      margin-top: 8px; padding: 9px; font-size: 12px; color: var(--text-soft);
-      border: 1px dashed var(--border); border-radius: 10px; text-align: center;
+      padding: 8px 10px; font-size: 12px; color: var(--text-soft);
+      border: none; border-radius: 6px; text-align: left;
       cursor: pointer; background: transparent; font-family: inherit; transition: all .12s;
+      display: flex; align-items: center; gap: 6px;
     }
-    .hw-rail-add:hover, .hw-rail-invite:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-    .hw-rail-add { margin-top: auto; }
+    .hw-rail-add:hover, .hw-rail-invite:hover { color: var(--primary); background: var(--primary-light); }
+    .hw-rail-add { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--border); border-radius: 0; }
 
     @media (max-width: 900px) {
       .home-screen { flex-direction: column; }
