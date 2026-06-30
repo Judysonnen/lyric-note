@@ -6903,7 +6903,12 @@
         </div>`;
       } else {
         bodyHtml = '<div class="sv-song-list">' + songs.map(p => {
-          const meta = [p.lessonDate, p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : ''].filter(Boolean).join(' · ');
+          let meta;
+          if (p.lessonDate) meta = '上课日期：' + p.lessonDate;
+          else if (p.updatedAt) {
+            const d = new Date(p.updatedAt);
+            meta = '上次编辑：' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+          } else meta = '';
           return `
             <div class="sv-song-row" onclick="loadProject('${p.id}')">
               <div>
