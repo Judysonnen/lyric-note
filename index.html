@@ -2642,11 +2642,17 @@
     <div class="hw-form-row two-col">
       <div>
         <label>开始日期</label>
-        <input id="hw-form-start" type="date" class="hw-date-input" />
+        <div class="date-trigger" id="hw-start-trigger" onclick="openCalendar(this,'hw-start')">
+          <span class="dt-text dt-placeholder">选择日期</span>
+          <span class="dt-icon">📅</span>
+        </div>
       </div>
       <div>
         <label>截止日期</label>
-        <input id="hw-form-end" type="date" class="hw-date-input" />
+        <div class="date-trigger" id="hw-end-trigger" onclick="openCalendar(this,'hw-end')">
+          <span class="dt-text dt-placeholder">选择日期</span>
+          <span class="dt-icon">📅</span>
+        </div>
       </div>
     </div>
     <div class="hw-form-row" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:-8px;">
@@ -3389,7 +3395,11 @@
   function openCalendar(anchorEl, source) {
     calAnchorEl = anchorEl;
     calSource = source;
-    const current = source === 'modal' ? (document.getElementById('lesson-date-trigger').dataset.value || '') : lessonDate;
+    let current;
+    if (source === 'modal') current = document.getElementById('lesson-date-trigger').dataset.value || '';
+    else if (source === 'hw-start') current = document.getElementById('hw-start-trigger').dataset.value || '';
+    else if (source === 'hw-end')   current = document.getElementById('hw-end-trigger').dataset.value || '';
+    else current = lessonDate;
     const d = current ? new Date(current) : new Date();
     calYear = d.getFullYear();
     calMonth = d.getMonth();
@@ -3398,6 +3408,13 @@
         const trigger = document.getElementById('lesson-date-trigger');
         trigger.dataset.value = dateStr;
         const textEl = document.getElementById('lesson-date-text');
+        if (dateStr) { textEl.textContent = dateStr; textEl.classList.remove('dt-placeholder'); }
+        else { textEl.textContent = '选择日期'; textEl.classList.add('dt-placeholder'); }
+      } else if (source === 'hw-start' || source === 'hw-end') {
+        const id = source === 'hw-start' ? 'hw-start-trigger' : 'hw-end-trigger';
+        const trigger = document.getElementById(id);
+        trigger.dataset.value = dateStr;
+        const textEl = trigger.querySelector('.dt-text');
         if (dateStr) { textEl.textContent = dateStr; textEl.classList.remove('dt-placeholder'); }
         else { textEl.textContent = '选择日期'; textEl.classList.add('dt-placeholder'); }
       } else {
@@ -3475,7 +3492,11 @@
     calMonth += delta;
     if (calMonth < 0) { calMonth = 11; calYear--; }
     if (calMonth > 11) { calMonth = 0; calYear++; }
-    const current = calSource === 'modal' ? (document.getElementById('lesson-date-trigger').dataset.value || '') : lessonDate;
+    let current;
+    if (calSource === 'modal') current = document.getElementById('lesson-date-trigger').dataset.value || '';
+    else if (calSource === 'hw-start') current = document.getElementById('hw-start-trigger').dataset.value || '';
+    else if (calSource === 'hw-end')   current = document.getElementById('hw-end-trigger').dataset.value || '';
+    else current = lessonDate;
     renderCalendar(current);
   }
 
@@ -6429,28 +6450,36 @@
     document.getElementById('hw-form-desc').value = '';
     const minutesEl = document.getElementById('hw-form-minutes');
     if (minutesEl) minutesEl.value = '';
-    document.getElementById('hw-form-start').value = todayDateStr();
+    setHwTriggerDate('hw-start-trigger', todayDateStr());
     const d = new Date(); d.setDate(d.getDate() + 6);
-    document.getElementById('hw-form-end').value = d.toISOString().slice(0, 10);
+    setHwTriggerDate('hw-end-trigger', d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
     document.getElementById('hw-create-error').textContent = '';
     document.getElementById('hw-create-bg').style.display = 'flex';
     setTimeout(() => document.getElementById('hw-form-title').focus(), 50);
   }
+  function setHwTriggerDate(triggerId, dateStr) {
+    const t = document.getElementById(triggerId);
+    if (!t) return;
+    t.dataset.value = dateStr || '';
+    const textEl = t.querySelector('.dt-text');
+    if (dateStr) { textEl.textContent = dateStr; textEl.classList.remove('dt-placeholder'); }
+    else { textEl.textContent = '选择日期'; textEl.classList.add('dt-placeholder'); }
+  }
   function setHwDurationPreset(days) {
-    const startEl = document.getElementById('hw-form-start');
-    const endEl = document.getElementById('hw-form-end');
-    const start = startEl.value ? new Date(startEl.value + 'T00:00:00') : new Date();
-    if (!startEl.value) startEl.value = todayDateStr();
+    let startStr = document.getElementById('hw-start-trigger').dataset.value;
+    if (!startStr) { startStr = todayDateStr(); setHwTriggerDate('hw-start-trigger', startStr); }
+    const start = new Date(startStr + 'T00:00:00');
     const end = new Date(start); end.setDate(end.getDate() + days - 1);
-    endEl.value = end.getFullYear() + '-' + String(end.getMonth()+1).padStart(2,'0') + '-' + String(end.getDate()).padStart(2,'0');
+    const endStr = end.getFullYear() + '-' + String(end.getMonth()+1).padStart(2,'0') + '-' + String(end.getDate()).padStart(2,'0');
+    setHwTriggerDate('hw-end-trigger', endStr);
   }
   window.setHwDurationPreset = setHwDurationPreset;
   function closeCreateHomework() { document.getElementById('hw-create-bg').style.display = 'none'; }
   async function submitCreateHomework() {
     const title = document.getElementById('hw-form-title').value.trim();
     const desc = document.getElementById('hw-form-desc').value.trim();
-    const start = document.getElementById('hw-form-start').value;
-    const end = document.getElementById('hw-form-end').value;
+    const start = document.getElementById('hw-start-trigger').dataset.value || '';
+    const end = document.getElementById('hw-end-trigger').dataset.value || '';
     const err = document.getElementById('hw-create-error');
     if (!title) { err.textContent = '请填标题'; return; }
     if (!start || !end) { err.textContent = '请选日期'; return; }
