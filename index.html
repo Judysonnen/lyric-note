@@ -1901,6 +1901,53 @@
     body.role-student .home-toolbar,
     body.role-student .student-chips { display: none !important; }
 
+    /* Student main view */
+    .sv-back {
+      background: none; border: none; color: var(--muted); font-size: 12px;
+      cursor: pointer; padding: 4px 0; margin-bottom: 12px;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .sv-back:hover { color: var(--primary); }
+    .sv-header {
+      display: flex; align-items: center; gap: 14px;
+      padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px;
+    }
+    .sv-avatar {
+      width: 56px; height: 56px; border-radius: 50%;
+      background: var(--primary); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px; font-weight: 600; flex-shrink: 0;
+    }
+    .sv-avatar.unlinked { background: #C9B5A0; }
+    .sv-name { font-size: 22px; font-weight: 700; color: var(--text); }
+    .sv-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .sv-actions { margin-left: auto; display: flex; gap: 8px; }
+    .sv-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .sv-tab { padding: 8px 0; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500; }
+    .sv-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .sv-tab .num { font-size: 11px; color: inherit; opacity: .7; margin-left: 4px; }
+    .sv-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }
+    .sv-hw-card {
+      border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
+      cursor: pointer; transition: all .12s;
+    }
+    .sv-hw-card:hover { border-color: var(--primary); }
+    .sv-hw-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    .sv-hw-card-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .sv-hw-card-meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .sv-hw-card-status { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 999px; flex-shrink: 0; }
+    .sv-hw-card-status.active { background: var(--primary-light); color: var(--primary); }
+    .sv-hw-card-status.done { background: #ECFDF5; color: #047857; }
+    .sv-hw-card-status.future { background: #F3F4F6; color: var(--muted); }
+    .sv-song-row {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer;
+    }
+    .sv-song-row:hover { background: var(--primary-light); }
+    .sv-song-row:last-child { border-bottom: none; }
+    .sv-song-name { font-size: 14px; font-weight: 500; color: var(--text); }
+    .sv-song-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
     @media (max-width: 900px) {
       .home-screen { flex-direction: column; }
       .hw-rail { width: 100%; max-height: 280px; }
@@ -2109,31 +2156,34 @@
         <button class="hw-rail-add" onclick="openInviteStudentPickerOrNew()" title="给已有学生发邀请链接">+ 邀请学生</button>
       </aside>
       <div class="home-main">
-        <div class="home-logo">🎵</div>
-        <div class="home-title">标唱 <span>LyricNote</span><span id="home-role-badge" class="home-role-badge" style="display:none;"></span></div>
-        <div class="home-subtitle" id="home-subtitle">歌词标注练唱工具</div>
-        <div class="home-cloud-status" id="home-cloud-status">
-          <span class="cloud-dot"></span> <span id="home-cloud-text">已连接云端</span>
+        <div id="home-default-view" style="display:contents;">
+          <div class="home-logo">🎵</div>
+          <div class="home-title">标唱 <span>LyricNote</span><span id="home-role-badge" class="home-role-badge" style="display:none;"></span></div>
+          <div class="home-subtitle" id="home-subtitle">歌词标注练唱工具</div>
+          <div class="home-cloud-status" id="home-cloud-status">
+            <span class="cloud-dot"></span> <span id="home-cloud-text">已连接云端</span>
+          </div>
+          <div class="home-actions">
+            <button class="btn btn-primary home-btn" onclick="openModal(false)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
+              导入新歌词
+            </button>
+            <button class="btn btn-primary home-btn" id="home-assign-hw-btn" onclick="openCreateHomeworkPicker()" style="display:none;background:var(--card);color:var(--primary);border:1px solid var(--primary);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+              布置作业
+            </button>
+          </div>
+          <div id="student-homework-section" class="hw-section" style="display:none;margin-top:0;">
+            <div class="hw-section-title"><span>我的练习 · 今日打卡</span></div>
+            <div id="student-homework-list" class="hw-today-list"></div>
+          </div>
+          <div id="student-teachers-section" class="hw-section" style="display:none;margin-top:0;">
+            <div class="hw-section-title"><span>我的老师</span></div>
+            <div id="student-teachers-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
+          </div>
+          <div id="recent-projects" class="recent-section"></div>
         </div>
-        <div class="home-actions">
-          <button class="btn btn-primary home-btn" onclick="openModal(false)">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M12 5v14M5 12h14"/></svg>
-            导入新歌词
-          </button>
-          <button class="btn btn-primary home-btn" id="home-assign-hw-btn" onclick="openCreateHomeworkPicker()" style="display:none;background:var(--card);color:var(--primary);border:1px solid var(--primary);">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            布置作业
-          </button>
-        </div>
-        <div id="student-homework-section" class="hw-section" style="display:none;margin-top:0;">
-          <div class="hw-section-title"><span>我的练习 · 今日打卡</span></div>
-          <div id="student-homework-list" class="hw-today-list"></div>
-        </div>
-        <div id="student-teachers-section" class="hw-section" style="display:none;margin-top:0;">
-          <div class="hw-section-title"><span>我的老师</span></div>
-          <div id="student-teachers-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
-        </div>
-        <div id="recent-projects" class="recent-section"></div>
+        <div id="student-main-view" style="display:none;width:100%;text-align:left;"></div>
         <button class="home-fab" onclick="openModal(false)" title="导入新歌词" aria-label="导入新歌词">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         </button>
@@ -6137,6 +6187,7 @@
       document.getElementById('student-homework-section').style.display = 'none';
       const stSec = document.getElementById('student-teachers-section');
       if (stSec) stSec.style.display = 'none';
+      if (currentStudentViewId) renderStudentMainView();
     } else if (userRole === 'student') {
       hideTeacherStudentsSidebar();
       renderStudentHomeworkSection();
@@ -6192,7 +6243,7 @@
     function row(s) {
       const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
       const click = s.linked
-        ? `onclick="openStudentDrawer('${s.id}')"`
+        ? `onclick="openStudentMainView('${s.id}')"`
         : `onclick="openStudentInviteModal('${nameJs}')"`;
       let meta;
       if (!s.linked) {
@@ -6589,6 +6640,112 @@
     document.getElementById('hw-drawer-bg').style.display = 'none';
     drawerHomeworkId = null; drawerStudentId = null; drawerRole = null;
   }
+
+  // ── Student main view (replace home page main area with student detail) ──
+  let currentStudentViewId = null;
+  let currentStudentViewTab = 'homework';
+
+  async function openStudentMainView(studentId) {
+    currentStudentViewId = studentId;
+    currentStudentViewTab = 'homework';
+    document.getElementById('home-default-view').style.display = 'none';
+    const view = document.getElementById('student-main-view');
+    view.style.display = 'block';
+    renderStudentMainView();
+  }
+  function closeStudentMainView() {
+    currentStudentViewId = null;
+    document.getElementById('home-default-view').style.display = '';
+    document.getElementById('student-main-view').style.display = 'none';
+  }
+  function setStudentViewTab(tab) {
+    currentStudentViewTab = tab;
+    renderStudentMainView();
+  }
+  function renderStudentMainView() {
+    if (!currentStudentViewId) return;
+    const s = myStudents.find(x => x.id === currentStudentViewId);
+    if (!s) { closeStudentMainView(); return; }
+    const view = document.getElementById('student-main-view');
+    const studentColors = ['#A84D35','#7C3AED','#5C7A4E','#0F766E','#B45309','#BE185D','#1D4ED8','#9333EA'];
+    const idx = myStudents.indexOf(s);
+    const avatarColor = studentColors[idx % studentColors.length];
+    const initial = (s.displayName || '?').charAt(0);
+    const songs = getProjectIndex().filter(p => p.isOwner !== false && (p.studentName || '').trim().toLowerCase() === s.displayName.toLowerCase());
+    const studentHw = homeworkAsTeacher.filter(h => h.student_id === s.id);
+    const today = todayDateStr();
+    const activeHw = studentHw.filter(h => h.start_date <= today && h.end_date >= today);
+
+    const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
+    const headerHtml = `
+      <button class="sv-back" onclick="closeStudentMainView()">← 全部学生</button>
+      <div class="sv-header">
+        <div class="sv-avatar" style="background:${avatarColor};">${escHtml(initial)}</div>
+        <div>
+          <div class="sv-name">${escHtml(s.displayName)}</div>
+          <div class="sv-sub">${songs.length} 首歌 · ${studentHw.length} 份作业${activeHw.length ? ' · ' + activeHw.length + ' 进行中' : ''}</div>
+        </div>
+        <div class="sv-actions">
+          <button class="btn btn-primary" onclick="openCreateHomework('${s.id}','${nameJs}')">+ 布置作业</button>
+        </div>
+      </div>
+      <div class="sv-tabs">
+        <div class="sv-tab ${currentStudentViewTab==='homework'?'active':''}" onclick="setStudentViewTab('homework')">作业 <span class="num">${studentHw.length}</span></div>
+        <div class="sv-tab ${currentStudentViewTab==='songs'?'active':''}" onclick="setStudentViewTab('songs')">歌词 <span class="num">${songs.length}</span></div>
+      </div>
+    `;
+
+    let bodyHtml = '';
+    if (currentStudentViewTab === 'homework') {
+      if (!studentHw.length) {
+        bodyHtml = `<div class="sv-empty">还没给 ta 布置作业。点右上「+ 布置作业」开始。</div>`;
+      } else {
+        const sortedHw = [...studentHw].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
+        bodyHtml = sortedHw.map(h => {
+          const days = dateRangeDays(h.start_date, h.end_date);
+          const checks = homeworkChecksByHw[h.id] || {};
+          const doneDays = days.filter(d => checks[d] && checks[d].completed).length;
+          const pct = days.length ? Math.round((doneDays / days.length) * 100) : 0;
+          let statusLabel, statusCls;
+          if (h.end_date < today) { statusLabel = '已结束'; statusCls = 'done'; }
+          else if (h.start_date > today) { statusLabel = '未开始'; statusCls = 'future'; }
+          else { statusLabel = '进行中'; statusCls = 'active'; }
+          return `
+            <div class="sv-hw-card" onclick="openHomeworkDrawerForTeacher('${h.id}')">
+              <div class="sv-hw-card-head">
+                <div>
+                  <div class="sv-hw-card-title">${escHtml(h.title)}</div>
+                  <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date} · 完成 ${doneDays}/${days.length} (${pct}%)</div>
+                </div>
+                <span class="sv-hw-card-status ${statusCls}">${statusLabel}</span>
+              </div>
+            </div>`;
+        }).join('');
+      }
+    } else if (currentStudentViewTab === 'songs') {
+      if (!songs.length) {
+        bodyHtml = `<div class="sv-empty">还没给 ta 建过歌词。回主页点「导入新歌词」，「学生」字段写「${escHtml(s.displayName)}」即可。</div>`;
+      } else {
+        bodyHtml = '<div>' + songs.map(p => {
+          const meta = [p.lessonDate, p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : ''].filter(Boolean).join(' · ');
+          return `
+            <div class="sv-song-row" onclick="loadProject('${p.id}')">
+              <div>
+                <div class="sv-song-name">${escHtml(p.name || '未命名歌词')}</div>
+                <div class="sv-song-meta">${escHtml(meta)}</div>
+              </div>
+              <span style="color:var(--muted);">→</span>
+            </div>`;
+        }).join('') + '</div>';
+      }
+    }
+
+    view.innerHTML = headerHtml + bodyHtml;
+  }
+
+  window.openStudentMainView = openStudentMainView;
+  window.closeStudentMainView = closeStudentMainView;
+  window.setStudentViewTab = setStudentViewTab;
 
   // ── Audio recording ──────────────────────────────────────────────
   let _mediaRecorder = null;
