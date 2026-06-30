@@ -1807,6 +1807,26 @@
     .home-cloud-status.offline { color: var(--muted); }
     .home-cloud-status.offline .cloud-dot { background: #D1D5DB; }
 
+    /* ── Role selector (register form + role picker modal) ── */
+    .role-picker { display: flex; gap: 10px; margin-bottom: 12px; }
+    .role-opt {
+      flex: 1; padding: 14px 12px; border: 1.5px solid var(--border); border-radius: 12px;
+      background: white; cursor: pointer; transition: all .15s;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .role-opt:hover { border-color: var(--primary); }
+    .role-opt.active { border-color: var(--primary); background: var(--primary-light); }
+    .role-opt-emoji { font-size: 24px; }
+    .role-opt-label { font-size: 13px; font-weight: 600; color: var(--text); }
+    .role-opt-sub { font-size: 11px; color: var(--muted); line-height: 1.3; text-align: center; }
+
+    .home-role-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      font-size: 11px; color: var(--muted); margin-left: 8px;
+      padding: 2px 8px; border: 1px solid var(--border); border-radius: 999px;
+      letter-spacing: 0.05em;
+    }
+
     /* ── Homework sections ── */
     .hw-section { margin-top: 36px; }
     .hw-section-title {
@@ -1957,6 +1977,21 @@
       <div class="home-title">标唱 <span>LyricNote</span></div>
       <div class="home-subtitle">登录以同步你的歌词笔记</div>
       <div class="login-form">
+        <div id="register-role-field" style="display:none;margin-bottom:14px;">
+          <div style="font-size:12px;color:var(--text-soft);margin-bottom:8px;letter-spacing:0.05em;">你是？</div>
+          <div class="role-picker">
+            <div class="role-opt active" data-role="teacher" onclick="pickRegisterRole('teacher')">
+              <div class="role-opt-emoji">🎤</div>
+              <div class="role-opt-label">老师</div>
+              <div class="role-opt-sub">给学生标注、留作业</div>
+            </div>
+            <div class="role-opt" data-role="student" onclick="pickRegisterRole('student')">
+              <div class="role-opt-emoji">🎓</div>
+              <div class="role-opt-label">学生</div>
+              <div class="role-opt-sub">练习、打卡、上传录音</div>
+            </div>
+          </div>
+        </div>
         <div class="login-field">
           <input class="login-input" id="login-username" type="text" placeholder="用户名" autocomplete="username" aria-label="用户名" aria-describedby="status-username" maxlength="30" autofocus>
           <div class="field-status" id="status-username" role="alert" aria-live="polite"></div>
@@ -1986,8 +2021,8 @@
     <!-- Home screen (shown when no project is open) -->
     <div id="home-screen" class="home-screen" style="display:none">
       <div class="home-logo">🎵</div>
-      <div class="home-title">标唱 <span>LyricNote</span></div>
-      <div class="home-subtitle">歌词标注练唱工具</div>
+      <div class="home-title">标唱 <span>LyricNote</span><span id="home-role-badge" class="home-role-badge" style="display:none;"></span></div>
+      <div class="home-subtitle" id="home-subtitle">歌词标注练唱工具</div>
       <div class="home-cloud-status" id="home-cloud-status">
         <span class="cloud-dot"></span> <span id="home-cloud-text">已连接云端</span>
       </div>
@@ -2008,6 +2043,10 @@
       <div id="teacher-students-section" class="hw-section" style="display:none;margin-top:0;">
         <div class="hw-section-title"><span>我的学生</span></div>
         <div id="teacher-students-list" class="hw-students-grid"></div>
+      </div>
+      <div id="student-teachers-section" class="hw-section" style="display:none;margin-top:0;">
+        <div class="hw-section-title"><span>我的老师</span></div>
+        <div id="student-teachers-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
       </div>
       <div id="recent-projects" class="recent-section"></div>
       <button class="home-fab" onclick="openModal(false)" title="导入新歌词" aria-label="导入新歌词">
@@ -2449,6 +2488,26 @@
     <div style="display:flex;gap:8px;justify-content:flex-end;">
       <button class="btn btn-ghost" onclick="closeCreateHomework()">取消</button>
       <button class="btn btn-primary" id="hw-create-confirm" onclick="submitCreateHomework()">布置</button>
+    </div>
+  </div>
+</div>
+
+<!-- Role Picker Modal (for accounts without a role set) -->
+<div class="modal-backdrop" id="role-picker-bg" style="display:none;z-index:9200;">
+  <div class="modal" style="max-width:440px;padding:28px;">
+    <h3 style="margin:0 0 6px;font-size:18px;font-weight:600;color:var(--text);text-align:center;">你是？</h3>
+    <div style="font-size:12px;color:var(--muted);text-align:center;margin-bottom:18px;">选一次就好。可以以后从设置改。</div>
+    <div class="role-picker" style="margin-bottom:6px;">
+      <div class="role-opt" data-role="teacher" onclick="saveInitialRole('teacher')">
+        <div class="role-opt-emoji">🎤</div>
+        <div class="role-opt-label">老师</div>
+        <div class="role-opt-sub">给学生标注、留作业</div>
+      </div>
+      <div class="role-opt" data-role="student" onclick="saveInitialRole('student')">
+        <div class="role-opt-emoji">🎓</div>
+        <div class="role-opt-label">学生</div>
+        <div class="role-opt-sub">练习、打卡、上传录音</div>
+      </div>
     </div>
   </div>
 </div>
@@ -5230,6 +5289,7 @@
     startCloudPoll();
     startRealtimeSync();
     document.getElementById('login-screen').style.display = 'none';
+    loadUserRole();
     showHomeScreen();
   }
 
@@ -5369,6 +5429,8 @@
       registerMode = true;
       const cf = document.getElementById('confirm-field');
       cf.classList.add('show');
+      const rf = document.getElementById('register-role-field');
+      if (rf) rf.style.display = '';
       document.getElementById('login-password-confirm').tabIndex = 0;
       document.getElementById('register-btn').textContent = '确认注册';
       const u = document.getElementById('login-username');
@@ -5402,7 +5464,7 @@
     try {
       const { data, error } = await supabaseClient.auth.signUp({
         email: toEmail(username), password,
-        options: { data: { display_name: username } }
+        options: { data: { display_name: username, role: registerSelectedRole } }
       });
       if (error) throw error;
       if (data.user) {
@@ -5427,6 +5489,8 @@
     if (confirmInput) { confirmInput.value = ''; confirmInput.tabIndex = -1; }
     const btn = document.getElementById('register-btn');
     if (btn) btn.textContent = '注册';
+    const rf = document.getElementById('register-role-field');
+    if (rf) rf.style.display = 'none';
     clearFieldStatuses();
   }
 
@@ -5971,11 +6035,25 @@
     if (!cloudUser) {
       document.getElementById('teacher-students-section').style.display = 'none';
       document.getElementById('student-homework-section').style.display = 'none';
+      const stSec = document.getElementById('student-teachers-section');
+      if (stSec) stSec.style.display = 'none';
       return;
     }
     await Promise.all([loadHomeworkAll(), loadMyStudents()]);
-    renderTeacherStudentsSection();
-    renderStudentHomeworkSection();
+    if (userRole === 'teacher') {
+      renderTeacherStudentsSection();
+      document.getElementById('student-homework-section').style.display = 'none';
+      const stSec = document.getElementById('student-teachers-section');
+      if (stSec) stSec.style.display = 'none';
+    } else if (userRole === 'student') {
+      document.getElementById('teacher-students-section').style.display = 'none';
+      renderStudentHomeworkSection();
+      renderStudentTeachersSection();
+    } else {
+      // role unknown yet — render both, picker modal will show
+      renderTeacherStudentsSection();
+      renderStudentHomeworkSection();
+    }
   }
 
   function renderTeacherStudentsSection() {
@@ -6442,6 +6520,92 @@
     }
   }
 
+  // ── Role (teacher / student) ─────────────────────────────────────
+  let userRole = null; // 'teacher' | 'student'
+  let registerSelectedRole = 'teacher';
+
+  function pickRegisterRole(role) {
+    registerSelectedRole = role;
+    document.querySelectorAll('#register-role-field .role-opt').forEach(el => {
+      el.classList.toggle('active', el.dataset.role === role);
+    });
+  }
+
+  async function loadUserRole() {
+    if (!cloudUser) { userRole = null; return; }
+    userRole = (cloudUser.user_metadata && cloudUser.user_metadata.role) || null;
+    if (!userRole) {
+      // Show one-time picker
+      document.querySelectorAll('#role-picker-bg .role-opt').forEach(el => el.classList.remove('active'));
+      document.getElementById('role-picker-bg').style.display = 'flex';
+    } else {
+      applyRoleToHomeUI();
+    }
+  }
+  async function saveInitialRole(role) {
+    document.getElementById('role-picker-bg').style.display = 'none';
+    try {
+      const { data, error } = await supabaseClient.auth.updateUser({ data: { role } });
+      if (error) throw error;
+      cloudUser = data.user || cloudUser;
+      userRole = role;
+      applyRoleToHomeUI();
+      await refreshHomeworkUI();
+    } catch(e) {
+      alert('保存角色失败：' + (e.message || '未知'));
+    }
+  }
+  function applyRoleToHomeUI() {
+    const badge = document.getElementById('home-role-badge');
+    const subtitle = document.getElementById('home-subtitle');
+    const teacherSec = document.getElementById('teacher-students-section');
+    const studentTeachersSec = document.getElementById('student-teachers-section');
+    const studentHwSec = document.getElementById('student-homework-section');
+    const assignBtn = document.getElementById('home-assign-hw-btn');
+    if (userRole === 'teacher') {
+      badge.textContent = '老师'; badge.style.display = '';
+      if (subtitle) subtitle.textContent = '给学生标注、留作业';
+      if (assignBtn) assignBtn.style.display = '';
+      if (studentTeachersSec) studentTeachersSec.style.display = 'none';
+      if (studentHwSec) studentHwSec.style.display = 'none';
+    } else if (userRole === 'student') {
+      badge.textContent = '学生'; badge.style.display = '';
+      if (subtitle) subtitle.textContent = '练习、打卡、复习老师的批注';
+      if (assignBtn) assignBtn.style.display = 'none';
+      if (teacherSec) teacherSec.style.display = 'none';
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  async function loadMyTeachers() {
+    if (!supabaseClient || !cloudUser) return [];
+    try {
+      const { data, error } = await supabaseClient
+        .from('teacher_student')
+        .select('teacher_id, joined_at')
+        .eq('student_id', cloudUser.id);
+      if (error) throw error;
+      const out = [];
+      for (const lk of (data || [])) {
+        out.push({ id: lk.teacher_id, displayName: await lookupUsername(lk.teacher_id), joinedAt: lk.joined_at });
+      }
+      return out;
+    } catch(e) { console.error('loadMyTeachers failed', e); return []; }
+  }
+  async function renderStudentTeachersSection() {
+    const sec = document.getElementById('student-teachers-section');
+    const list = document.getElementById('student-teachers-list');
+    if (userRole !== 'student') { sec.style.display = 'none'; return; }
+    const teachers = await loadMyTeachers();
+    if (!teachers.length) { sec.style.display = 'none'; return; }
+    sec.style.display = '';
+    list.innerHTML = teachers.map(t => `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--text);">
+        🎤 ${escHtml(t.displayName)}
+      </div>`).join('');
+  }
+
   // ── Student invite (per-student persistent link) ────────────────
   async function openStudentInviteModal(label) {
     if (!supabaseClient || !cloudUser) { alert('请先登录'); return; }
@@ -6528,6 +6692,8 @@
   }
 
   // Expose to global
+  window.pickRegisterRole = pickRegisterRole;
+  window.saveInitialRole = saveInitialRole;
   window.openStudentInviteModal = openStudentInviteModal;
   window.closeStudentInviteModal = closeStudentInviteModal;
   window.copyStudentInviteLink = copyStudentInviteLink;
