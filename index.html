@@ -6826,7 +6826,7 @@
       console.error('Claim student invite error:', e);
       const msg = e.message || '未知';
       if (msg.includes('cannot_self_claim')) {
-        alert('这是你自己生成的邀请链接，不能自己认领。\n\n要测试学生流程：先退出登录，再在无痕窗口或别的浏览器用学生账号打开链接。');
+        alert('这是你自己的邀请链接。请先退出登录，再用学生账号打开。');
       } else if (msg.includes('already_claimed_by_other')) {
         alert('这个邀请链接已经被别人认领了。请向老师重新索取。');
       } else if (msg.includes('invalid_token')) {
