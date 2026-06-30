@@ -1849,6 +1849,63 @@
     .hw-add:hover { color: var(--primary); background: var(--primary-light); }
 
     .hw-students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 6px; }
+
+    /* ── Teacher Students sidebar (fixed, left of viewport) ── */
+    .hw-students-sidebar {
+      position: fixed; top: 50%; left: 24px; transform: translateY(-50%);
+      width: 240px; max-height: 70vh; overflow-y: auto;
+      background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+      padding: 14px; box-shadow: 0 8px 28px rgba(120, 80, 50, 0.10);
+      z-index: 50;
+    }
+    .hw-students-sidebar::-webkit-scrollbar { width: 4px; }
+    .hw-students-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .hw-students-sidebar-head {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    }
+    .hw-students-sidebar-title {
+      font-size: 11px; color: var(--text-soft); letter-spacing: 0.22em;
+      text-transform: uppercase; font-weight: 600;
+    }
+    .hw-students-sidebar-count { font-size: 11px; color: var(--muted); }
+    .hw-students-sidebar-list { display: flex; flex-direction: column; gap: 4px; }
+    .hw-students-sidebar-list .hw-student-card { padding: 6px 8px; min-height: 40px; gap: 8px; border-color: transparent; }
+    .hw-students-sidebar-list .hw-student-card:hover { border-color: var(--primary); }
+    .hw-students-sidebar-list .hw-student-avatar { width: 26px; height: 26px; font-size: 11px; }
+    .hw-students-sidebar-list .hw-student-name { font-size: 13px; }
+    .hw-students-sidebar-list .hw-student-meta { font-size: 10px; }
+    .hw-students-sidebar-list .hw-student-progress { width: 28px; }
+
+    /* Floating toggle button for narrow viewports */
+    .hw-students-toggle {
+      position: fixed; left: 18px; bottom: 28px;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--card); border: 1px solid var(--border);
+      color: var(--text); cursor: pointer; z-index: 51;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 18px rgba(120, 80, 50, 0.18);
+      transition: all .15s;
+    }
+    .hw-students-toggle:hover { border-color: var(--primary); color: var(--primary); }
+    .hw-students-toggle svg { width: 20px; height: 20px; }
+    .hw-students-toggle-count {
+      position: absolute; top: -4px; right: -4px;
+      min-width: 18px; height: 18px; border-radius: 9px;
+      background: var(--primary); color: white;
+      font-size: 10px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      padding: 0 5px;
+    }
+
+    /* Hide sidebar on narrow viewports, show toggle instead */
+    @media (max-width: 1320px) {
+      .hw-students-sidebar:not(.open) { display: none !important; }
+      .hw-students-sidebar.open {
+        position: fixed; top: 24px; left: 24px; bottom: 24px; max-height: none; transform: none;
+        z-index: 200;
+      }
+    }
     .hw-student-card {
       background: var(--card); border: 1px solid var(--border); border-radius: 10px;
       padding: 8px 10px; cursor: pointer; transition: all .12s;
@@ -2063,10 +2120,6 @@
         <div class="hw-section-title"><span>我的练习 · 今日打卡</span></div>
         <div id="student-homework-list" class="hw-today-list"></div>
       </div>
-      <div id="teacher-students-section" class="hw-section" style="display:none;margin-top:0;">
-        <div class="hw-section-title"><span>我的学生</span></div>
-        <div id="teacher-students-list" class="hw-students-grid"></div>
-      </div>
       <div id="student-teachers-section" class="hw-section" style="display:none;margin-top:0;">
         <div class="hw-section-title"><span>我的老师</span></div>
         <div id="student-teachers-list" style="display:flex;flex-wrap:wrap;gap:8px;"></div>
@@ -2212,6 +2265,19 @@
     </div><!-- /editor-view -->
   </div>
 </div>
+
+<!-- Teacher: My Students sidebar (fixed, visible only on home + role=teacher + students>0) -->
+<aside id="teacher-students-section" class="hw-students-sidebar" style="display:none;">
+  <div class="hw-students-sidebar-head">
+    <span class="hw-students-sidebar-title">我的学生</span>
+    <span class="hw-students-sidebar-count" id="hw-students-count"></span>
+  </div>
+  <div id="teacher-students-list" class="hw-students-sidebar-list"></div>
+</aside>
+<button id="teacher-students-toggle" class="hw-students-toggle" style="display:none;" onclick="toggleStudentsSidebar()" title="我的学生">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/><path d="M16 11a4 4 0 0 0 0-8"/><path d="M21 21v-2a4 4 0 0 0-3-3.87"/></svg>
+  <span class="hw-students-toggle-count" id="hw-students-toggle-count"></span>
+</button>
 
 <!-- Float Toolbar -->
 <div id="float-toolbar">
@@ -3668,10 +3734,29 @@
     renderHomeScreen();
     if (typeof refreshHomeworkUI === 'function') refreshHomeworkUI();
   }
+  function hideTeacherStudentsSidebar() {
+    const sec = document.getElementById('teacher-students-section');
+    const toggle = document.getElementById('teacher-students-toggle');
+    if (sec) { sec.style.display = 'none'; sec.classList.remove('open'); }
+    if (toggle) toggle.style.display = 'none';
+  }
+  function toggleStudentsSidebar() {
+    const sec = document.getElementById('teacher-students-section');
+    if (!sec) return;
+    if (sec.classList.contains('open')) {
+      sec.classList.remove('open');
+      sec.style.display = 'none';
+    } else {
+      sec.classList.add('open');
+      sec.style.display = '';
+    }
+  }
+  window.toggleStudentsSidebar = toggleStudentsSidebar;
   function showEditorView() {
     document.getElementById('home-screen').style.display = 'none';
     const ev = document.getElementById('editor-view');
     ev.style.display = 'flex';
+    if (typeof hideTeacherStudentsSidebar === 'function') hideTeacherStudentsSidebar();
   }
 
   let homeSearchQuery = '';
@@ -6069,11 +6154,10 @@
       const stSec = document.getElementById('student-teachers-section');
       if (stSec) stSec.style.display = 'none';
     } else if (userRole === 'student') {
-      document.getElementById('teacher-students-section').style.display = 'none';
+      hideTeacherStudentsSidebar();
       renderStudentHomeworkSection();
       renderStudentTeachersSection();
     } else {
-      // role unknown yet — render both, picker modal will show
       renderTeacherStudentsSection();
       renderStudentHomeworkSection();
     }
@@ -6082,11 +6166,19 @@
   function renderTeacherStudentsSection() {
     const sec = document.getElementById('teacher-students-section');
     const list = document.getElementById('teacher-students-list');
+    const toggle = document.getElementById('teacher-students-toggle');
+    const countEl = document.getElementById('hw-students-count');
+    const toggleCount = document.getElementById('hw-students-toggle-count');
     if (!myStudents.length) {
       sec.style.display = 'none';
+      if (toggle) toggle.style.display = 'none';
       return;
     }
-    sec.style.display = '';
+    if (countEl) countEl.textContent = myStudents.length;
+    if (toggleCount) toggleCount.textContent = myStudents.length;
+    const onHome = document.getElementById('home-screen').style.display !== 'none';
+    sec.style.display = onHome ? '' : 'none';
+    if (toggle) toggle.style.display = onHome ? '' : 'none';
     const studentColors = ['#A84D35','#7C3AED','#5C7A4E','#0F766E','#B45309','#BE185D','#1D4ED8','#9333EA'];
     list.innerHTML = myStudents.map((s, idx) => {
       const linked = !!s.id;
