@@ -6223,12 +6223,18 @@
       openStudentInviteModal(unlinked[0].displayName);
       return;
     }
-    const name = prompt('给哪个学生发邀请？\n\n未关联的学生：\n' + unlinked.map(s => '· ' + s.displayName).join('\n') + '\n\n输入学生名字（区分大小写）：');
-    if (name && unlinked.find(s => s.displayName === name.trim())) {
-      openStudentInviteModal(name.trim());
-    } else if (name) {
-      alert('没找到这个学生。');
-    }
+    // Reuse the hw-pickstudent modal with custom content for unlinked students
+    const list = document.getElementById('hw-pickstudent-list');
+    list.innerHTML = unlinked.map(s => `
+      <button class="hw-rail-row" style="background:white;border:1px solid var(--border);text-align:left;cursor:pointer;width:100%;" onclick="closePickStudent();openStudentInviteModal('${escHtml(s.displayName).replace(/'/g, "\\'")}')">
+        <div class="hw-stu-pill-avatar unlinked" style="background:#C9B5A0;">${escHtml((s.displayName || '?').charAt(0))}</div>
+        <span class="hw-rail-name">${escHtml(s.displayName)}</span>
+        <span class="hw-rail-meta">${s.songCount} 首</span>
+      </button>`).join('');
+    // Update modal title
+    const titleEl = document.querySelector('#hw-pickstudent-bg h3');
+    if (titleEl) titleEl.textContent = '邀请哪个学生加入';
+    document.getElementById('hw-pickstudent-bg').style.display = 'flex';
   }
   window.openInviteStudentPickerOrNew = openInviteStudentPickerOrNew;
 
