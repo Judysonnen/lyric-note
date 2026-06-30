@@ -1911,49 +1911,95 @@
     /* Student main view */
     .sv-back {
       background: none; border: none; color: var(--muted); font-size: 12px;
-      cursor: pointer; padding: 4px 0; margin-bottom: 12px;
+      cursor: pointer; padding: 4px 0; margin-bottom: 16px;
       display: inline-flex; align-items: center; gap: 4px;
     }
     .sv-back:hover { color: var(--primary); }
     .sv-header {
-      display: flex; align-items: center; gap: 14px;
-      padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 20px;
+      display: flex; align-items: center; gap: 16px;
+      padding: 20px 24px; margin-bottom: 22px;
+      background: linear-gradient(135deg, rgba(168,77,53,0.06) 0%, rgba(168,77,53,0.02) 100%);
+      border-radius: 16px; border: 1px solid var(--border);
     }
     .sv-avatar {
-      width: 56px; height: 56px; border-radius: 50%;
+      width: 60px; height: 60px; border-radius: 50%;
       background: var(--primary); color: white;
       display: flex; align-items: center; justify-content: center;
-      font-size: 22px; font-weight: 600; flex-shrink: 0;
+      font-size: 24px; font-weight: 600; flex-shrink: 0;
+      box-shadow: 0 4px 12px rgba(168,77,53,0.25);
     }
-    .sv-avatar.unlinked { background: #C9B5A0; }
-    .sv-name { font-size: 22px; font-weight: 700; color: var(--text); }
-    .sv-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .sv-avatar.unlinked { background: #C9B5A0; box-shadow: 0 4px 12px rgba(201,181,160,0.25); }
+    .sv-name { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1.15; }
+    .sv-sub { font-size: 13px; color: var(--text-soft); margin-top: 4px; }
+    .sv-link-badge {
+      display: inline-block; font-size: 11px; font-weight: 500;
+      padding: 2px 10px; border-radius: 999px; margin-left: 8px;
+      background: #ECFDF5; color: #047857;
+    }
+    .sv-link-badge.unlinked { background: #FEF3C7; color: #92400E; }
     .sv-actions { margin-left: auto; display: flex; gap: 8px; }
-    .sv-tabs { display: flex; gap: 22px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
-    .sv-tab { padding: 8px 0; font-size: 13px; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; font-weight: 500; }
-    .sv-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
-    .sv-tab .num { font-size: 11px; color: inherit; opacity: .7; margin-left: 4px; }
-    .sv-empty { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; }
-    .sv-hw-card {
-      border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px;
-      cursor: pointer; transition: all .12s;
+
+    .sv-tabbar {
+      display: flex; align-items: flex-end; justify-content: space-between;
+      border-bottom: 1px solid var(--border); margin-bottom: 18px; gap: 12px;
     }
-    .sv-hw-card:hover { border-color: var(--primary); }
+    .sv-tabs { display: flex; gap: 22px; }
+    .sv-tab {
+      padding: 10px 4px; font-size: 14px; color: var(--muted); cursor: pointer;
+      border-bottom: 2px solid transparent; font-weight: 500;
+      margin-bottom: -1px; transition: all .12s;
+    }
+    .sv-tab:hover { color: var(--text); }
+    .sv-tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+    .sv-tab .num { font-size: 11px; color: inherit; opacity: .7; margin-left: 4px; font-weight: 500; }
+    .sv-tab-action {
+      margin-bottom: 6px;
+      padding: 7px 14px; font-size: 13px; font-weight: 600;
+      background: var(--primary); color: white; border: none; border-radius: 8px;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+      transition: all .12s;
+    }
+    .sv-tab-action:hover { background: var(--primary-hover); transform: translateY(-1px); }
+    .sv-tab-action svg { width: 14px; height: 14px; }
+
+    .sv-empty {
+      text-align: center; padding: 48px 24px; color: var(--muted); font-size: 13px;
+      background: rgba(168,77,53,0.02); border-radius: 14px; border: 1px dashed var(--border);
+    }
+    .sv-empty-icon { font-size: 32px; opacity: 0.4; margin-bottom: 10px; }
+    .sv-empty-cta {
+      margin-top: 16px; padding: 9px 18px; background: var(--primary); color: white;
+      border: none; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+    }
+    .sv-empty-cta:hover { background: var(--primary-hover); }
+
+    .sv-hw-card {
+      border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 10px;
+      background: var(--card); cursor: pointer; transition: all .15s;
+    }
+    .sv-hw-card:hover { border-color: var(--primary); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(120,80,50,.08); }
     .sv-hw-card-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .sv-hw-card-title { font-size: 14px; font-weight: 600; color: var(--text); }
-    .sv-hw-card-meta { font-size: 11px; color: var(--muted); margin-top: 4px; }
-    .sv-hw-card-status { font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 999px; flex-shrink: 0; }
+    .sv-hw-card-title { font-size: 15px; font-weight: 600; color: var(--text); }
+    .sv-hw-card-meta { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+    .sv-hw-card-status { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; flex-shrink: 0; letter-spacing: 0.05em; }
     .sv-hw-card-status.active { background: var(--primary-light); color: var(--primary); }
     .sv-hw-card-status.done { background: #ECFDF5; color: #047857; }
     .sv-hw-card-status.future { background: #F3F4F6; color: var(--muted); }
+    .sv-hw-card-prog { margin-top: 10px; height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; }
+    .sv-hw-card-prog > div { height: 100%; background: var(--primary); transition: width .3s; }
+
+    .sv-song-list { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .sv-song-row {
       display: flex; align-items: center; justify-content: space-between; gap: 8px;
-      padding: 10px 12px; border-bottom: 1px solid var(--border); cursor: pointer;
+      padding: 12px 16px; border-bottom: 1px solid var(--border); cursor: pointer;
+      transition: background .12s;
     }
     .sv-song-row:hover { background: var(--primary-light); }
     .sv-song-row:last-child { border-bottom: none; }
     .sv-song-name { font-size: 14px; font-weight: 500; color: var(--text); }
-    .sv-song-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .sv-song-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .sv-song-arrow { color: var(--muted); font-size: 18px; }
 
     @media (max-width: 900px) {
       .home-screen { flex-direction: column; }
@@ -6767,34 +6813,60 @@
 
     const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
     const linked = !!s.id;
-    const subText = linked
-      ? `${songs.length} 首歌 · ${studentHw.length} 份作业${activeHw.length ? ' · ' + activeHw.length + ' 进行中' : ''}`
-      : `${songs.length} 首歌 · 未关联账号（点右侧邀请加入后才能布置作业）`;
-    const actionBtn = linked
-      ? `<button class="btn btn-primary" onclick="openCreateHomework('${s.id}','${nameJs}')">+ 布置作业</button>`
-      : `<button class="btn btn-primary" onclick="openStudentInviteModal('${nameJs}')">邀请加入</button>`;
+    const linkBadge = linked
+      ? `<span class="sv-link-badge">已关联</span>`
+      : `<span class="sv-link-badge unlinked">未关联</span>`;
+    const subParts = [`${songs.length} 首歌`];
+    if (linked) {
+      subParts.push(`${studentHw.length} 份作业`);
+      if (activeHw.length) subParts.push(`${activeHw.length} 进行中`);
+    }
+    const subText = subParts.join(' · ');
+    const headerActionBtn = linked
+      ? ''
+      : `<button class="btn btn-primary" onclick="openStudentInviteModal('${nameJs}')">+ 邀请加入</button>`;
     const headerHtml = `
       <button class="sv-back" onclick="closeStudentMainView()">← 全部学生</button>
       <div class="sv-header">
         <div class="sv-avatar ${linked ? '' : 'unlinked'}" style="background:${linked ? avatarColor : '#C9B5A0'};">${escHtml(initial)}</div>
-        <div>
-          <div class="sv-name">${escHtml(s.displayName)}</div>
+        <div style="flex:1;min-width:0;">
+          <div class="sv-name">${escHtml(s.displayName)}${linkBadge}</div>
           <div class="sv-sub">${subText}</div>
         </div>
-        <div class="sv-actions">${actionBtn}</div>
+        ${headerActionBtn ? `<div class="sv-actions">${headerActionBtn}</div>` : ''}
       </div>
-      <div class="sv-tabs">
-        <div class="sv-tab ${currentStudentViewTab==='homework'?'active':''}" onclick="setStudentViewTab('homework')">作业 <span class="num">${linked ? studentHw.length : 0}</span></div>
-        <div class="sv-tab ${currentStudentViewTab==='songs'?'active':''}" onclick="setStudentViewTab('songs')">歌词 <span class="num">${songs.length}</span></div>
+    `;
+
+    const tabActionBtn = currentStudentViewTab === 'homework'
+      ? (linked
+          ? `<button class="sv-tab-action" onclick="openCreateHomework('${s.id}','${nameJs}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>布置作业</button>`
+          : '')
+      : `<button class="sv-tab-action" onclick="openModalForStudent('${nameJs}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新歌词</button>`;
+
+    const tabsHtml = `
+      <div class="sv-tabbar">
+        <div class="sv-tabs">
+          <div class="sv-tab ${currentStudentViewTab==='homework'?'active':''}" onclick="setStudentViewTab('homework')">作业 <span class="num">${linked ? studentHw.length : 0}</span></div>
+          <div class="sv-tab ${currentStudentViewTab==='songs'?'active':''}" onclick="setStudentViewTab('songs')">歌词 <span class="num">${songs.length}</span></div>
+        </div>
+        ${tabActionBtn}
       </div>
     `;
 
     let bodyHtml = '';
     if (currentStudentViewTab === 'homework') {
       if (!linked) {
-        bodyHtml = `<div class="sv-empty">这个学生还没关联账号，无法在线布置作业。<br>点右上「邀请加入」生成链接发给 ta 即可。</div>`;
+        bodyHtml = `<div class="sv-empty">
+          <div class="sv-empty-icon">🔗</div>
+          <div>这个学生还没关联账号，无法布置在线作业</div>
+          <button class="sv-empty-cta" onclick="openStudentInviteModal('${nameJs}')">+ 邀请加入</button>
+        </div>`;
       } else if (!studentHw.length) {
-        bodyHtml = `<div class="sv-empty">还没给 ta 布置作业。点右上「+ 布置作业」开始。</div>`;
+        bodyHtml = `<div class="sv-empty">
+          <div class="sv-empty-icon">📝</div>
+          <div>还没给 <b>${escHtml(s.displayName)}</b> 布置过作业</div>
+          <button class="sv-empty-cta" onclick="openCreateHomework('${s.id}','${nameJs}')">+ 布置第一份作业</button>
+        </div>`;
       } else {
         const sortedHw = [...studentHw].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
         bodyHtml = sortedHw.map(h => {
@@ -6810,20 +6882,25 @@
           return `
             <div class="sv-hw-card" onclick="openHomeworkDrawerForTeacher('${h.id}')">
               <div class="sv-hw-card-head">
-                <div>
+                <div style="flex:1;min-width:0;">
                   <div class="sv-hw-card-title">${escHtml(h.title)}</div>
-                  <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date}${minutesLabel} · 完成 ${doneDays}/${days.length} (${pct}%)</div>
+                  <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date}${minutesLabel}<br>完成 ${doneDays}/${days.length} 天</div>
                 </div>
                 <span class="sv-hw-card-status ${statusCls}">${statusLabel}</span>
               </div>
+              <div class="sv-hw-card-prog"><div style="width:${pct}%"></div></div>
             </div>`;
         }).join('');
       }
     } else if (currentStudentViewTab === 'songs') {
       if (!songs.length) {
-        bodyHtml = `<div class="sv-empty">还没给 ta 建过歌词。回主页点「导入新歌词」，「学生」字段写「${escHtml(s.displayName)}」即可。</div>`;
+        bodyHtml = `<div class="sv-empty">
+          <div class="sv-empty-icon">🎵</div>
+          <div>还没给 <b>${escHtml(s.displayName)}</b> 建过歌词</div>
+          <button class="sv-empty-cta" onclick="openModalForStudent('${nameJs}')">+ 新建第一首歌词</button>
+        </div>`;
       } else {
-        bodyHtml = '<div>' + songs.map(p => {
+        bodyHtml = '<div class="sv-song-list">' + songs.map(p => {
           const meta = [p.lessonDate, p.updatedAt ? new Date(p.updatedAt).toLocaleDateString() : ''].filter(Boolean).join(' · ');
           return `
             <div class="sv-song-row" onclick="loadProject('${p.id}')">
@@ -6831,14 +6908,23 @@
                 <div class="sv-song-name">${escHtml(p.name || '未命名歌词')}</div>
                 <div class="sv-song-meta">${escHtml(meta)}</div>
               </div>
-              <span style="color:var(--muted);">→</span>
+              <span class="sv-song-arrow">→</span>
             </div>`;
         }).join('') + '</div>';
       }
     }
 
-    view.innerHTML = headerHtml + bodyHtml;
+    view.innerHTML = headerHtml + tabsHtml + bodyHtml;
   }
+
+  function openModalForStudent(studentName) {
+    openModal(false);
+    setTimeout(() => {
+      const inp = document.getElementById('student-name-input');
+      if (inp) inp.value = studentName;
+    }, 80);
+  }
+  window.openModalForStudent = openModalForStudent;
 
   window.openStudentMainView = openStudentMainView;
   window.openStudentMainViewByName = openStudentMainViewByName;
