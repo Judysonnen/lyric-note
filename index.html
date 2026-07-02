@@ -6626,9 +6626,8 @@
       const wd = wdayShort[dateObj.getDay()];
       const num = dateObj.getDate();
       let click = '';
-      if (isToday) click = `onclick="toggleDayCheck('${h.id}','${d}')"`;
-      else if (!isFuture) click = `onclick="openHomeworkDrawerForStudent('${h.id}','${d}')"`;
-      const titleStr = done ? '已完成 · 点击取消' : (isToday ? '今天 · 点击标记完成' : (isMissed ? '未完成 · 点击补写' : '未到'));
+      if (!isFuture) click = `onclick="toggleDayCheck('${h.id}','${d}')"`;
+      const titleStr = done ? '已完成 · 点击取消' : (isToday ? '今天 · 点击标记完成' : (isMissed ? '未完成 · 点击补卡' : '未到'));
       return `<div class="hw-day ${cls}" ${click} title="${d} · ${titleStr}">
         <span class="hw-day-wday">${wd}</span>
         <div class="hw-day-circle"><span class="hw-day-num">${num}</span></div>
