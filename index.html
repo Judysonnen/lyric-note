@@ -7150,6 +7150,13 @@
     const val = el.value;
     await upsertCheck(hwId, date, { student_note: val || null });
     await loadHomeworkAll();
+    // Refresh the drawer so the note button label flips to "✎ 感想已写"
+    const hw = homeworkAsStudent.find(h => h.id === hwId);
+    if (hw && drawerRole === 'student') {
+      renderDrawerDayList(hw, 'student');
+      const row = document.getElementById('hw-day-' + hwId + '-' + date);
+      if (row) { row.classList.add('expanded'); renderDayDetail(hwId, date); }
+    }
   }
   async function saveTeacherComment(hwId, date) {
     const el = document.getElementById('hw-tc-' + hwId + '-' + date);
