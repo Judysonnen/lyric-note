@@ -1938,6 +1938,12 @@
     }
     .sv-link-badge.unlinked { background: #FEF3C7; color: #92400E; }
     .sv-actions { margin-left: auto; display: flex; gap: 8px; }
+    .sv-unlink-btn {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 6px 12px; border-radius: 6px; font-size: 12.5px; cursor: pointer;
+      transition: all .15s;
+    }
+    .sv-unlink-btn:hover { border-color: #DC2626; color: #DC2626; }
 
     .sv-tabbar {
       display: flex; align-items: flex-end; justify-content: space-between;
@@ -6936,8 +6942,9 @@
       if (activeHw.length) subParts.push(`${activeHw.length} 进行中`);
     }
     const subText = subParts.join(' · ');
+    const linkIdJs = s.linkId ? String(s.linkId) : '';
     const headerActionBtn = linked
-      ? ''
+      ? `<button class="sv-unlink-btn" onclick="unlinkStudentByTeacher('${linkIdJs}','${nameJs}')" title="取消和这个学生的关联">取消关联</button>`
       : `<button class="btn btn-primary" onclick="openStudentInviteModal('${nameJs}')">+ 邀请加入</button>`;
     const headerHtml = `
       <button class="sv-back" onclick="closeStudentMainView()">← 全部学生</button>
@@ -7220,10 +7227,15 @@
     const teachers = await loadMyTeachers();
     if (!teachers.length) { sec.style.display = 'none'; return; }
     sec.style.display = '';
-    list.innerHTML = teachers.map(t => `
-      <div style="background:var(--card);border:1px solid var(--border);border-radius:999px;padding:6px 14px;font-size:13px;color:var(--text);">
+    list.innerHTML = teachers.map(t => {
+      const nameJs = escHtml(t.displayName).replace(/'/g, "\\'");
+      return `
+      <div style="background:var(--card);border:1px solid var(--border);border-radius:999px;padding:6px 8px 6px 14px;font-size:13px;color:var(--text);display:inline-flex;align-items:center;gap:6px;">
         🎤 ${escHtml(t.displayName)}
-      </div>`).join('');
+        <button onclick="unlinkTeacherByStudent('${t.id}','${nameJs}')" title="取消和这位老师的关联"
+          style="background:transparent;border:none;color:var(--muted);cursor:pointer;padding:0 4px;font-size:14px;line-height:1;border-radius:999px;">×</button>
+      </div>`;
+    }).join('');
   }
 
   // ── Student invite (per-student persistent link) ────────────────
@@ -7259,6 +7271,40 @@
     }
   }
   function closeStudentInviteModal() { document.getElementById('student-invite-bg').style.display = 'none'; }
+
+  // ── Unlink (teacher removes a student, or student removes a teacher) ──
+  async function unlinkStudentByTeacher(linkId, label) {
+    if (!linkId) return;
+    const ok = confirm(`确定取消和「${label}」的关联吗？\n\n· 你和 ta 都会立即失去对方分享的内容访问\n· ta 那边不会收到通知\n· 双方各自的歌词和作业记录都会保留`);
+    if (!ok) return;
+    try {
+      const { error } = await supabaseClient.rpc('unlink_teacher_student', { row_id: linkId });
+      if (error) throw error;
+      if (currentStudentViewLabel && currentStudentViewLabel.toLowerCase() === label.toLowerCase()) {
+        closeStudentMainView();
+      }
+      await refreshHomeworkUI();
+      renderHomeScreen();
+    } catch(e) {
+      alert('取消关联失败：' + (e.message || '未知'));
+    }
+  }
+  async function unlinkTeacherByStudent(teacherId, teacherName) {
+    if (!teacherId) return;
+    const ok = confirm(`确定取消和老师「${teacherName}」的关联吗？\n\n· ta 建的歌词不会再出现在你主页\n· 老师那边不会收到通知\n· 你自己的歌词和已写的打卡记录都会保留`);
+    if (!ok) return;
+    try {
+      const { error } = await supabaseClient.rpc('unlink_teacher_as_student', { t_id: teacherId });
+      if (error) throw error;
+      await refreshHomeworkUI();
+      await renderStudentTeachersSection();
+      renderHomeScreen();
+    } catch(e) {
+      alert('取消关联失败：' + (e.message || '未知'));
+    }
+  }
+  window.unlinkStudentByTeacher = unlinkStudentByTeacher;
+  window.unlinkTeacherByStudent = unlinkTeacherByStudent;
   function copyStudentInviteLink() {
     const inp = document.getElementById('student-invite-input');
     if (!inp) return;
