@@ -6665,14 +6665,20 @@
     if (!supabaseClient || !cloudUser) return null;
     const existing = (homeworkChecksByHw[homeworkId] || {})[date];
     try {
-      if (existing) {
+      if (existing && existing.id) {
         const { error } = await supabaseClient.from('homework_check')
           .update({ ...fields, updated_at: new Date().toISOString() })
           .eq('id', existing.id);
         if (error) throw error;
       } else {
+        // No real DB row yet (optimistic stub or first check). Use upsert
+        // so a concurrent click or a re-run just updates the existing row
+        // instead of blowing up on the (homework_id, check_date) unique index.
         const { error } = await supabaseClient.from('homework_check')
-          .insert({ homework_id: homeworkId, check_date: date, ...fields });
+          .upsert(
+            { homework_id: homeworkId, check_date: date, ...fields },
+            { onConflict: 'homework_id,check_date' }
+          );
         if (error) throw error;
       }
     } catch(e) {
