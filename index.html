@@ -7217,8 +7217,13 @@
     const initial = (s.displayName || '?').charAt(0).toUpperCase();
     const songs = getProjectIndex().filter(p => p.isOwner !== false && (p.studentName || '').trim().toLowerCase() === s.displayName.toLowerCase());
     const studentHw = homeworkAsTeacher.filter(h => h.student_id === s.id);
+    const activeStudentHw = studentHw.filter(h => !h.archived_at);
+    const archivedStudentHw = studentHw.filter(h => !!h.archived_at);
     const today = todayDateStr();
-    const activeHw = studentHw.filter(h => h.start_date <= today && h.end_date >= today);
+    const activeHw = activeStudentHw.filter(h => h.start_date <= today && h.end_date >= today);
+    const archivedGroupCount = computeHwGroups(archivedStudentHw).length;
+    // Auto-fallback if user landed on archive tab but has none archived
+    if (currentStudentViewTab === 'archive' && !archivedGroupCount) currentStudentViewTab = 'homework';
 
     const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
     const linked = !!s.id;
@@ -7255,11 +7260,15 @@
       tabActionBtn = `<button class="sv-tab-action" onclick="openModalForStudent('${nameJs}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>新歌词</button>`;
     }
 
+    const archiveTabHtml = archivedGroupCount
+      ? `<div class="sv-tab ${currentStudentViewTab==='archive'?'active':''}" onclick="setStudentViewTab('archive')">归档 <span class="num">${archivedGroupCount}</span></div>`
+      : '';
     const tabsHtml = `
       <div class="sv-tabbar">
         <div class="sv-tabs">
-          <div class="sv-tab ${currentStudentViewTab==='homework'?'active':''}" onclick="setStudentViewTab('homework')">作业 <span class="num">${linked ? studentHw.length : 0}</span></div>
+          <div class="sv-tab ${currentStudentViewTab==='homework'?'active':''}" onclick="setStudentViewTab('homework')">作业 <span class="num">${linked ? activeStudentHw.length : 0}</span></div>
           <div class="sv-tab ${currentStudentViewTab==='songs'?'active':''}" onclick="setStudentViewTab('songs')">歌词 <span class="num">${songs.length}</span></div>
+          ${archiveTabHtml}
         </div>
         ${tabActionBtn}
       </div>
@@ -7273,14 +7282,23 @@
           <div>这个学生还没关联账号，无法布置在线作业</div>
           <button class="sv-empty-cta" onclick="openStudentInviteModal('${nameJs}')">+ 邀请加入</button>
         </div>`;
-      } else if (!studentHw.length) {
+      } else if (!activeStudentHw.length) {
         bodyHtml = `<div class="sv-empty">
           <div class="sv-empty-icon">📝</div>
-          <div>还没给 <b>${escHtml(s.displayName)}</b> 布置过作业</div>
-          <button class="sv-empty-cta" onclick="openCreateHomework('${s.id}','${nameJs}')">+ 布置第一份作业</button>
+          <div>${studentHw.length ? '当前没有进行中的作业' : `还没给 <b>${escHtml(s.displayName)}</b> 布置过作业`}</div>
+          <button class="sv-empty-cta" onclick="openCreateHomework('${s.id}','${nameJs}')">+ 布置${studentHw.length ? '新' : '第一份'}作业</button>
         </div>`;
       } else {
-        bodyHtml = renderHwGroupsForStudent(studentHw, today);
+        bodyHtml = renderHwGroupsForStudent(activeStudentHw, today, 'active');
+      }
+    } else if (currentStudentViewTab === 'archive') {
+      if (!archivedStudentHw.length) {
+        bodyHtml = `<div class="sv-empty">
+          <div class="sv-empty-icon">📦</div>
+          <div>还没有归档过任何作业组</div>
+        </div>`;
+      } else {
+        bodyHtml = renderHwGroupsForStudent(archivedStudentHw, today, 'archive');
       }
     } else if (currentStudentViewTab === 'songs') {
       if (!songs.length) {
@@ -7312,7 +7330,7 @@
     view.innerHTML = headerHtml + tabsHtml + bodyHtml;
   }
 
-  function renderHwGroupsForStudent(studentHw, today) {
+  function computeHwGroups(studentHw) {
     // Group by batch_id; rows without batch_id become singleton groups keyed by id.
     const byBatch = new Map();
     for (const h of studentHw) {
@@ -7329,13 +7347,22 @@
         batchId: first.batch_id || null,
         startDate: rows.reduce((m, r) => r.start_date < m ? r.start_date : m, first.start_date),
         endDate: rows.reduce((m, r) => r.end_date > m ? r.end_date : m, first.end_date),
-        createdAt: first.created_at || ''
+        createdAt: first.created_at || '',
+        archivedAt: first.archived_at || ''
       };
     });
-    groups.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+    return groups;
+  }
 
-    const activeGroups = groups.filter(g => !g.archived);
-    const archivedGroups = groups.filter(g => g.archived);
+  function renderHwGroupsForStudent(studentHw, today, mode) {
+    mode = mode || 'active';
+    const groups = computeHwGroups(studentHw);
+    const filtered = mode === 'archive' ? groups.filter(g => g.archived) : groups.filter(g => !g.archived);
+    filtered.sort((a, b) => {
+      const aKey = mode === 'archive' ? a.archivedAt : a.createdAt;
+      const bKey = mode === 'archive' ? b.archivedAt : b.createdAt;
+      return (bKey || '').localeCompare(aKey || '');
+    });
 
     const renderGroup = (g) => {
       const totalTasks = g.rows.length;
@@ -7386,15 +7413,7 @@
         </div>`;
     };
 
-    let html = activeGroups.map(renderGroup).join('');
-    if (archivedGroups.length) {
-      html += `
-        <details class="sv-archived-details">
-          <summary>已归档（${archivedGroups.length} 组）</summary>
-          ${archivedGroups.map(renderGroup).join('')}
-        </details>`;
-    }
-    return html;
+    return filtered.map(renderGroup).join('');
   }
 
   async function archiveHwBatch(batchId, groupTitle) {
