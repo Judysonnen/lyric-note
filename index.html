@@ -1980,6 +1980,35 @@
     }
     .sv-empty-cta:hover { background: var(--primary-hover); }
 
+    .sv-hw-group {
+      background: transparent; margin-bottom: 20px;
+    }
+    .sv-hw-group.archived { opacity: .65; }
+    .sv-hw-group-head {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 8px 4px 10px; border-bottom: 1px dashed var(--border); margin-bottom: 10px;
+    }
+    .sv-hw-group-title {
+      font-size: 14px; font-weight: 600; color: var(--text);
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .sv-hw-group-sub { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .sv-group-action {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+      flex-shrink: 0; transition: all .15s; font-family: inherit;
+    }
+    .sv-group-action:hover { border-color: var(--primary); color: var(--primary); }
+    .sv-hw-group-body { display: flex; flex-direction: column; gap: 8px; }
+    .sv-archived-details {
+      margin-top: 24px; padding-top: 12px; border-top: 1px dashed var(--border);
+    }
+    .sv-archived-details > summary {
+      cursor: pointer; font-size: 13px; color: var(--muted); padding: 6px 0;
+      user-select: none; letter-spacing: .05em;
+    }
+    .sv-archived-details > summary:hover { color: var(--primary); }
+    .sv-archived-details[open] > summary { margin-bottom: 12px; color: var(--text); }
     .sv-hw-card {
       border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 10px;
       background: var(--card); cursor: pointer; transition: all .15s;
@@ -6459,7 +6488,7 @@
 
     const enriched = myStudents.map((s, idx) => {
       const linked = !!s.id;
-      const studentHomework = linked ? homeworkAsTeacher.filter(h => h.student_id === s.id) : [];
+      const studentHomework = linked ? homeworkAsTeacher.filter(h => h.student_id === s.id && !h.archived_at) : [];
       const today = todayDateStr();
       const activeHw = studentHomework.filter(h => h.start_date <= today && h.end_date >= today);
       const initial = (s.displayName || '?').charAt(0).toUpperCase();
@@ -6538,10 +6567,11 @@
     const list = document.getElementById('student-homework-list');
     if (userRole !== 'student') { sec.style.display = 'none'; return; }
     const today = todayDateStr();
-    const activeHw = homeworkAsStudent.filter(h => h.start_date <= today && h.end_date >= today);
-    const futureHw = homeworkAsStudent.filter(h => h.start_date > today);
+    const liveHomework = homeworkAsStudent.filter(h => !h.archived_at);
+    const activeHw = liveHomework.filter(h => h.start_date <= today && h.end_date >= today);
+    const futureHw = liveHomework.filter(h => h.start_date > today);
     const totalShown = activeHw.length + futureHw.length;
-    if (!homeworkAsStudent.length) { sec.style.display = 'none'; return; }
+    if (!liveHomework.length) { sec.style.display = 'none'; return; }
     sec.style.display = '';
 
     // Replace the default section title with a friendlier "today" header
@@ -6756,6 +6786,10 @@
     if (!tasks.length) { err.textContent = '至少填一个任务标题'; return; }
     btn.disabled = true; btn.innerHTML = '提交中…';
     try {
+      const batchId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+        ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+          const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16);
+        }));
       const rows = tasks.map(t => ({
         teacher_id: cloudUser.id,
         student_id: pendingStudentForHomework,
@@ -6763,7 +6797,8 @@
         description: t.desc || null,
         start_date: start,
         end_date: end,
-        daily_minutes: t.minutes
+        daily_minutes: t.minutes,
+        batch_id: batchId
       }));
       const { error } = await supabaseClient.from('homework').insert(rows);
       if (error) throw error;
@@ -7092,29 +7127,7 @@
           <button class="sv-empty-cta" onclick="openCreateHomework('${s.id}','${nameJs}')">+ 布置第一份作业</button>
         </div>`;
       } else {
-        const sortedHw = [...studentHw].sort((a, b) => (b.created_at || '').localeCompare(a.created_at || ''));
-        bodyHtml = sortedHw.map(h => {
-          const days = dateRangeDays(h.start_date, h.end_date);
-          const checks = homeworkChecksByHw[h.id] || {};
-          const doneDays = days.filter(d => checks[d] && checks[d].completed).length;
-          const pct = days.length ? Math.round((doneDays / days.length) * 100) : 0;
-          let statusLabel, statusCls;
-          if (h.end_date < today) { statusLabel = '已结束'; statusCls = 'done'; }
-          else if (h.start_date > today) { statusLabel = '未开始'; statusCls = 'future'; }
-          else { statusLabel = '进行中'; statusCls = 'active'; }
-          const minutesLabel = h.daily_minutes ? ` · 每天 ${h.daily_minutes} 分钟` : '';
-          return `
-            <div class="sv-hw-card" onclick="openHomeworkDrawerForTeacher('${h.id}')">
-              <div class="sv-hw-card-head">
-                <div style="flex:1;min-width:0;">
-                  <div class="sv-hw-card-title">${escHtml(h.title)}</div>
-                  <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date}${minutesLabel}<br>完成 ${doneDays}/${days.length} 天</div>
-                </div>
-                <span class="sv-hw-card-status ${statusCls}">${statusLabel}</span>
-              </div>
-              <div class="sv-hw-card-prog"><div style="width:${pct}%"></div></div>
-            </div>`;
-        }).join('');
+        bodyHtml = renderHwGroupsForStudent(studentHw, today);
       }
     } else if (currentStudentViewTab === 'songs') {
       if (!songs.length) {
@@ -7145,6 +7158,115 @@
 
     view.innerHTML = headerHtml + tabsHtml + bodyHtml;
   }
+
+  function renderHwGroupsForStudent(studentHw, today) {
+    // Group by batch_id; rows without batch_id become singleton groups keyed by id.
+    const byBatch = new Map();
+    for (const h of studentHw) {
+      const key = h.batch_id || ('single:' + h.id);
+      if (!byBatch.has(key)) byBatch.set(key, []);
+      byBatch.get(key).push(h);
+    }
+    const groups = Array.from(byBatch.entries()).map(([key, rows]) => {
+      rows.sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
+      const first = rows[0];
+      const archived = !!first.archived_at;
+      return {
+        key, rows, archived,
+        batchId: first.batch_id || null,
+        startDate: rows.reduce((m, r) => r.start_date < m ? r.start_date : m, first.start_date),
+        endDate: rows.reduce((m, r) => r.end_date > m ? r.end_date : m, first.end_date),
+        createdAt: first.created_at || ''
+      };
+    });
+    groups.sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || ''));
+
+    const activeGroups = groups.filter(g => !g.archived);
+    const archivedGroups = groups.filter(g => g.archived);
+
+    const renderGroup = (g) => {
+      const totalTasks = g.rows.length;
+      let groupDoneDays = 0, groupTotalDays = 0;
+      const rowsHtml = g.rows.map(h => {
+        const days = dateRangeDays(h.start_date, h.end_date);
+        const checks = homeworkChecksByHw[h.id] || {};
+        const doneDays = days.filter(d => checks[d] && checks[d].completed).length;
+        groupDoneDays += doneDays; groupTotalDays += days.length;
+        const pct = days.length ? Math.round((doneDays / days.length) * 100) : 0;
+        let statusLabel, statusCls;
+        if (g.archived) { statusLabel = '已归档'; statusCls = 'done'; }
+        else if (h.end_date < today) { statusLabel = '已结束'; statusCls = 'done'; }
+        else if (h.start_date > today) { statusLabel = '未开始'; statusCls = 'future'; }
+        else { statusLabel = '进行中'; statusCls = 'active'; }
+        const minutesLabel = h.daily_minutes ? ` · 每天 ${h.daily_minutes} 分钟` : '';
+        return `
+          <div class="sv-hw-card" onclick="openHomeworkDrawerForTeacher('${h.id}')">
+            <div class="sv-hw-card-head">
+              <div style="flex:1;min-width:0;">
+                <div class="sv-hw-card-title">${escHtml(h.title)}</div>
+                <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date}${minutesLabel}<br>完成 ${doneDays}/${days.length} 天</div>
+              </div>
+              <span class="sv-hw-card-status ${statusCls}">${statusLabel}</span>
+            </div>
+            <div class="sv-hw-card-prog"><div style="width:${pct}%"></div></div>
+          </div>`;
+      }).join('');
+      const groupTitleParts = g.rows.slice(0, 3).map(r => r.title);
+      const titleSuffix = g.rows.length > 3 ? ' 等' : '';
+      const groupTitle = groupTitleParts.join(' + ') + titleSuffix;
+      const btn = g.batchId
+        ? (g.archived
+            ? `<button class="sv-group-action" onclick="unarchiveHwBatch('${g.batchId}')">取消归档</button>`
+            : `<button class="sv-group-action" onclick="archiveHwBatch('${g.batchId}','${escHtml(groupTitle).replace(/'/g,"\\'")}')">归档本组</button>`)
+        : '';
+      const summary = `${totalTasks} 个任务 · ${g.startDate} → ${g.endDate}${groupTotalDays ? ` · 打卡 ${groupDoneDays}/${groupTotalDays}` : ''}`;
+      return `
+        <div class="sv-hw-group ${g.archived ? 'archived' : ''}">
+          <div class="sv-hw-group-head">
+            <div style="flex:1;min-width:0;">
+              <div class="sv-hw-group-title">${escHtml(groupTitle)}</div>
+              <div class="sv-hw-group-sub">${summary}</div>
+            </div>
+            ${btn}
+          </div>
+          <div class="sv-hw-group-body">${rowsHtml}</div>
+        </div>`;
+    };
+
+    let html = activeGroups.map(renderGroup).join('');
+    if (archivedGroups.length) {
+      html += `
+        <details class="sv-archived-details">
+          <summary>已归档（${archivedGroups.length} 组）</summary>
+          ${archivedGroups.map(renderGroup).join('')}
+        </details>`;
+    }
+    return html;
+  }
+
+  async function archiveHwBatch(batchId, groupTitle) {
+    if (!confirm(`归档「${groupTitle}」这一组？\n\n· 这组所有任务会从主页和进行中列表消失\n· 学生也不会再看到\n· 打卡、感想、批注都保留，可以随时取消归档`)) return;
+    try {
+      const { error } = await supabaseClient.rpc('archive_homework_batch', { batch: batchId });
+      if (error) throw error;
+      await refreshHomeworkUI();
+      if (currentStudentViewLabel) renderStudentMainView();
+    } catch(e) {
+      alert('归档失败：' + (e.message || '未知'));
+    }
+  }
+  async function unarchiveHwBatch(batchId) {
+    try {
+      const { error } = await supabaseClient.rpc('unarchive_homework_batch', { batch: batchId });
+      if (error) throw error;
+      await refreshHomeworkUI();
+      if (currentStudentViewLabel) renderStudentMainView();
+    } catch(e) {
+      alert('取消归档失败：' + (e.message || '未知'));
+    }
+  }
+  window.archiveHwBatch = archiveHwBatch;
+  window.unarchiveHwBatch = unarchiveHwBatch;
 
   function openModalForStudent(studentName) {
     openModal(false);
