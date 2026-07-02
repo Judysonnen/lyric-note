@@ -6663,7 +6663,7 @@
     pendingStudentForHomework = studentId;
     document.getElementById('hw-create-student-label').textContent = '给「' + studentName + '」布置作业';
     window.hwTasks.length = 0;
-    window.hwTasks.push({ title: '', desc: '', minutes: null });
+    window.hwTasks.push({ title: '', desc: '', minutes: 5 });
     renderHwTaskList();
     setHwTriggerDate('hw-start-trigger', todayDateStr());
     const d = new Date(); d.setDate(d.getDate() + 6);
@@ -6699,7 +6699,7 @@
   }
   function addHwTask() {
     if (window.hwTasks.length >= 20) return;
-    window.hwTasks.push({ title: '', desc: '', minutes: null });
+    window.hwTasks.push({ title: '', desc: '', minutes: 5 });
     renderHwTaskList();
     setTimeout(() => {
       const inputs = document.querySelectorAll('.hw-task-title-in');
