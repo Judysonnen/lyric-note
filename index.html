@@ -7275,7 +7275,7 @@
   // ── Unlink (teacher removes a student, or student removes a teacher) ──
   async function unlinkStudentByTeacher(linkId, label) {
     if (!linkId) return;
-    const ok = confirm(`确定取消和「${label}」的关联吗？\n\n· 你和 ta 都会立即失去对方分享的内容访问\n· ta 那边不会收到通知\n· 双方各自的歌词和作业记录都会保留`);
+    const ok = confirm(`确定取消和「${label}」的关联吗？\n\n· ta 主页不会再显示你建的歌词和作业\n· ta 那边不会收到通知\n· 你这边给 ${label} 建的所有歌词、作业、批注都还在，只是不再同步给 ta`);
     if (!ok) return;
     try {
       const { error } = await supabaseClient.rpc('unlink_teacher_student', { row_id: linkId });
@@ -7291,7 +7291,7 @@
   }
   async function unlinkTeacherByStudent(teacherId, teacherName) {
     if (!teacherId) return;
-    const ok = confirm(`确定取消和老师「${teacherName}」的关联吗？\n\n· ta 建的歌词不会再出现在你主页\n· 老师那边不会收到通知\n· 你自己的歌词和已写的打卡记录都会保留`);
+    const ok = confirm(`确定取消和老师「${teacherName}」的关联吗？\n\n· 老师给你建的歌词和作业不会再出现在你主页\n· 老师那边不会收到通知\n· 你自己创建的歌词、之前写过的打卡感想都在你账号里`);
     if (!ok) return;
     try {
       const { error } = await supabaseClient.rpc('unlink_teacher_as_student', { t_id: teacherId });
