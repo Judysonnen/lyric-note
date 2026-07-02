@@ -2215,6 +2215,56 @@
     .hw-form-row textarea { resize: vertical; min-height: 72px; }
     .hw-form-row.two-col { display: flex; gap: 12px; }
     .hw-form-row.two-col > div { flex: 1; }
+    .hw-section-label {
+      font-size: 11px; letter-spacing: .18em; text-transform: uppercase;
+      color: var(--primary); font-weight: 600; margin: 4px 0 10px;
+    }
+    .hw-section-hint {
+      font-size: 10px; letter-spacing: .05em; text-transform: none;
+      color: var(--muted); font-weight: 400;
+    }
+    .hw-task-row {
+      background: #FAF5EC; border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; margin-bottom: 8px;
+      display: flex; gap: 8px; align-items: flex-start;
+    }
+    .hw-task-idx {
+      font-size: 11px; color: var(--muted); font-weight: 600;
+      letter-spacing: .05em; padding-top: 10px; min-width: 34px;
+    }
+    .hw-task-fields { flex: 1; display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+    .hw-task-title-in {
+      flex: 0 0 130px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-size: 13px; font-weight: 500; color: var(--text);
+      box-sizing: border-box; font-family: inherit;
+    }
+    .hw-task-desc-in {
+      flex: 1 1 160px; min-height: 36px; padding: 8px 10px; border: 1px solid var(--border);
+      border-radius: 6px; background: white; font-size: 12.5px; color: var(--text);
+      box-sizing: border-box; font-family: inherit; resize: vertical;
+    }
+    .hw-task-min-wrap {
+      display: flex; align-items: center; gap: 4px; flex: 0 0 auto;
+      background: white; border: 1px solid var(--border); border-radius: 6px;
+      padding: 0 10px 0 4px; height: 36px;
+    }
+    .hw-task-min-in {
+      width: 46px; border: none; outline: none; padding: 8px 4px; background: transparent;
+      font-size: 13px; color: var(--text); text-align: right; font-family: inherit;
+    }
+    .hw-task-min-wrap span { font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .hw-task-del {
+      background: transparent; border: none; color: var(--muted); font-size: 18px;
+      line-height: 1; cursor: pointer; padding: 8px 4px 0; border-radius: 4px;
+    }
+    .hw-task-del:hover { color: #DC2626; }
+    .hw-task-del[disabled] { opacity: .25; cursor: not-allowed; }
+    .hw-add-task-btn {
+      width: 100%; padding: 10px; background: white; border: 1px dashed var(--border);
+      border-radius: 8px; color: var(--muted); font-size: 13px; cursor: pointer;
+      transition: all .15s; font-family: inherit;
+    }
+    .hw-add-task-btn:hover { border-color: var(--primary); color: var(--primary); background: #FAF5EC; }
     .hw-date-input {
       font-family: inherit; color: var(--text); cursor: pointer;
     }
@@ -2734,27 +2784,14 @@
 
 <!-- Create Homework Modal -->
 <div class="modal-backdrop" id="hw-create-bg" onclick="if(event.target===this) closeCreateHomework()" style="display:none;z-index:9100;">
-  <div class="modal" style="max-width:520px;padding:26px;">
+  <div class="modal" style="max-width:560px;padding:26px;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <h3 style="margin:0;font-size:17px;font-weight:600;color:var(--text);" id="hw-create-title">布置作业</h3>
       <button onclick="closeCreateHomework()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">×</button>
     </div>
-    <div id="hw-create-student-label" style="font-size:13px;color:var(--text-soft);margin-bottom:14px;"></div>
-    <div class="hw-form-row">
-      <label>标题</label>
-      <input id="hw-form-title" type="text" placeholder="如：哼鸣练习 / 气息控制" maxlength="80" />
-    </div>
-    <div class="hw-form-row">
-      <label>描述（可选）</label>
-      <textarea id="hw-form-desc" placeholder="如：先开嗓 5 分钟，然后从主歌反复练 5 遍，最后通唱一遍。" maxlength="600"></textarea>
-    </div>
-    <div class="hw-form-row">
-      <label>建议每天花多少时间（可选）</label>
-      <div style="display:flex;align-items:center;gap:8px;">
-        <input id="hw-form-minutes" type="number" min="1" max="600" placeholder="如 30" style="width:120px;" />
-        <span style="font-size:13px;color:var(--muted);">分钟</span>
-      </div>
-    </div>
+    <div id="hw-create-student-label" style="font-size:13px;color:var(--text-soft);margin-bottom:16px;"></div>
+
+    <div class="hw-section-label">默认设置 <span class="hw-section-hint">（每个任务都会用这些，除非单独修改）</span></div>
     <div class="hw-form-row two-col">
       <div>
         <label>开始日期</label>
@@ -2777,10 +2814,14 @@
       <button type="button" class="hw-date-preset" onclick="setHwDurationPreset(30)">30 天</button>
       <button type="button" class="hw-date-preset" onclick="setHwDurationPreset(60)">60 天</button>
     </div>
-    <div id="hw-create-error" style="color:#DC2626;font-size:12px;min-height:16px;margin-bottom:8px;"></div>
+    <div class="hw-section-label" style="margin-top:18px;">任务清单 <span class="hw-section-hint">（标题、描述、每天分钟都可以每条不同）</span></div>
+    <div id="hw-task-list"></div>
+    <button type="button" class="hw-add-task-btn" onclick="addHwTask()">+ 添加任务</button>
+
+    <div id="hw-create-error" style="color:#DC2626;font-size:12px;min-height:16px;margin:12px 0 8px;"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
       <button class="btn btn-ghost" onclick="closeCreateHomework()">取消</button>
-      <button class="btn btn-primary" id="hw-create-confirm" onclick="submitCreateHomework()">布置</button>
+      <button class="btn btn-primary" id="hw-create-confirm" onclick="submitCreateHomework()">布置 <span id="hw-task-count-label">1</span> 个作业</button>
     </div>
   </div>
 </div>
@@ -5891,6 +5932,9 @@
         }
       }
       if (document.getElementById('home-screen').style.display !== 'none') renderHomeScreen();
+      // Also refresh the student rail: unlinked students derive from project
+      // labels, so they only show up once projects have finished loading.
+      if (typeof refreshHomeworkUI === 'function') refreshHomeworkUI();
     } catch(e) {
       console.error('Pull from cloud error:', e);
     }
@@ -6609,20 +6653,61 @@
     closePickStudent();
     openCreateHomework(sid, name);
   }
+  window.hwTasks = window.hwTasks || [];
   function openCreateHomework(studentId, studentName) {
     pendingStudentForHomework = studentId;
     document.getElementById('hw-create-student-label').textContent = '给「' + studentName + '」布置作业';
-    document.getElementById('hw-form-title').value = '';
-    document.getElementById('hw-form-desc').value = '';
-    const minutesEl = document.getElementById('hw-form-minutes');
-    if (minutesEl) minutesEl.value = '';
+    window.hwTasks.length = 0;
+    window.hwTasks.push({ title: '', desc: '', minutes: null });
+    renderHwTaskList();
     setHwTriggerDate('hw-start-trigger', todayDateStr());
     const d = new Date(); d.setDate(d.getDate() + 6);
     setHwTriggerDate('hw-end-trigger', d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
     document.getElementById('hw-create-error').textContent = '';
     document.getElementById('hw-create-bg').style.display = 'flex';
-    setTimeout(() => document.getElementById('hw-form-title').focus(), 50);
+    setTimeout(() => {
+      const first = document.querySelector('.hw-task-title-in');
+      if (first) first.focus();
+    }, 50);
   }
+  function renderHwTaskList() {
+    const container = document.getElementById('hw-task-list');
+    if (!container) return;
+    container.innerHTML = window.hwTasks.map((t, i) => `
+      <div class="hw-task-row">
+        <div class="hw-task-idx">#${i+1}</div>
+        <div class="hw-task-fields">
+          <input class="hw-task-title-in" placeholder="标题（如：练熟副歌）" maxlength="80"
+            value="${escHtml(t.title || '')}" oninput="window.hwTasks[${i}].title=this.value" />
+          <textarea class="hw-task-desc-in" placeholder="描述（可选）" maxlength="600" rows="1"
+            oninput="window.hwTasks[${i}].desc=this.value">${escHtml(t.desc || '')}</textarea>
+          <div class="hw-task-min-wrap">
+            <input class="hw-task-min-in" type="number" min="1" max="600" placeholder="—"
+              value="${t.minutes || ''}" oninput="window.hwTasks[${i}].minutes=this.value?parseInt(this.value,10):null" />
+            <span>分钟/天</span>
+          </div>
+        </div>
+        <button class="hw-task-del" onclick="removeHwTask(${i})" title="删除任务" ${window.hwTasks.length<=1?'disabled':''}>×</button>
+      </div>`).join('');
+    const countEl = document.getElementById('hw-task-count-label');
+    if (countEl) countEl.textContent = hwTasks.length;
+  }
+  function addHwTask() {
+    if (window.hwTasks.length >= 20) return;
+    window.hwTasks.push({ title: '', desc: '', minutes: null });
+    renderHwTaskList();
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('.hw-task-title-in');
+      if (inputs.length) inputs[inputs.length - 1].focus();
+    }, 30);
+  }
+  function removeHwTask(idx) {
+    if (window.hwTasks.length <= 1) return;
+    window.hwTasks.splice(idx, 1);
+    renderHwTaskList();
+  }
+  window.addHwTask = addHwTask;
+  window.removeHwTask = removeHwTask;
   function setHwTriggerDate(triggerId, dateStr) {
     const t = document.getElementById(triggerId);
     if (!t) return;
@@ -6642,34 +6727,40 @@
   window.setHwDurationPreset = setHwDurationPreset;
   function closeCreateHomework() { document.getElementById('hw-create-bg').style.display = 'none'; }
   async function submitCreateHomework() {
-    const title = document.getElementById('hw-form-title').value.trim();
-    const desc = document.getElementById('hw-form-desc').value.trim();
     const start = document.getElementById('hw-start-trigger').dataset.value || '';
     const end = document.getElementById('hw-end-trigger').dataset.value || '';
     const err = document.getElementById('hw-create-error');
-    if (!title) { err.textContent = '请填标题'; return; }
+    const btn = document.getElementById('hw-create-confirm');
+    const originalLabel = btn.innerHTML;
+    err.textContent = '';
+    if (!pendingStudentForHomework) { err.textContent = '没选学生'; return; }
     if (!start || !end) { err.textContent = '请选日期'; return; }
     if (end < start) { err.textContent = '截止日期不能早于开始日期'; return; }
-    if (!pendingStudentForHomework) { err.textContent = '没选学生'; return; }
-    const btn = document.getElementById('hw-create-confirm');
-    btn.disabled = true; btn.textContent = '提交中…';
+    const tasks = (window.hwTasks || []).map(t => ({
+      title: (t.title || '').trim(),
+      desc: (t.desc || '').trim(),
+      minutes: (t.minutes && !isNaN(t.minutes)) ? t.minutes : null
+    })).filter(t => t.title);
+    if (!tasks.length) { err.textContent = '至少填一个任务标题'; return; }
+    btn.disabled = true; btn.innerHTML = '提交中…';
     try {
-      const minutesRaw = document.getElementById('hw-form-minutes').value;
-      const minutes = minutesRaw ? parseInt(minutesRaw, 10) : null;
-      const { error } = await supabaseClient.from('homework').insert({
+      const rows = tasks.map(t => ({
         teacher_id: cloudUser.id,
         student_id: pendingStudentForHomework,
-        title, description: desc || null,
-        start_date: start, end_date: end,
-        daily_minutes: (minutes && !isNaN(minutes)) ? minutes : null
-      });
+        title: t.title,
+        description: t.desc || null,
+        start_date: start,
+        end_date: end,
+        daily_minutes: t.minutes
+      }));
+      const { error } = await supabaseClient.from('homework').insert(rows);
       if (error) throw error;
       closeCreateHomework();
       await refreshHomeworkUI();
     } catch(e) {
       err.textContent = '失败：' + (e.message || '未知');
     } finally {
-      btn.disabled = false; btn.textContent = '布置';
+      btn.disabled = false; btn.innerHTML = originalLabel;
     }
   }
 
