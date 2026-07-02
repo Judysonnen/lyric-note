@@ -2162,7 +2162,8 @@
     .hw-day-date .hw-day-weekday { font-weight: 400; color: var(--muted); margin-left: 4px; font-size: 12px; }
     .hw-day-status { font-size: 12px; color: var(--muted); flex: 1; }
     .hw-day-status.done { color: var(--primary); font-weight: 500; }
-    .hw-day-expand-icon { color: var(--muted); font-size: 14px; transition: transform .15s; }
+    .hw-day-expand-icon { color: var(--muted); font-size: 14px; transition: transform .15s; padding: 4px 8px; cursor: pointer; border-radius: 4px; }
+    .hw-day-expand-icon:hover { background: rgba(199,103,84,0.08); color: var(--primary); }
     .hw-day-row.expanded .hw-day-expand-icon { transform: rotate(90deg); }
     .hw-day-detail { display: none; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
     .hw-day-row.expanded .hw-day-detail { display: block; }
@@ -6856,18 +6857,25 @@
     const checks = homeworkChecksByHw[hw.id] || {};
     const today = todayDateStr();
     const body = document.getElementById('hw-drawer-body');
+    const isStudentDrawer = drawerRole === 'student';
     body.innerHTML = days.map(d => {
       const c = checks[d] || {};
       const done = !!c.completed;
       const isFuture = isFutureDate(d);
       const isPast = isPastDate(d);
       const cls = (done ? 'done ' : '') + (isFuture ? 'future ' : '') + (isPast && !done ? 'past' : '');
+      const headerClick = isStudentDrawer
+        ? `onclick="toggleDayCheck('${hw.id}','${d}')"`
+        : `onclick="toggleDayExpand('${hw.id}','${d}')"`;
+      const expandBtn = isStudentDrawer
+        ? `<span class="hw-day-expand-icon" onclick="event.stopPropagation();toggleDayExpand('${hw.id}','${d}')" title="写感想 / 看老师批注">›</span>`
+        : `<span class="hw-day-expand-icon">›</span>`;
       return `
         <div class="hw-day-row ${cls}" id="hw-day-${hw.id}-${d}">
-          <div class="hw-day-header" onclick="toggleDayExpand('${hw.id}','${d}')">
+          <div class="hw-day-header" ${headerClick}>
             <div class="hw-day-date">${d.slice(5)}<span class="hw-day-weekday">${weekdayShort(d)}</span></div>
             <div class="hw-day-status ${done ? 'done' : ''}">${done ? '✓ 已完成' : (isFuture ? '未到' : (isPast ? '未完成' : '今天'))}</div>
-            <span class="hw-day-expand-icon">›</span>
+            ${expandBtn}
           </div>
           <div class="hw-day-detail" id="hw-day-detail-${hw.id}-${d}"></div>
         </div>`;
@@ -6922,15 +6930,6 @@
       comment = `<div class="hw-teacher-comment">老师：${escHtml(c.teacher_comment)}</div>`;
     }
 
-    let checkAction = '';
-    if (isStudent) {
-      checkAction = `
-        <div class="hw-day-section" style="display:flex;align-items:center;gap:10px;">
-          <div class="hw-today-check ${done ? 'done' : ''}" onclick="toggleDayCheck('${hwId}','${date}')"></div>
-          <div style="font-size:13px;color:var(--text);">${done ? '已完成今日' : '点这里标记完成'}</div>
-        </div>`;
-    }
-
     let note = '';
     if (isStudent) {
       note = `
@@ -6946,7 +6945,7 @@
         </div>`;
     }
 
-    detail.innerHTML = checkAction + note + audioBlock + comment;
+    detail.innerHTML = note + audioBlock + comment;
   }
 
   async function toggleDayCheck(hwId, date) {
