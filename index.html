@@ -2203,12 +2203,8 @@
     }
     .hw-day-check-zone {
       flex: 1; display: flex; align-items: center; gap: 12px;
-      padding: 2px 6px 2px 2px; margin: -4px 0; border-radius: 6px;
-      cursor: pointer; transition: background-color .12s;
+      pointer-events: none;
     }
-    .hw-day-check-zone:hover { background: rgba(199,103,84,0.06); }
-    .hw-day-row.future .hw-day-check-zone { cursor: default; }
-    .hw-day-row.future .hw-day-check-zone:hover { background: transparent; }
     .hw-day-check-mark {
       width: 22px; height: 22px; border-radius: 50%; border: 1.8px solid var(--border);
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
@@ -6950,13 +6946,13 @@
       const hasComment = !!(c.teacher_comment && c.teacher_comment.trim());
       const cls = (done ? 'done ' : '') + (isFuture ? 'future ' : '') + (isPast && !done ? 'past' : '');
       if (isStudentDrawer) {
-        const checkAction = isFuture ? '' : `onclick="toggleDayCheck('${hw.id}','${d}')"`;
+        const headerClick = isFuture ? '' : `onclick="toggleDayCheck('${hw.id}','${d}')"`;
         const noteLabel = hasNote ? '✎ 感想已写' : (hasComment ? '💬 老师留言' : '写感想');
         const noteBtnCls = (hasNote || hasComment) ? 'hw-day-note-btn has-content' : 'hw-day-note-btn';
         return `
           <div class="hw-day-row ${cls}" id="hw-day-${hw.id}-${d}">
-            <div class="hw-day-header">
-              <div class="hw-day-check-zone" ${checkAction}>
+            <div class="hw-day-header" ${headerClick}>
+              <div class="hw-day-check-zone">
                 <div class="hw-day-check-mark">${done ? '✓' : ''}</div>
                 <div class="hw-day-date">${d.slice(5)}<span class="hw-day-weekday">${weekdayShort(d)}</span></div>
                 <div class="hw-day-status ${done ? 'done' : ''}">${done ? '已完成' : (isFuture ? '未到' : (isPast ? '未完成' : '今天'))}</div>
