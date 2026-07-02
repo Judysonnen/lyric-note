@@ -2106,13 +2106,15 @@
       transition: transform .12s;
     }
     .hw-day:hover { transform: translateY(-2px); }
+    .hw-today-card.today-done .hw-day:hover { transform: none; }
     .hw-day-wday { font-size: 9px; color: var(--muted); letter-spacing: 0.05em; }
     .hw-day-circle {
       width: 32px; height: 32px; border-radius: 50%;
       border: 2px solid var(--border); background: white;
       display: flex; align-items: center; justify-content: center;
       font-size: 11px; font-weight: 600; color: var(--text-soft);
-      transition: all .15s;
+      transition: background-color .15s, border-color .15s, color .15s;
+      backface-visibility: hidden;
     }
     .hw-day.done .hw-day-circle {
       background: var(--primary); border-color: var(--primary); color: white;
