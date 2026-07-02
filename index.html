@@ -2081,6 +2081,32 @@
       content: "今天已完成 · 明天再来"; display: block; margin-top: 8px;
       font-size: 11px; color: var(--muted); font-style: italic; text-align: right;
     }
+    .hw-archive-details {
+      margin-top: 24px; padding-top: 12px; border-top: 1px dashed var(--border);
+    }
+    .hw-archive-details > summary {
+      cursor: pointer; font-size: 13px; color: var(--muted); padding: 6px 0;
+      user-select: none; list-style: none;
+    }
+    .hw-archive-details > summary::-webkit-details-marker { display: none; }
+    .hw-archive-details > summary:hover { color: var(--primary); }
+    .hw-archive-details[open] > summary { color: var(--text); margin-bottom: 10px; }
+    .hw-archive-list { display: flex; flex-direction: column; gap: 12px; }
+    .hw-archive-group {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 14px; opacity: .85;
+    }
+    .hw-archive-group-head { margin-bottom: 8px; }
+    .hw-archive-group-title { font-size: 14px; font-weight: 600; color: var(--text); }
+    .hw-archive-group-meta { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .hw-archive-group-body { display: flex; flex-direction: column; gap: 6px; }
+    .hw-archive-row {
+      background: #FAF5EC; border: 1px solid var(--border); border-radius: 6px;
+      padding: 8px 10px; cursor: pointer; transition: border-color .12s;
+    }
+    .hw-archive-row:hover { border-color: var(--primary); }
+    .hw-archive-row-title { font-size: 13px; color: var(--text); font-weight: 500; }
+    .hw-archive-row-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
     .hw-today-card-head {
       display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
       margin-bottom: 10px;
@@ -6606,10 +6632,11 @@
     if (userRole !== 'student') { sec.style.display = 'none'; return; }
     const today = todayDateStr();
     const liveHomework = homeworkAsStudent.filter(h => !h.archived_at);
+    const archivedHomework = homeworkAsStudent.filter(h => !!h.archived_at);
     const activeHw = liveHomework.filter(h => h.start_date <= today && h.end_date >= today);
     const futureHw = liveHomework.filter(h => h.start_date > today);
     const totalShown = activeHw.length + futureHw.length;
-    if (!liveHomework.length) { sec.style.display = 'none'; return; }
+    if (!liveHomework.length && !archivedHomework.length) { sec.style.display = 'none'; return; }
     sec.style.display = '';
 
     // Replace the default section title with a friendlier "today" header
@@ -6621,12 +6648,63 @@
       sectionTitle.innerHTML = `<span>今天 · ${wday} · ${dateLabel}</span>`;
     }
 
+    let activeHtml = '';
     if (!activeHw.length) {
-      list.innerHTML = `<div class="hw-today-rest"><div class="emo">🌿</div>今天没有作业，休息一下吧</div>`;
-      return;
+      activeHtml = `<div class="hw-today-rest"><div class="emo">🌿</div>今天没有作业，休息一下吧</div>`;
+    } else {
+      activeHtml = activeHw.map(h => renderHomeworkStripCard(h, today)).join('');
     }
 
-    list.innerHTML = activeHw.map(h => renderHomeworkStripCard(h, today)).join('');
+    let archivedHtml = '';
+    if (archivedHomework.length) {
+      // Group archived rows by batch_id like the teacher side, so the same
+      // "一组作业" concept shows up. Use most-recent-first.
+      const byBatch = new Map();
+      for (const h of archivedHomework) {
+        const key = h.batch_id || ('single:' + h.id);
+        if (!byBatch.has(key)) byBatch.set(key, []);
+        byBatch.get(key).push(h);
+      }
+      const groups = Array.from(byBatch.values()).map(rows => {
+        rows.sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
+        return rows;
+      });
+      groups.sort((a, b) => (b[0].archived_at || '').localeCompare(a[0].archived_at || ''));
+
+      const groupHtml = groups.map(rows => {
+        const start = rows.reduce((m, r) => r.start_date < m ? r.start_date : m, rows[0].start_date);
+        const end = rows.reduce((m, r) => r.end_date > m ? r.end_date : m, rows[0].end_date);
+        const titles = rows.slice(0, 3).map(r => r.title).join(' + ') + (rows.length > 3 ? ' 等' : '');
+        let groupDone = 0, groupTotal = 0;
+        for (const r of rows) {
+          const days = dateRangeDays(r.start_date, r.end_date);
+          groupTotal += days.length;
+          const cks = homeworkChecksByHw[r.id] || {};
+          groupDone += days.filter(d => cks[d] && cks[d].completed).length;
+        }
+        const rowsList = rows.map(r => `
+          <div class="hw-archive-row" onclick="openHomeworkDrawerForStudent('${r.id}','${todayDateStr()}')">
+            <div class="hw-archive-row-title">${escHtml(r.title)}</div>
+            <div class="hw-archive-row-meta">${r.start_date} → ${r.end_date}${r.daily_minutes ? ' · 每天 ' + r.daily_minutes + ' 分钟' : ''}</div>
+          </div>`).join('');
+        return `
+          <div class="hw-archive-group">
+            <div class="hw-archive-group-head">
+              <div class="hw-archive-group-title">${escHtml(titles)}</div>
+              <div class="hw-archive-group-meta">${start} → ${end} · 共 ${rows.length} 个任务 · 打卡 ${groupDone}/${groupTotal}</div>
+            </div>
+            <div class="hw-archive-group-body">${rowsList}</div>
+          </div>`;
+      }).join('');
+
+      archivedHtml = `
+        <details class="hw-archive-details">
+          <summary>📦 已归档作业（${groups.length} 组）</summary>
+          <div class="hw-archive-list">${groupHtml}</div>
+        </details>`;
+    }
+
+    list.innerHTML = activeHtml + archivedHtml;
   }
 
   function renderHomeworkStripCard(h, today) {
