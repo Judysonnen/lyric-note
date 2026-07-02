@@ -2086,7 +2086,12 @@
       margin-bottom: 10px;
     }
     .hw-today-card-title { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.3; }
-    .hw-today-card-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+    .hw-today-card-desc {
+      font-size: 12.5px; color: var(--text); line-height: 1.55; margin-top: 6px;
+      background: rgba(199,103,84,0.06); border-left: 2px solid var(--primary);
+      padding: 6px 10px; border-radius: 0 6px 6px 0; white-space: pre-wrap;
+    }
+    .hw-today-card-sub { font-size: 11px; color: var(--muted); margin-top: 6px; }
     .hw-today-card-prog {
       flex-shrink: 0; text-align: right;
     }
@@ -6662,6 +6667,7 @@
         <div class="hw-today-card-head">
           <div style="flex:1;min-width:0;">
             <div class="hw-today-card-title">${escHtml(h.title)}</div>
+            ${h.description ? `<div class="hw-today-card-desc">${escHtml(h.description)}</div>` : ''}
             <div class="hw-today-card-sub">${minutesLabel}${minutesLabel?' · ':''}${h.start_date} → ${h.end_date}</div>
           </div>
           <div class="hw-today-card-prog">
