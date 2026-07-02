@@ -2122,6 +2122,13 @@
     .hw-day.missed .hw-day-circle {
       border-color: #FCA5A5; border-style: dashed; color: #DC2626;
     }
+    @keyframes hwBloomPop {
+      0%   { transform: scale(1); }
+      35%  { transform: scale(1.35); }
+      65%  { transform: scale(0.94); }
+      100% { transform: scale(1); }
+    }
+    .hw-day-circle.bloom { animation: hwBloomPop .45s cubic-bezier(.34,1.56,.64,1); }
     .hw-day.future .hw-day-circle {
       border-color: var(--border); color: #C9B5A0; opacity: 0.6;
     }
@@ -6989,13 +6996,107 @@
   }
 
   async function toggleDayCheck(hwId, date) {
-    const c = (homeworkChecksByHw[hwId] || {})[date] || {};
-    const next = !c.completed;
-    await upsertCheck(hwId, date, { completed: next, completed_at: next ? new Date().toISOString() : null });
-    await loadHomeworkAll();
+    const prev = (homeworkChecksByHw[hwId] || {})[date] || {};
+    const next = !prev.completed;
+    // ── Optimistic update: apply locally + re-render before the network call
+    if (!homeworkChecksByHw[hwId]) homeworkChecksByHw[hwId] = {};
+    homeworkChecksByHw[hwId][date] = Object.assign({}, prev, {
+      completed: next,
+      completed_at: next ? new Date().toISOString() : null
+    });
     const hw = homeworkAsStudent.find(h => h.id === hwId);
     if (hw) renderDrawerDayList(hw, 'student');
     renderStudentHomeworkSection();
+    // Celebrate on the newly-rendered done circle
+    if (next) {
+      requestAnimationFrame(() => {
+        const cell = document.querySelector(`.hw-day.done[title^="${date} "] .hw-day-circle`);
+        if (cell) { cell.classList.add('bloom'); setTimeout(() => cell.classList.remove('bloom'), 500); }
+        celebrateAt(cell || document.querySelector(`#hw-day-${hwId}-${date}`));
+      });
+    }
+    // Sync in background; revert on error
+    try {
+      await upsertCheck(hwId, date, { completed: next, completed_at: next ? new Date().toISOString() : null });
+      await loadHomeworkAll();
+      const hw2 = homeworkAsStudent.find(h => h.id === hwId);
+      if (hw2) renderDrawerDayList(hw2, 'student');
+      renderStudentHomeworkSection();
+    } catch(e) {
+      console.error('check sync failed, reverting', e);
+      if (Object.keys(prev).length) homeworkChecksByHw[hwId][date] = prev;
+      else delete homeworkChecksByHw[hwId][date];
+      if (hw) renderDrawerDayList(hw, 'student');
+      renderStudentHomeworkSection();
+    }
+  }
+
+  function celebrateAt(el) {
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    let canvas = document.getElementById('celebrate-canvas');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.id = 'celebrate-canvas';
+      canvas.style.cssText = 'position:fixed;top:0;left:0;width:100vw;height:100vh;pointer-events:none;z-index:9999;';
+      document.body.appendChild(canvas);
+    }
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = window.innerWidth * dpr;
+    canvas.height = window.innerHeight * dpr;
+    canvas.style.width = window.innerWidth + 'px';
+    canvas.style.height = window.innerHeight + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const colors = ['#C76754','#E8A63A','#5C7A4E','#7C3AED','#0F766E','#F59E0B','#EC4899'];
+    const parts = [];
+    for (let i = 0; i < 34; i++) {
+      const angle = -Math.PI/2 + (Math.random() - 0.5) * Math.PI * 1.1;
+      const speed = 3.5 + Math.random() * 4.5;
+      parts.push({
+        x: cx, y: cy,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 5 + Math.random() * 5,
+        color: colors[i % colors.length],
+        rot: Math.random() * 360,
+        vrot: (Math.random() - 0.5) * 24,
+        life: 55 + Math.random() * 20
+      });
+    }
+    (window._celebrateParts = window._celebrateParts || []).push(...parts);
+    if (window._celebrateRAF) return;
+    const loop = () => {
+      const list = window._celebrateParts;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let alive = 0;
+      for (const p of list) {
+        if (p.life <= 0) continue;
+        alive++;
+        p.vy += 0.22;
+        p.vx *= 0.995;
+        p.x += p.vx; p.y += p.vy;
+        p.rot += p.vrot;
+        p.life--;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot * Math.PI / 180);
+        ctx.globalAlpha = Math.min(1, p.life / 25);
+        ctx.fillStyle = p.color;
+        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.55);
+        ctx.restore();
+      }
+      if (alive) {
+        window._celebrateRAF = requestAnimationFrame(loop);
+      } else {
+        window._celebrateRAF = null;
+        window._celebrateParts = [];
+        canvas.remove();
+      }
+    };
+    window._celebrateRAF = requestAnimationFrame(loop);
   }
 
   async function saveStudentNote(hwId, date) {
