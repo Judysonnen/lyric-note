@@ -6577,12 +6577,17 @@
       const isToday = d === today;
       const isFuture = d > today;
       const isMissed = !done && !isFuture && !isToday;
-      const cls = [done ? 'done' : '', isToday ? 'today' : '', isFuture ? 'future' : '', isMissed ? 'missed' : ''].filter(Boolean).join(' ');
+      // Once today is done, drop the "today" highlight — becomes a normal done circle
+      const showToday = isToday && !done;
+      const cls = [done ? 'done' : '', showToday ? 'today' : '', isFuture ? 'future' : '', isMissed ? 'missed' : ''].filter(Boolean).join(' ');
       const dateObj = new Date(d + 'T00:00:00');
       const wd = wdayShort[dateObj.getDay()];
       const num = dateObj.getDate();
-      const click = isFuture ? '' : `onclick="openHomeworkDrawerForStudent('${h.id}','${d}')"`;
-      return `<div class="hw-day ${cls}" ${click} title="${d} · ${done ? '已完成' : (isToday ? '今天' : (isMissed ? '未完成' : '未到'))}">
+      let click = '';
+      if (isToday) click = `onclick="toggleDayCheck('${h.id}','${d}')"`;
+      else if (!isFuture) click = `onclick="openHomeworkDrawerForStudent('${h.id}','${d}')"`;
+      const titleStr = done ? '已完成 · 点击取消' : (isToday ? '今天 · 点击标记完成' : (isMissed ? '未完成 · 点击补写' : '未到'));
+      return `<div class="hw-day ${cls}" ${click} title="${d} · ${titleStr}">
         <span class="hw-day-wday">${wd}</span>
         <div class="hw-day-circle"><span class="hw-day-num">${num}</span></div>
       </div>`;
