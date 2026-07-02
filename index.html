@@ -2226,36 +2226,41 @@
     .hw-task-row {
       background: #FAF5EC; border: 1px solid var(--border); border-radius: 8px;
       padding: 10px 12px; margin-bottom: 8px;
-      display: flex; gap: 8px; align-items: flex-start;
+      display: flex; gap: 10px; align-items: center;
     }
     .hw-task-idx {
       font-size: 11px; color: var(--muted); font-weight: 600;
-      letter-spacing: .05em; padding-top: 10px; min-width: 34px;
+      letter-spacing: .05em; min-width: 28px; flex: 0 0 auto;
     }
-    .hw-task-fields { flex: 1; display: flex; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+    .hw-task-fields {
+      flex: 1; display: flex; gap: 8px; align-items: center;
+    }
+    .hw-task-title-in, .hw-task-desc-in, .hw-task-min-wrap {
+      height: 38px; box-sizing: border-box; background: white;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-family: -apple-system,"PingFang SC",sans-serif;
+      font-size: 13px; color: var(--text); line-height: 1.4;
+    }
     .hw-task-title-in {
-      flex: 0 0 130px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px;
-      background: white; font-size: 13px; font-weight: 500; color: var(--text);
-      box-sizing: border-box; font-family: inherit;
+      flex: 0 0 180px; padding: 8px 10px; font-weight: 500;
     }
     .hw-task-desc-in {
-      flex: 1 1 160px; min-height: 36px; padding: 8px 10px; border: 1px solid var(--border);
-      border-radius: 6px; background: white; font-size: 12.5px; color: var(--text);
-      box-sizing: border-box; font-family: inherit; resize: vertical;
+      flex: 1 1 auto; padding: 8px 10px; resize: none;
     }
     .hw-task-min-wrap {
-      display: flex; align-items: center; gap: 4px; flex: 0 0 auto;
-      background: white; border: 1px solid var(--border); border-radius: 6px;
-      padding: 0 10px 0 4px; height: 36px;
+      display: flex; align-items: center; gap: 4px; flex: 0 0 130px;
+      padding: 0 10px 0 6px;
     }
     .hw-task-min-in {
-      width: 46px; border: none; outline: none; padding: 8px 4px; background: transparent;
-      font-size: 13px; color: var(--text); text-align: right; font-family: inherit;
+      width: 52px; border: none; outline: none; padding: 0 4px; background: transparent;
+      font-size: 13px; color: var(--text); text-align: right;
+      font-family: -apple-system,"PingFang SC",sans-serif;
     }
     .hw-task-min-wrap span { font-size: 12px; color: var(--muted); white-space: nowrap; }
     .hw-task-del {
       background: transparent; border: none; color: var(--muted); font-size: 18px;
-      line-height: 1; cursor: pointer; padding: 8px 4px 0; border-radius: 4px;
+      line-height: 1; cursor: pointer; padding: 4px 6px; border-radius: 4px;
+      flex: 0 0 auto;
     }
     .hw-task-del:hover { color: #DC2626; }
     .hw-task-del[disabled] { opacity: .25; cursor: not-allowed; }
@@ -2784,7 +2789,7 @@
 
 <!-- Create Homework Modal -->
 <div class="modal-backdrop" id="hw-create-bg" onclick="if(event.target===this) closeCreateHomework()" style="display:none;z-index:9100;">
-  <div class="modal" style="max-width:560px;padding:26px;max-height:90vh;overflow-y:auto;">
+  <div class="modal" style="max-width:780px;padding:26px;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
       <h3 style="margin:0;font-size:17px;font-weight:600;color:var(--text);" id="hw-create-title">布置作业</h3>
       <button onclick="closeCreateHomework()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">×</button>
@@ -6679,8 +6684,8 @@
         <div class="hw-task-fields">
           <input class="hw-task-title-in" placeholder="标题（如：练熟副歌）" maxlength="80"
             value="${escHtml(t.title || '')}" oninput="window.hwTasks[${i}].title=this.value" />
-          <textarea class="hw-task-desc-in" placeholder="描述（可选）" maxlength="600" rows="1"
-            oninput="window.hwTasks[${i}].desc=this.value">${escHtml(t.desc || '')}</textarea>
+          <input class="hw-task-desc-in" placeholder="描述（可选）" maxlength="600" type="text"
+            value="${escHtml(t.desc || '')}" oninput="window.hwTasks[${i}].desc=this.value" />
           <div class="hw-task-min-wrap">
             <input class="hw-task-min-in" type="number" min="1" max="600" placeholder="—"
               value="${t.minutes || ''}" oninput="window.hwTasks[${i}].minutes=this.value?parseInt(this.value,10):null" />
