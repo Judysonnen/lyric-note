@@ -6631,7 +6631,6 @@
     const totalDays = days.length;
     const dayIndexInRange = days.indexOf(today) + 1;
     const minutesLabel = h.daily_minutes ? `每天 ${h.daily_minutes} 分钟` : '';
-    const teacherCommentToday = (checks[today] || {}).teacher_comment;
     const wdayShort = ['日','一','二','三','四','五','六'];
 
     const dayCells = days.map(d => {
@@ -6655,7 +6654,7 @@
       </div>`;
     }).join('');
 
-    const teacherLine = teacherCommentToday ? `<a onclick="openHomeworkDrawerForStudent('${h.id}','${today}')">💬 老师留言</a>` : '';
+    const teacherLine = '';
 
     const todayDone = !!(checks[today] && checks[today].completed);
     return `
@@ -6943,12 +6942,11 @@
       const isFuture = isFutureDate(d);
       const isPast = isPastDate(d);
       const hasNote = !!(c.student_note && c.student_note.trim());
-      const hasComment = !!(c.teacher_comment && c.teacher_comment.trim());
       const cls = (done ? 'done ' : '') + (isFuture ? 'future ' : '') + (isPast && !done ? 'past' : '');
       if (isStudentDrawer) {
         const headerClick = isFuture ? '' : `onclick="toggleDayCheck('${hw.id}','${d}')"`;
-        const noteLabel = hasNote ? '✎ 感想已写' : (hasComment ? '💬 老师留言' : '写感想');
-        const noteBtnCls = (hasNote || hasComment) ? 'hw-day-note-btn has-content' : 'hw-day-note-btn';
+        const noteLabel = hasNote ? '✎ 感想已写' : '写感想';
+        const noteBtnCls = hasNote ? 'hw-day-note-btn has-content' : 'hw-day-note-btn';
         return `
           <div class="hw-day-row ${cls}" id="hw-day-${hw.id}-${d}">
             <div class="hw-day-header" ${headerClick}>
@@ -7011,17 +7009,6 @@
         </div>`;
     }
 
-    let comment = '';
-    if (isTeacher) {
-      comment = `
-        <div class="hw-day-section">
-          <div class="hw-day-field-label">我的批注（学生可见）</div>
-          <textarea class="hw-day-textarea" id="hw-tc-${hwId}-${date}" placeholder="鼓励或纠正" onblur="saveTeacherComment('${hwId}','${date}')">${escHtml(c.teacher_comment || '')}</textarea>
-        </div>`;
-    } else if (c.teacher_comment) {
-      comment = `<div class="hw-teacher-comment">老师：${escHtml(c.teacher_comment)}</div>`;
-    }
-
     let note = '';
     if (isStudent) {
       note = `
@@ -7037,7 +7024,11 @@
         </div>`;
     }
 
-    detail.innerHTML = note + audioBlock + comment;
+    let teacherEmpty = '';
+    if (isTeacher && !c.student_note && !audioBlock) {
+      teacherEmpty = `<div class="hw-day-section" style="color:var(--muted);font-size:13px;">学生这天还没写感想。</div>`;
+    }
+    detail.innerHTML = note + audioBlock + teacherEmpty;
   }
 
   async function toggleDayCheck(hwId, date) {
