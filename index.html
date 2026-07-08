@@ -2284,6 +2284,59 @@
     @keyframes hwPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
     /* ── Stamps (印谱) ── */
+    .stamp-shelf {
+      display: flex; align-items: center; gap: 14px;
+      background: linear-gradient(180deg, #FDF6E0 0%, #F5E9CA 100%);
+      border: 1px solid rgba(139,115,85,0.35);
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(139,45,30,0.06);
+      transition: all .18s;
+      position: relative;
+      overflow: hidden;
+    }
+    .stamp-shelf::before {
+      content: "";
+      position: absolute; inset: 0;
+      background-image:
+        repeating-linear-gradient(102deg, transparent 0 3px, rgba(139,105,50,0.03) 3px 4px);
+      pointer-events: none;
+      border-radius: inherit;
+    }
+    .stamp-shelf:hover {
+      border-color: #B92923;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(139,45,30,0.12);
+    }
+    .stamp-shelf-left { flex-shrink: 0; min-width: 78px; z-index: 1; }
+    .stamp-shelf-title {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 15px; letter-spacing: 0.35em; color: #2A1F16; font-weight: 500;
+      margin-left: 2px;
+    }
+    .stamp-shelf-count {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 11px; color: #8A7355; letter-spacing: 0.1em; margin-top: 2px;
+    }
+    .stamp-shelf-count b {
+      color: #B92923; font-size: 15px; font-variant-numeric: tabular-nums;
+    }
+    .stamp-shelf-strip {
+      flex: 1; display: flex; gap: 6px; align-items: center;
+      overflow: hidden; z-index: 1;
+    }
+    .stamp-shelf-seal { flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+    .stamp-shelf-seal.empty { opacity: 0.28; filter: grayscale(0.6); }
+    .stamp-shelf-arrow {
+      font-family: "Noto Serif SC", serif;
+      color: #B92923; font-size: 24px; line-height: 1;
+      flex-shrink: 0; opacity: 0.6; transition: transform .18s;
+      z-index: 1;
+    }
+    .stamp-shelf:hover .stamp-shelf-arrow { transform: translateX(3px); opacity: 1; }
+
     .stamp-book-btn {
       background: none; border: 1px solid var(--border);
       color: var(--primary); font-size: 11.5px; letter-spacing: 0.15em;
@@ -2399,6 +2452,177 @@
     .stamp-sub {
       font-size: 10px; color: #8A7355; letter-spacing: 0.03em;
     }
+
+    /* Tier badge (罗马数字 in corner of the seal) */
+    .stamp-svg-wrap { position: relative; display: inline-block; }
+    .stamp-tier-badge {
+      position: absolute; top: -6px; right: -8px;
+      background: linear-gradient(140deg, #E0B573 0%, #B98A2D 100%);
+      color: #FBF3D8;
+      font-family: "Noto Serif SC", serif;
+      font-size: 10px; letter-spacing: 0;
+      width: 20px; height: 20px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 3px rgba(70,45,20,0.35);
+      z-index: 2;
+    }
+    /* Tier progression dots below the seal */
+    .stamp-tier-dots {
+      display: flex; gap: 4px; justify-content: center; margin-top: 2px;
+    }
+    .stamp-tier-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: rgba(139,115,85,0.25); border: 1px solid rgba(139,115,85,0.35);
+    }
+    .stamp-tier-dot.on {
+      background: #B92923; border-color: #B92923;
+      box-shadow: 0 0 3px rgba(185,41,35,0.4);
+    }
+    /* Unclaimed: pulsing red badge over the cell */
+    .stamp-cell.unclaimed .stamp-svg-wrap::after {
+      content: "";
+      position: absolute; inset: -6px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,215,140,0.35), transparent 65%);
+      animation: stampClaimGlow 1.6s ease-in-out infinite;
+      pointer-events: none;
+      z-index: 0;
+    }
+    @keyframes stampClaimGlow {
+      0%, 100% { opacity: 0.4; transform: scale(0.9); }
+      50% { opacity: 1; transform: scale(1.15); }
+    }
+    .stamp-claim-badge {
+      position: absolute; bottom: -8px; left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(140deg, #D63A34 0%, #8E1F1B 100%);
+      color: #FBF3D8;
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 10.5px; letter-spacing: 0.08em; font-weight: 600;
+      padding: 3px 10px; border-radius: 999px;
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(139,45,30,0.35);
+      cursor: pointer; transition: transform .12s;
+      z-index: 3;
+    }
+    .stamp-claim-badge:hover { transform: translateX(-50%) scale(1.06); }
+    .stamp-cell.unclaimed { cursor: pointer; }
+
+    /* Teacher stamps: gold-tinged glow to visually distinguish */
+    .stamp-cell.teacher-seal svg.seal-svg {
+      filter: drop-shadow(0 0 5px rgba(217,172,83,0.5))
+              drop-shadow(0 1.5px 2px rgba(139,45,30,0.15));
+    }
+    .stamp-cell.teacher-seal .stamp-svg-wrap::before {
+      content: "師";
+      position: absolute; top: -6px; left: -6px;
+      background: linear-gradient(140deg, #E0B573 0%, #B98A2D 100%);
+      color: #2A1F16;
+      font-family: "Noto Serif SC", serif;
+      font-size: 9px; font-weight: 700;
+      width: 18px; height: 18px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 1px 3px rgba(70,45,20,0.3);
+      z-index: 2;
+    }
+
+    /* Modal tabs */
+    .stamp-modal-tabs {
+      display: flex; gap: 0;
+      border-bottom: 1px solid rgba(139,115,85,0.25);
+      padding: 0 26px;
+      background: #F9F1DC;
+    }
+    .stamp-modal-tab {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 13px; letter-spacing: 0.28em; padding: 12px 20px;
+      color: #8A7355; cursor: pointer; border-bottom: 2px solid transparent;
+      transition: all .15s;
+    }
+    .stamp-modal-tab:hover { color: #4E3E2E; }
+    .stamp-modal-tab.active {
+      color: #B92923; border-bottom-color: #B92923;
+    }
+    .stamp-modal-tab .badge {
+      margin-left: 6px; background: #B92923; color: #FBF3D8;
+      font-size: 9.5px; padding: 1px 6px; border-radius: 10px;
+      letter-spacing: 0.05em; font-weight: 700;
+    }
+
+    /* Balance + title in modal head */
+    .stamp-modal-head-row {
+      display: flex; align-items: baseline; justify-content: space-between;
+      gap: 12px;
+    }
+    .stamp-title-badge {
+      font-family: "Kaiti SC", "STKaiti", serif;
+      color: #B98A2D; font-size: 12px; letter-spacing: 0.2em;
+      padding: 2px 10px; border: 1px solid #D9AC53;
+      border-radius: 4px; font-weight: 600;
+    }
+    .stamp-balance {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 13px; color: #8E1F1B; letter-spacing: 0.05em;
+      font-variant-numeric: tabular-nums;
+    }
+    .stamp-balance b {
+      color: #B92923; font-size: 17px; font-weight: 600;
+      margin-right: 2px;
+    }
+    .stamp-balance .label {
+      color: #8A7355; font-size: 10.5px; letter-spacing: 0.2em;
+      margin-left: 2px;
+    }
+
+    /* Shop */
+    .shop-cat-label {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 12px; letter-spacing: 0.28em; color: #8A7355;
+      margin: 4px 0 12px; padding-bottom: 6px;
+      border-bottom: 1px dashed rgba(139,115,85,0.35);
+    }
+    .shop-cat-label + .shop-cat-label { margin-top: 24px; }
+    .shop-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;
+    }
+    @media (max-width: 480px) { .shop-grid { grid-template-columns: 1fr; } }
+    .shop-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px; background: #FDF6E0;
+      border: 1px solid rgba(139,115,85,0.3);
+      border-radius: 8px;
+    }
+    .shop-item-visual {
+      flex-shrink: 0; width: 48px; height: 48px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .shop-item-info { flex: 1; min-width: 0; }
+    .shop-item-name {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 13px; color: #2A1F16; letter-spacing: 0.08em;
+      font-weight: 500;
+    }
+    .shop-item-sub {
+      font-size: 10.5px; color: #8A7355; margin-top: 2px;
+    }
+    .shop-item-buy {
+      background: #B92923; color: #FBF3D8;
+      font-family: "Noto Serif SC", serif;
+      font-size: 11.5px; letter-spacing: 0.1em; font-weight: 600;
+      padding: 5px 10px; border-radius: 999px;
+      border: none; cursor: pointer;
+      white-space: nowrap;
+      transition: transform .12s;
+    }
+    .shop-item-buy:hover:not(:disabled) { transform: scale(1.06); }
+    .shop-item-buy:disabled {
+      background: #C9B5A0; cursor: not-allowed;
+    }
+    .shop-item.owned .shop-item-buy {
+      background: transparent; color: #8FA37D;
+      border: 1px solid #8FA37D; padding: 4px 10px;
+    }
+    .shop-item.owned .shop-item-buy:hover { transform: none; }
 
     /* Reveal moment: full-screen dim + falling stamp */
     .stamp-reveal-bg {
@@ -2640,6 +2864,7 @@
               布置作业
             </button>
           </div>
+          <div id="teacher-stamp-shelf" class="hw-section" style="display:none;margin-top:0;width:100%;max-width:460px;"></div>
           <div id="student-homework-section" class="hw-section" style="display:none;margin-top:0;">
             <div class="hw-section-title"><span>我的练习 · 今日打卡</span></div>
             <div id="student-homework-list" class="hw-today-list"></div>
@@ -3110,8 +3335,18 @@
 <div class="modal-backdrop" id="stamp-book-bg" onclick="if(event.target===this) closeStampBook()" style="display:none;z-index:9300;">
   <div class="modal stamp-modal">
     <div class="stamp-modal-head">
-      <h3>印 谱</h3>
-      <div class="stamp-count"><b id="stamp-count-num">0</b> / <span id="stamp-count-total">0</span> 已得</div>
+      <div class="stamp-modal-head-row">
+        <h3 id="stamp-book-title">印 谱</h3>
+        <span class="stamp-title-badge" id="stamp-book-title-badge" style="display:none;"></span>
+      </div>
+      <div class="stamp-modal-head-row" style="margin-top:8px;">
+        <div class="stamp-count"><b id="stamp-count-num">0</b> / <span id="stamp-count-total">0</span> 已得</div>
+        <div class="stamp-balance"><b id="stamp-balance-num">0</b><span class="label">宝</span></div>
+      </div>
+    </div>
+    <div class="stamp-modal-tabs" id="stamp-modal-tabs">
+      <div class="stamp-modal-tab active" data-tab="book" onclick="switchStampTab('book')">印 谱<span class="badge" id="stamp-tab-unclaimed" style="display:none;">0</span></div>
+      <div class="stamp-modal-tab" data-tab="shop" onclick="switchStampTab('shop')">印 肆</div>
     </div>
     <div class="stamp-modal-body" id="stamp-book-body"></div>
   </div>
@@ -6716,6 +6951,14 @@
       </g></svg>`,
   };
 
+  // Extra state introduced in v2: tiers, shop, teacher/student split.
+  let shopPurchases = [];              // rows { item_code, cost, purchased_at }
+  let ownedItemCodes = new Set();
+  // Currently-viewed stamps in the modal. For self it points to earnedStamps;
+  // when a teacher opens a student's book we swap in their rows temporarily.
+  let stampViewState = { role: 'self', label: null, stamps: null, purchases: null };
+  let stampCurrentTab = 'book';        // 'book' | 'shop'
+
   // Trigger context: derived from current homeworkAsStudent + homeworkChecksByHw.
   // Everything used by stamp rules should be a plain field on the returned object.
   function stampContext() {
@@ -6824,150 +7067,211 @@
       if (diff >= 7) comebackCount++;
     }
 
+    // Full-house count over history: for each checked date, was every homework
+    // active-on-that-date also completed? Requires at least 2 active tasks so
+    // trivially completing the sole active task doesn't count.
+    let fullHouseCount = 0;
+    for (const d of dateSet) {
+      const activeThat = homeworkAsStudent.filter(h => h.start_date <= d && h.end_date >= d);
+      if (activeThat.length < 2) continue;
+      if (activeThat.every(h => {
+        const c = (homeworkChecksByHw[h.id] || {})[d];
+        return c && c.completed;
+      })) fullHouseCount++;
+    }
+
+    // Weekend count: distinct weekends where both Sat and Sun had a check.
+    let weekendCount = 0;
+    for (const d of dateSet) {
+      const dt = new Date(d + 'T00:00:00');
+      if (dt.getDay() !== 6) continue; // Sat
+      const sun = new Date(dt); sun.setDate(dt.getDate() + 1);
+      const sunStr = sun.getFullYear() + '-' + String(sun.getMonth()+1).padStart(2,'0') + '-' + String(sun.getDate()).padStart(2,'0');
+      if (dateSet.has(sunStr)) weekendCount++;
+    }
+
+    // Full months count over history: any prior month + this month if complete.
+    let monthFullCount = 0;
+    if (monthFull) monthFullCount++;
+    if (dateSet.size) {
+      const minDate = sorted[0];
+      const startYear = parseInt(minDate.slice(0,4)); const startMon = parseInt(minDate.slice(5,7)) - 1;
+      let cy = startYear, cm = startMon;
+      while (cy < y || (cy === y && cm < m)) {
+        const cLast = new Date(cy, cm + 1, 0).getDate();
+        let allDone = true;
+        for (let d = 1; d <= cLast; d++) {
+          const ds = cy + '-' + String(cm+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+          if (!dateSet.has(ds)) { allDone = false; break; }
+        }
+        if (allDone) monthFullCount++;
+        cm++;
+        if (cm > 11) { cm = 0; cy++; }
+      }
+    }
+
+    // New-song count: any homework with a recorded first-check date.
+    const newSongCount = Object.keys(hwFirstDate).length;
+
     return {
       streak, cumulative, songsCompleted,
-      weekChecked, weekFull, weekStreak, weekendChecked, monthFull, monthChecked, monthTotal: lastDay,
+      songsCompletedCount: songsCompleted.length,
+      weekChecked, weekFull, weekStreak,
+      weekendChecked, weekendCount,
+      monthFull, monthChecked, monthTotal: lastDay, monthFullCount,
       earlyCount, nightCount, bothTimeCount,
       todayFullHouse, activeTodayCount: activeToday.length,
-      newSongToday, comebackCount,
+      newSongToday, newSongCount, comebackCount,
+      fullHouseCount,
     };
   }
 
-  // ── Stamp catalog (v2 · 30 印) ──
-  // Fields: code, name, sub, cat, svg(size, meta?), rule(ctx), progress(ctx)?
-  // progress returns { current, target, hint } to power the "next up" preview.
+  // ─────── Teacher metrics ───────
+  // Different from student ctx: student stamps depend on student's own check-ins;
+  // teacher stamps depend on teaching activity + reflected student milestones.
+  function teacherStampContext() {
+    // Homework this user assigned as teacher
+    const myHw = homeworkAsTeacher || [];
+    // Songs I've taught: distinct student-song pairs from projects I own
+    const projs = getProjectIndex().filter(p => p.isOwner !== false);
+    const linkedStudents = (myStudents || []).filter(s => s.id);
+    // Sum reflected metrics from students' stamps (loaded into cache)
+    const reflected = reflectedStudentMetrics();
+    return {
+      hwAssignCount: myHw.length,
+      studentCount: linkedStudents.length,
+      songsOwned: projs.length,
+      studentTotalStreak3: reflected.streak3,
+      studentTotalStreak7: reflected.streak7,
+      studentTotalStreak30: reflected.streak30,
+      studentTotalStreak100: reflected.streak100,
+      studentTotalCum100: reflected.cum100,
+      studentTotalCum500: reflected.cum500,
+      studentTotalSongComplete: reflected.songComplete,
+      studentTotalFullHouse: reflected.fullHouse,
+      studentActiveCount: reflected.activeCount,
+      teacherCheckInDays: reflected.teacherCheckInDays,
+    };
+  }
+
+  // Cache of student stamps the teacher has loaded, keyed by student_id.
+  // Filled on demand when the teacher opens student workspaces.
+  const studentStampsCache = {};
+  function reflectedStudentMetrics() {
+    let streak3 = 0, streak7 = 0, streak30 = 0, streak100 = 0;
+    let cum100 = 0, cum500 = 0, songComplete = 0, fullHouse = 0;
+    let activeCount = 0;
+    for (const stu of (myStudents || [])) {
+      if (!stu.id) continue;
+      const rows = studentStampsCache[stu.id];
+      if (!rows) continue;
+      const codes = new Set(rows.map(r => r.stamp_code));
+      if (codes.has('streak_3')) streak3++;
+      if (codes.has('streak_7')) streak7++;
+      if (codes.has('streak_30')) streak30++;
+      if (codes.has('streak_100')) streak100++;
+      if (codes.has('cum_100')) cum100++;
+      if (codes.has('cum_500')) cum500++;
+      songComplete += rows.filter(r => r.stamp_code.startsWith('song_complete:')).length;
+      const fhRow = rows.find(r => r.stamp_code === 'full_house');
+      if (fhRow) fullHouse += fhRow.tier || 1;
+      activeCount++; // student loaded means we're paying attention
+    }
+    return { streak3, streak7, streak30, streak100, cum100, cum500, songComplete, fullHouse, activeCount, teacherCheckInDays: 0 };
+  }
+
+  // ── Stamp catalog (v3 · tiers + XP claim) ──
+  // Two shapes exist:
+  //   Single-tier stamps: tiers: [{at: N, xp: M}], metric: 'field'
+  //     One row is created when ctx[metric] >= at.
+  //   Multi-tier stamps: tiers: [{at, xp}, ...], metric: 'field'
+  //     One row per tier level reached, awarded as thresholds pass.
+  //   Parameterized (song_complete): { parameterized: true, ruleParam(ctx) }
+  //     Each returned entry is its own stamp_code.
+  // Everything else about a catalog entry: code, name, sub, cat, svg(size, tier, meta).
   const STAMP_CATALOG = [
-    // ═══ 连续之印 (streak) ═══
+    // ═══ 连续之印 · streak (each threshold = own stamp, distinct visual)
     { code: 'first_day', name: '首日印', sub: '首次打卡', cat: 'streak',
-      svg: (s) => stampSvg.box('始', s),
-      rule: (ctx) => ctx.cumulative >= 1,
-      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 1), target: 1, hint: '首次打卡即得' }) },
+      svg: (s) => stampSvg.box('始', s), metric: 'cumulative', tiers: [{at: 1, xp: 5}] },
     { code: 'streak_3', name: '初心', sub: '连续 3 日', cat: 'streak',
-      svg: (s) => stampSvg.box('初', s),
-      rule: (ctx) => ctx.streak >= 3,
-      progress: (ctx) => ({ current: Math.min(ctx.streak, 3), target: 3, hint: `再连续 ${Math.max(0, 3 - ctx.streak)} 日` }) },
+      svg: (s) => stampSvg.box('初', s), metric: 'streak', tiers: [{at: 3, xp: 10}] },
     { code: 'streak_5', name: '五日印', sub: '连续 5 日', cat: 'streak',
-      svg: (s) => stampSvg.pill('五', '日', s),
-      rule: (ctx) => ctx.streak >= 5,
-      progress: (ctx) => ({ current: Math.min(ctx.streak, 5), target: 5, hint: `再连续 ${Math.max(0, 5 - ctx.streak)} 日` }) },
+      svg: (s) => stampSvg.pill('五', '日', s), metric: 'streak', tiers: [{at: 5, xp: 15}] },
     { code: 'streak_7', name: '一周', sub: '连续 7 日', cat: 'streak',
-      svg: (s) => stampSvg.round2('七', '日', s),
-      rule: (ctx) => ctx.streak >= 7,
-      progress: (ctx) => ({ current: Math.min(ctx.streak, 7), target: 7, hint: `再连续 ${Math.max(0, 7 - ctx.streak)} 日` }) },
+      svg: (s) => stampSvg.round2('七', '日', s), metric: 'streak', tiers: [{at: 7, xp: 25}] },
     { code: 'streak_10', name: '旬印', sub: '连续 10 日', cat: 'streak',
-      svg: (s) => stampSvg.box('旬', s),
-      rule: (ctx) => ctx.streak >= 10,
-      progress: (ctx) => ({ current: Math.min(ctx.streak, 10), target: 10, hint: `再连续 ${Math.max(0, 10 - ctx.streak)} 日` }) },
+      svg: (s) => stampSvg.box('旬', s), metric: 'streak', tiers: [{at: 10, xp: 40}] },
     { code: 'streak_14', name: '两周不断', sub: '连续 14 日', cat: 'streak',
-      svg: (s) => stampSvg.vert3('兩', '周', '不斷', s),
-      rule: (ctx) => ctx.streak >= 14,
-      progress: (ctx) => ({ current: Math.min(ctx.streak, 14), target: 14, hint: `再连续 ${Math.max(0, 14 - ctx.streak)} 日` }) },
+      svg: (s) => stampSvg.vert3('兩', '周', '不斷', s), metric: 'streak', tiers: [{at: 14, xp: 60}] },
     { code: 'streak_21', name: '三周', sub: '连续 21 日', cat: 'streak',
-      svg: (s) => stampSvg.hex('三', '周', s),
-      rule: (ctx) => ctx.streak >= 21,
-      progress: (ctx) => ({ current: Math.min(ctx.streak, 21), target: 21, hint: `再连续 ${Math.max(0, 21 - ctx.streak)} 日` }) },
+      svg: (s) => stampSvg.hex('三', '周', s), metric: 'streak', tiers: [{at: 21, xp: 100}] },
     { code: 'streak_30', name: '满月印', sub: '连续 30 日', cat: 'streak',
-      svg: (s) => stampSvg.doublering('滿', '月', s),
-      rule: (ctx) => ctx.streak >= 30,
-      progress: (ctx) => ({ current: Math.min(ctx.streak, 30), target: 30, hint: `再连续 ${Math.max(0, 30 - ctx.streak)} 日` }) },
+      svg: (s) => stampSvg.doublering('滿', '月', s), metric: 'streak', tiers: [{at: 30, xp: 150}] },
     { code: 'streak_50', name: '半百印', sub: '连续 50 日', cat: 'streak',
-      svg: (s) => stampSvg.horiz2('五', '十', s),
-      rule: (ctx) => ctx.streak >= 50,
-      progress: (ctx) => ({ current: Math.min(ctx.streak, 50), target: 50, hint: `再连续 ${Math.max(0, 50 - ctx.streak)} 日` }) },
+      svg: (s) => stampSvg.horiz2('五', '十', s), metric: 'streak', tiers: [{at: 50, xp: 300}] },
     { code: 'streak_100', name: '百日不断', sub: '连续 100 日', cat: 'streak',
-      svg: (s) => stampSvg.grid4(['百', '日', '不', '斷'], s),
-      rule: (ctx) => ctx.streak >= 100,
-      progress: (ctx) => ({ current: Math.min(ctx.streak, 100), target: 100, hint: `再连续 ${Math.max(0, 100 - ctx.streak)} 日` }) },
+      svg: (s) => stampSvg.grid4(['百', '日', '不', '斷'], s), metric: 'streak', tiers: [{at: 100, xp: 800}] },
 
-    // ═══ 累积之印 (cumulative) ═══
+    // ═══ 累积之印 · cumulative (each threshold own stamp)
     { code: 'cum_10', name: '十次印', sub: '累积 10 次', cat: 'cumulative',
-      svg: (s) => stampSvg.pill('十', '次', s),
-      rule: (ctx) => ctx.cumulative >= 10,
-      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 10), target: 10, hint: `再打卡 ${Math.max(0, 10 - ctx.cumulative)} 次` }) },
+      svg: (s) => stampSvg.pill('十', '次', s), metric: 'cumulative', tiers: [{at: 10, xp: 10}] },
     { code: 'cum_30', name: '三十次', sub: '累积 30 次', cat: 'cumulative',
-      svg: (s) => stampSvg.horiz2('卅', '次', s),
-      rule: (ctx) => ctx.cumulative >= 30,
-      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 30), target: 30, hint: `再打卡 ${Math.max(0, 30 - ctx.cumulative)} 次` }) },
+      svg: (s) => stampSvg.horiz2('卅', '次', s), metric: 'cumulative', tiers: [{at: 30, xp: 25}] },
     { code: 'cum_50', name: '五十次', sub: '累积 50 次', cat: 'cumulative',
-      svg: (s) => stampSvg.oval('五', '十', s),
-      rule: (ctx) => ctx.cumulative >= 50,
-      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 50), target: 50, hint: `再打卡 ${Math.max(0, 50 - ctx.cumulative)} 次` }) },
+      svg: (s) => stampSvg.oval('五', '十', s), metric: 'cumulative', tiers: [{at: 50, xp: 50}] },
     { code: 'cum_100', name: '百日歌心', sub: '累积 100 次', cat: 'cumulative',
-      svg: (s) => stampSvg.grid4(['百', '日', '歌', '心'], s),
-      rule: (ctx) => ctx.cumulative >= 100,
-      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 100), target: 100, hint: `再打卡 ${Math.max(0, 100 - ctx.cumulative)} 次` }) },
+      svg: (s) => stampSvg.grid4(['百', '日', '歌', '心'], s), metric: 'cumulative', tiers: [{at: 100, xp: 150}] },
     { code: 'cum_365', name: '一年不辍', sub: '累积 365 次', cat: 'cumulative',
-      svg: (s) => stampSvg.doublering('一年', '不輟', s),
-      rule: (ctx) => ctx.cumulative >= 365,
-      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 365), target: 365, hint: `再打卡 ${Math.max(0, 365 - ctx.cumulative)} 次` }) },
+      svg: (s) => stampSvg.doublering('一年', '不輟', s), metric: 'cumulative', tiers: [{at: 365, xp: 500}] },
     { code: 'cum_500', name: '五百余音', sub: '累积 500 次', cat: 'cumulative',
-      svg: (s) => stampSvg.gourd('五百', '餘音', s),
-      rule: (ctx) => ctx.cumulative >= 500,
-      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 500), target: 500, hint: `再打卡 ${Math.max(0, 500 - ctx.cumulative)} 次` }) },
+      svg: (s) => stampSvg.gourd('五百', '餘音', s), metric: 'cumulative', tiers: [{at: 500, xp: 800}] },
 
-    // ═══ 周月之印 (weekly / monthly) ═══
-    { code: 'week_full_1', name: '一周不歇', sub: '本周 7 日皆有印', cat: 'weekly',
-      svg: (s) => stampSvg.round2('周', '全', s),
-      rule: (ctx) => ctx.weekFull,
-      progress: (ctx) => ({ current: ctx.weekChecked, target: 7, hint: `本周再打 ${Math.max(0, 7 - ctx.weekChecked)} 天` }) },
-    { code: 'week_streak_4', name: '四周连贯', sub: '连续 4 周皆全', cat: 'weekly',
-      svg: (s) => stampSvg.hex('四', '周', s),
-      rule: (ctx) => ctx.weekStreak >= 4,
-      progress: (ctx) => ({ current: Math.min(ctx.weekStreak, 4), target: 4, hint: `再连续 ${Math.max(0, 4 - ctx.weekStreak)} 周` }) },
-    { code: 'month_full_1', name: '满勤月', sub: '整月每日有印', cat: 'weekly',
-      svg: (s) => stampSvg.doublering('滿', '勤', s),
-      rule: (ctx) => ctx.monthFull,
-      progress: (ctx) => ({ current: ctx.monthChecked, target: ctx.monthTotal, hint: `本月再打 ${Math.max(0, ctx.monthTotal - ctx.monthChecked)} 天` }) },
-    { code: 'weekend_1', name: '周末不歇', sub: '本周六日皆打卡', cat: 'weekly',
-      svg: (s) => stampSvg.pill('周', '末', s),
-      rule: (ctx) => ctx.weekendChecked >= 2,
-      progress: (ctx) => ({ current: ctx.weekendChecked, target: 2, hint: `周末再打 ${Math.max(0, 2 - ctx.weekendChecked)} 天` }) },
+    // ═══ 周月之印 · weekly (multi-tier)
+    { code: 'week_full', name: '一周不歇', sub: '本周 / 4 周 / 12 周 / 52 周', cat: 'weekly',
+      svg: (s) => stampSvg.round2('周', '全', s), metric: 'weekStreak',
+      tiers: [{at: 1, xp: 10}, {at: 4, xp: 40}, {at: 12, xp: 100}, {at: 52, xp: 300}] },
+    { code: 'month_full', name: '满勤月', sub: '整月每日皆有印', cat: 'weekly',
+      svg: (s) => stampSvg.doublering('滿', '勤', s), metric: 'monthFullCount',
+      tiers: [{at: 1, xp: 30}, {at: 3, xp: 100}, {at: 12, xp: 400}] },
+    { code: 'weekend', name: '周末不歇', sub: '周六日皆打卡', cat: 'weekly',
+      svg: (s) => stampSvg.pill('周', '末', s), metric: 'weekendCount',
+      tiers: [{at: 1, xp: 5}, {at: 5, xp: 15}, {at: 20, xp: 60}] },
 
-    // ═══ 时辰之印 (time-of-day) ═══
-    { code: 'early_bird_5', name: '早鸟印', sub: '晨间 5 次（早 8 点前）', cat: 'time',
-      svg: (s) => stampSvg.sunrise('晨', s),
-      rule: (ctx) => ctx.earlyCount >= 5,
-      progress: (ctx) => ({ current: Math.min(ctx.earlyCount, 5), target: 5, hint: `再晨间打 ${Math.max(0, 5 - ctx.earlyCount)} 次` }) },
-    { code: 'night_owl_5', name: '夜歌印', sub: '夜间 5 次（晚 10 点后）', cat: 'time',
-      svg: (s) => stampSvg.crescent('夜', s),
-      rule: (ctx) => ctx.nightCount >= 5,
-      progress: (ctx) => ({ current: Math.min(ctx.nightCount, 5), target: 5, hint: `再夜间打 ${Math.max(0, 5 - ctx.nightCount)} 次` }) },
-    { code: 'both_time_3', name: '昼夜俱到', sub: '同日晨与夜 3 次', cat: 'time',
-      svg: (s) => stampSvg.sunmoon(s),
-      rule: (ctx) => ctx.bothTimeCount >= 3,
-      progress: (ctx) => ({ current: Math.min(ctx.bothTimeCount, 3), target: 3, hint: `再同日昼夜 ${Math.max(0, 3 - ctx.bothTimeCount)} 次` }) },
+    // ═══ 时辰之印 · time-of-day (multi-tier)
+    { code: 'early_bird', name: '早鸟印', sub: '晨间打卡（8 点前）', cat: 'time',
+      svg: (s) => stampSvg.sunrise('晨', s), metric: 'earlyCount',
+      tiers: [{at: 5, xp: 10}, {at: 20, xp: 30}, {at: 50, xp: 80}, {at: 100, xp: 200}] },
+    { code: 'night_owl', name: '夜歌印', sub: '夜间打卡（22 点后）', cat: 'time',
+      svg: (s) => stampSvg.crescent('夜', s), metric: 'nightCount',
+      tiers: [{at: 5, xp: 10}, {at: 20, xp: 30}, {at: 50, xp: 80}] },
+    { code: 'both_time', name: '昼夜俱到', sub: '同日晨与夜', cat: 'time',
+      svg: (s) => stampSvg.sunmoon(s), metric: 'bothTimeCount',
+      tiers: [{at: 3, xp: 10}, {at: 10, xp: 30}, {at: 30, xp: 80}] },
 
-    // ═══ 专项之印 (specialty) ═══
-    { code: 'full_house_1', name: '满堂印', sub: '今日所有任务皆打', cat: 'specialty',
-      svg: (s) => stampSvg.star(s),
-      rule: (ctx) => ctx.todayFullHouse },
-    { code: 'new_song_1', name: '新歌初染', sub: '首次打新任务', cat: 'specialty',
-      svg: (s) => stampSvg.boxSolid('新', s),
-      rule: (ctx) => ctx.newSongToday },
+    // ═══ 专项之印 · specialty (multi-tier)
+    { code: 'full_house', name: '满堂印', sub: '一日所有任务皆打', cat: 'specialty',
+      svg: (s) => stampSvg.star(s), metric: 'fullHouseCount',
+      tiers: [{at: 1, xp: 5}, {at: 5, xp: 15}, {at: 20, xp: 40}, {at: 50, xp: 100}, {at: 100, xp: 250}] },
+    { code: 'new_song', name: '新歌初染', sub: '打新任务的第一次', cat: 'specialty',
+      svg: (s) => stampSvg.boxSolid('新', s), metric: 'newSongCount',
+      tiers: [{at: 1, xp: 5}, {at: 3, xp: 15}, {at: 10, xp: 40}] },
     { code: 'comeback', name: '复归印', sub: '断而复起', cat: 'specialty',
-      svg: (s) => stampSvg.return2('復', '歸', s),
-      rule: (ctx) => ctx.comebackCount >= 1 },
-    { code: 'comeback_3', name: '三返印', sub: '复归 3 次', cat: 'specialty',
-      svg: (s) => stampSvg.horiz2('三', '返', s),
-      rule: (ctx) => ctx.comebackCount >= 3,
-      progress: (ctx) => ({ current: Math.min(ctx.comebackCount, 3), target: 3, hint: `再复归 ${Math.max(0, 3 - ctx.comebackCount)} 次` }) },
+      svg: (s) => stampSvg.return2('復', '歸', s), metric: 'comebackCount',
+      tiers: [{at: 1, xp: 10}, {at: 3, xp: 30}, {at: 10, xp: 80}] },
     { code: 'song_complete', parameterized: true, name: '结课印', sub: '一首歌完成', cat: 'specialty',
-      svg: (s, meta) => stampSvg.scroll('結課', (meta && meta.title) ? escHtml(String(meta.title).slice(0, 8)) : '', s),
+      svg: (s, tier, meta) => stampSvg.scroll('結課', (meta && meta.title) ? escHtml(String(meta.title).slice(0, 8)) : '', s),
       ruleParam: (ctx) => ctx.songsCompleted.map(sc => ({
-        code: 'song_complete:' + sc.id,
+        code: 'song_complete:' + sc.id, tier: 1, xp: 20,
         meta: { homework_id: sc.id, title: sc.title }
       })) },
 
-    // ═══ 藏印 (hidden · deterministic surprise) ═══
+    // ═══ 藏印 · hidden (each own single-tier)
     { code: 'mystery_1', name: '藏印壹 · 缘', sub: '暗藏于某一次', cat: 'hidden',
-      svg: (s) => stampSvg.mystery('緣', s),
-      rule: (ctx) => ctx.cumulative >= 12 },
+      svg: (s) => stampSvg.mystery('緣', s), metric: 'cumulative', tiers: [{at: 12, xp: 30}] },
     { code: 'mystery_2', name: '藏印贰 · 遇', sub: '暗藏于某一次', cat: 'hidden',
-      svg: (s) => stampSvg.mystery('遇', s),
-      rule: (ctx) => ctx.cumulative >= 42 },
+      svg: (s) => stampSvg.mystery('遇', s), metric: 'cumulative', tiers: [{at: 42, xp: 60}] },
     { code: 'mystery_3', name: '藏印叁 · 恒', sub: '暗藏于某一次', cat: 'hidden',
-      svg: (s) => stampSvg.mystery('恆', s),
-      rule: (ctx) => ctx.cumulative >= 88 },
+      svg: (s) => stampSvg.mystery('恆', s), metric: 'cumulative', tiers: [{at: 88, xp: 100}] },
   ];
 
   const STAMP_CAT_LABELS = {
@@ -6979,58 +7283,283 @@
     hidden: '藏之印',
   };
 
+  // ═══ Teacher catalog · 老师端 ═══
+  // Teachers earn seals for teaching activity and their students' milestones.
+  // Visually distinguished by a gold glow (via CSS class) + a 「師」 badge.
+  const TEACHER_STAMP_CATALOG = [
+    // ── 授业之印: what she does
+    { code: 't_first_hw', name: '授业开门', sub: '首次布置作业', cat: 't_teach',
+      svg: (s) => stampSvg.box('授', s), metric: 'hwAssignCount', tiers: [{at: 1, xp: 10}] },
+    { code: 't_hw_batch', name: '连布作业', sub: '3 / 10 / 30 / 100 份', cat: 't_teach',
+      svg: (s) => stampSvg.horiz2('授', '业', s), metric: 'hwAssignCount',
+      tiers: [{at: 3, xp: 15}, {at: 10, xp: 40}, {at: 30, xp: 120}, {at: 100, xp: 400}] },
+    { code: 't_songs', name: '一曲成课', sub: '完成 1 / 3 / 10 首歌批注', cat: 't_teach',
+      svg: (s) => stampSvg.scroll('成', '曲', s), metric: 'songsOwned',
+      tiers: [{at: 1, xp: 10}, {at: 3, xp: 40}, {at: 10, xp: 120}] },
+    { code: 't_disciples', name: '弟子门', sub: '关联 1 / 3 / 5 / 10 名学生', cat: 't_teach',
+      svg: (s) => stampSvg.hex('弟', '子', s), metric: 'studentCount',
+      tiers: [{at: 1, xp: 20}, {at: 3, xp: 60}, {at: 5, xp: 150}, {at: 10, xp: 400}] },
+
+    // ── 育徒之印: reflected from students' achievements
+    { code: 't_mirror_streak3', name: '徒得初心', sub: '有 N 位学生打通 3 日', cat: 't_raise',
+      svg: (s) => stampSvg.box('育', s), metric: 'studentTotalStreak3',
+      tiers: [{at: 1, xp: 5}, {at: 3, xp: 20}, {at: 5, xp: 40}] },
+    { code: 't_mirror_streak7', name: '徒过一周', sub: '有 N 位学生连续 7 日', cat: 't_raise',
+      svg: (s) => stampSvg.round2('徒', '週', s), metric: 'studentTotalStreak7',
+      tiers: [{at: 1, xp: 10}, {at: 3, xp: 40}, {at: 5, xp: 80}] },
+    { code: 't_mirror_streak30', name: '育徒满月', sub: '有 N 位学生连续 30 日', cat: 't_raise',
+      svg: (s) => stampSvg.doublering('育', '月', s), metric: 'studentTotalStreak30',
+      tiers: [{at: 1, xp: 50}, {at: 3, xp: 200}, {at: 5, xp: 500}] },
+    { code: 't_mirror_streak100', name: '育徒百日', sub: '有 N 位学生连续 100 日', cat: 't_raise',
+      svg: (s) => stampSvg.grid4(['育', '徒', '百', '日'], s), metric: 'studentTotalStreak100',
+      tiers: [{at: 1, xp: 200}, {at: 3, xp: 800}] },
+    { code: 't_mirror_cum100', name: '徒歌百次', sub: '有 N 位学生累积 100 次', cat: 't_raise',
+      svg: (s) => stampSvg.horiz2('徒', '勤', s), metric: 'studentTotalCum100',
+      tiers: [{at: 1, xp: 30}, {at: 3, xp: 120}, {at: 5, xp: 300}] },
+    { code: 't_mirror_song_complete', name: '徒有所成', sub: '学生完成 1 / 5 / 20 首歌', cat: 't_raise',
+      svg: (s) => stampSvg.scroll('成', '徒', s), metric: 'studentTotalSongComplete',
+      tiers: [{at: 1, xp: 30}, {at: 5, xp: 120}, {at: 20, xp: 400}] },
+    { code: 't_taoli', name: '桃李成蹊', sub: '3 / 5 / 10 名活跃学生', cat: 't_raise',
+      svg: (s) => stampSvg.oval('桃', '李', s), metric: 'studentActiveCount',
+      tiers: [{at: 3, xp: 100}, {at: 5, xp: 300}, {at: 10, xp: 800}] },
+
+    // ── 关怀之印: teacher's daily-care behavior
+    { code: 't_care_visit', name: '巡徒印', sub: '登录看学生 5 / 20 / 50 次', cat: 't_care',
+      svg: (s) => stampSvg.crescent('巡', s), metric: 'studentActiveCount',
+      tiers: [{at: 1, xp: 5}, {at: 3, xp: 15}, {at: 5, xp: 40}] },
+  ];
+
+  const TEACHER_CAT_LABELS = {
+    t_teach: '授业之印',
+    t_raise: '育徒之印',
+    t_care: '关怀之印',
+  };
+
+  // ═══ Shop (印肆): items you buy with 宝 ═══
+  const SHOP_ITEMS = [
+    // Idle seals — decorative 闲章 unlocked purely by 宝
+    { code: 'idle_bingxin', name: '一片冰心', cat: 'idle', cost: 30, sub: '闲章 · 王昌龄',
+      svg: (s) => stampSvg.oval('冰', '心', s, { rot: -6 }) },
+    { code: 'idle_zhiyin', name: '知音', cat: 'idle', cost: 40, sub: '闲章',
+      svg: (s) => stampSvg.round2('知', '音', s, { rot: 4 }) },
+    { code: 'idle_youhuang', name: '独坐幽篁', cat: 'idle', cost: 60, sub: '闲章 · 王维',
+      svg: (s) => stampSvg.vert3('幽', '篁', '独坐', s) },
+    { code: 'idle_baiyun', name: '白云自在', cat: 'idle', cost: 100, sub: '闲章',
+      svg: (s) => stampSvg.horiz2('白', '雲', s) },
+    // Cosmetic — record only for v1
+    { code: 'skin_sangpi', name: '桑皮纸底', cat: 'skin', cost: 120, sub: '印谱换纸' },
+    { code: 'skin_saijin', name: '洒金笺', cat: 'skin', cost: 200, sub: '印谱换纸' },
+    { code: 'font_kaishu', name: '楷体印文', cat: 'font', cost: 300, sub: '所有印文改楷体' },
+    { code: 'custom_seal', name: '自选定制印', cat: 'custom', cost: 500, sub: '自选 4 字 · 联系我们' },
+  ];
+
+  const SHOP_CAT_LABELS = {
+    idle: '闲章',
+    skin: '换纸',
+    font: '字体',
+    custom: '定制',
+  };
+
+  // ═══ Titles / 称号 ═══
+  // Threshold = total 宝 EARNED (not spent). Modifying spent never demotes.
+  const STUDENT_TITLES = [
+    { at: 0, name: '初染' },
+    { at: 100, name: '渐入' },
+    { at: 500, name: '得法' },
+    { at: 1500, name: '有神' },
+    { at: 4000, name: '通会' },
+    { at: 10000, name: '化境' },
+  ];
+  const TEACHER_TITLES = [
+    { at: 0, name: '授业初' },
+    { at: 100, name: '传声' },
+    { at: 500, name: '有徒' },
+    { at: 1500, name: '育英' },
+    { at: 4000, name: '桃李成蹊' },
+  ];
+  function titleFor(totalEarned, role) {
+    const table = role === 'teacher' ? TEACHER_TITLES : STUDENT_TITLES;
+    let cur = table[0].name;
+    for (const t of table) if (totalEarned >= t.at) cur = t.name;
+    return cur;
+  }
+  function catalogForRole(role) {
+    return role === 'teacher' ? TEACHER_STAMP_CATALOG : STAMP_CATALOG;
+  }
+  function catLabelsForRole(role) {
+    return role === 'teacher' ? TEACHER_CAT_LABELS : STAMP_CAT_LABELS;
+  }
+  const CJK_TIER = ['', '壹', '貳', '叁', '肆', '伍', '陸', '柒', '捌', '玖', '拾'];
+  function tierGlyph(n) { return CJK_TIER[n] || String(n); }
+
   async function loadStamps() {
     if (!supabaseClient || !cloudUser) return;
     try {
-      const { data, error } = await supabaseClient
-        .from('stamps').select('*').eq('user_id', cloudUser.id);
-      if (error) throw error;
-      earnedStamps = data || [];
+      const [stampRes, purchRes] = await Promise.all([
+        supabaseClient.from('stamps').select('*').eq('user_id', cloudUser.id),
+        supabaseClient.from('shop_purchases').select('*').eq('user_id', cloudUser.id),
+      ]);
+      if (stampRes.error) throw stampRes.error;
+      if (purchRes.error) throw purchRes.error;
+      earnedStamps = stampRes.data || [];
       earnedStampCodes = new Set(earnedStamps.map(s => s.stamp_code));
+      shopPurchases = purchRes.data || [];
+      ownedItemCodes = new Set(shopPurchases.map(p => p.item_code));
     } catch(e) { console.error('loadStamps failed', e); }
   }
 
-  // Evaluate the catalog against current context; award anything newly earned.
-  // Returns array of newly-awarded stamps for the reveal animation.
+  // Evaluate the catalog against current context; award any missing tier rows.
+  // Rows land in the DB with claimed_at=null and xp_earned set to the tier's xp.
   async function evaluateStamps() {
-    if (!supabaseClient || !cloudUser) return [];
-    const ctx = stampContext();
+    if (!supabaseClient || !cloudUser || !userRole) return [];
+    const catalog = catalogForRole(userRole);
+    const ctx = userRole === 'teacher' ? teacherStampContext() : stampContext();
+    // Existing rows keyed by "code:tier"
+    const existing = new Set(earnedStamps.map(r => r.stamp_code + ':' + r.tier));
     const toAward = [];
-    for (const st of STAMP_CATALOG) {
+    for (const st of catalog) {
       if (st.parameterized) {
         const items = st.ruleParam(ctx) || [];
         for (const it of items) {
-          if (!earnedStampCodes.has(it.code)) toAward.push({ code: it.code, meta: it.meta, def: st });
+          const key = it.code + ':' + (it.tier || 1);
+          if (existing.has(key)) continue;
+          toAward.push({
+            user_id: cloudUser.id, stamp_code: it.code, tier: it.tier || 1,
+            xp_earned: it.xp || 0, meta: it.meta || {}
+          });
         }
-      } else {
-        if (earnedStampCodes.has(st.code)) continue;
-        if (st.rule(ctx)) toAward.push({ code: st.code, meta: {}, def: st });
+      } else if (st.tiers) {
+        const val = ctx[st.metric] || 0;
+        for (let i = 0; i < st.tiers.length; i++) {
+          const tier = i + 1;
+          if (val < st.tiers[i].at) break;
+          const key = st.code + ':' + tier;
+          if (existing.has(key)) continue;
+          toAward.push({
+            user_id: cloudUser.id, stamp_code: st.code, tier,
+            xp_earned: st.tiers[i].xp, meta: {}
+          });
+        }
       }
     }
     if (!toAward.length) return [];
-    // Insert all newly-earned rows. Use onConflict do-nothing so racing tabs don't error.
-    const rows = toAward.map(a => ({ user_id: cloudUser.id, stamp_code: a.code, meta: a.meta }));
     try {
       const { data, error } = await supabaseClient
-        .from('stamps').upsert(rows, { onConflict: 'user_id,stamp_code', ignoreDuplicates: true })
+        .from('stamps')
+        .upsert(toAward, { onConflict: 'user_id,stamp_code,tier', ignoreDuplicates: true })
         .select();
       if (error) throw error;
-      for (const r of (data || [])) {
+      const inserted = data || [];
+      for (const r of inserted) {
         earnedStamps.push(r);
         earnedStampCodes.add(r.stamp_code);
       }
-      // Only reveal ones that were truly new (i.e., returned by insert).
-      const newCodes = new Set((data || []).map(r => r.stamp_code));
-      const revealed = toAward.filter(a => newCodes.has(a.code));
+      const insertedKeys = new Set(inserted.map(r => r.stamp_code + ':' + r.tier));
+      const revealed = toAward.filter(a => insertedKeys.has(a.stamp_code + ':' + a.tier))
+        .map(a => ({
+          def: catalog.find(s => s.code === a.stamp_code
+            || (s.parameterized && a.stamp_code.startsWith(s.code + ':'))),
+          tier: a.tier, xp: a.xp_earned, meta: a.meta,
+        }));
       queueStampReveals(revealed);
+      // Refresh shelf card / modal if open
+      if (document.getElementById('stamp-book-bg').style.display === 'flex') renderStampBook();
+      refreshHomeworkUIIfHome();
       return revealed;
     } catch(e) { console.error('evaluateStamps failed', e); return []; }
   }
 
-  function stampDefFromCode(code) {
-    const bareCode = code.split(':')[0];
-    return STAMP_CATALOG.find(s => s.code === bareCode || s.code === code);
+  function refreshHomeworkUIIfHome() {
+    if (document.getElementById('home-screen').style.display === 'none') return;
+    if (userRole === 'student' && typeof renderStudentHomeworkSection === 'function') {
+      renderStudentHomeworkSection();
+    }
+    // Teacher home shelf lives in the teacher rail area; re-render below.
+    if (typeof updateTeacherStampShelf === 'function') updateTeacherStampShelf();
   }
+
+  // ─── Claim mechanic: user taps unclaimed stamp → we set claimed_at.
+  async function claimStampChain(stampCode) {
+    if (!supabaseClient || !cloudUser) return;
+    if (stampViewState.role !== 'self') return;   // can't claim from teacher-viewing-student
+    const rows = earnedStamps.filter(r => r.stamp_code === stampCode && !r.claimed_at);
+    if (!rows.length) return;
+    const now = new Date().toISOString();
+    try {
+      const { data, error } = await supabaseClient
+        .from('stamps').update({ claimed_at: now })
+        .in('id', rows.map(r => r.id)).select();
+      if (error) throw error;
+      for (const r of rows) r.claimed_at = now;
+      // Confetti
+      const cell = document.querySelector(`[data-stamp-code="${stampCode}"] .stamp-svg-wrap`);
+      if (cell && typeof celebrateAt === 'function') celebrateAt(cell);
+      renderStampBook();
+      refreshHomeworkUIIfHome();
+    } catch(e) { console.error('claim failed', e); }
+  }
+  window.claimStampChain = claimStampChain;
+
+  async function claimAllStamps() {
+    if (!supabaseClient || !cloudUser) return;
+    if (stampViewState.role !== 'self') return;
+    const rows = earnedStamps.filter(r => !r.claimed_at);
+    if (!rows.length) return;
+    const now = new Date().toISOString();
+    try {
+      const { data, error } = await supabaseClient
+        .from('stamps').update({ claimed_at: now })
+        .in('id', rows.map(r => r.id)).select();
+      if (error) throw error;
+      for (const r of rows) r.claimed_at = now;
+      if (typeof celebrateAt === 'function') {
+        const el = document.querySelector('.stamp-modal-head');
+        if (el) celebrateAt(el);
+      }
+      renderStampBook();
+      refreshHomeworkUIIfHome();
+    } catch(e) { console.error('claim-all failed', e); }
+  }
+  window.claimAllStamps = claimAllStamps;
+
+  // ─── Balance / total earned / title
+  function computeBalance(stamps, purchases) {
+    const claimedXp = stamps.filter(r => r.claimed_at)
+      .reduce((s, r) => s + (r.xp_earned || 0), 0);
+    const spent = (purchases || []).reduce((s, p) => s + (p.cost || 0), 0);
+    return claimedXp - spent;
+  }
+  function computeTotalEarned(stamps) {
+    return stamps.filter(r => r.claimed_at).reduce((s, r) => s + (r.xp_earned || 0), 0);
+  }
+  function computeUnclaimedXp(stamps) {
+    return stamps.filter(r => !r.claimed_at).reduce((s, r) => s + (r.xp_earned || 0), 0);
+  }
+  function computeUnclaimedCount(stamps) {
+    return stamps.filter(r => !r.claimed_at).length;
+  }
+
+  // ─── Shop
+  async function buyShopItem(itemCode) {
+    if (!supabaseClient || !cloudUser) return;
+    if (stampViewState.role !== 'self') return;
+    if (ownedItemCodes.has(itemCode)) return;
+    const item = SHOP_ITEMS.find(i => i.code === itemCode);
+    if (!item) return;
+    const balance = computeBalance(earnedStamps, shopPurchases);
+    if (balance < item.cost) { alert('宝不够 · 差 ' + (item.cost - balance) + ' 宝'); return; }
+    try {
+      const { data, error } = await supabaseClient
+        .from('shop_purchases')
+        .insert({ user_id: cloudUser.id, item_code: itemCode, cost: item.cost })
+        .select().single();
+      if (error) throw error;
+      shopPurchases.push(data);
+      ownedItemCodes.add(itemCode);
+      renderStampBook();
+    } catch(e) { console.error('buy failed', e); alert('购买失败'); }
+  }
+  window.buyShopItem = buyShopItem;
 
   function queueStampReveals(revealed) {
     for (const a of revealed) _stampQueue.push(a);
@@ -7046,9 +7575,12 @@
     const svgEl = document.getElementById('stamp-reveal-svg');
     const nameEl = document.getElementById('stamp-reveal-name');
     const subEl = document.getElementById('stamp-reveal-sub');
-    svgEl.innerHTML = a.def.svg(180, a.meta);
-    nameEl.textContent = a.def.name;
-    subEl.textContent = a.meta && a.meta.title ? `《${a.meta.title}》 · ${a.def.sub}` : a.def.sub;
+    svgEl.innerHTML = a.def.svg(180, a.tier, a.meta);
+    const tierLabel = a.tier > 1 ? ` · ${tierGlyph(a.tier)}级` : '';
+    nameEl.textContent = a.def.name + tierLabel;
+    const meta = a.meta || {};
+    const base = meta.title ? `《${escHtml(meta.title)}》 · ${escHtml(a.def.sub)}` : escHtml(a.def.sub);
+    subEl.innerHTML = base + `<div style="margin-top:10px;color:#B92923;font-size:15px;letter-spacing:0.15em;font-weight:600;">+${a.xp} 宝 待收</div>`;
     bg.classList.add('active');
   }
 
@@ -7057,112 +7589,290 @@
     if (!bg.classList.contains('active')) return;
     bg.classList.remove('active');
     setTimeout(() => {
-      // Reset animation state by clearing then next tick showing next
       _stampRevealing = false;
       playNextStampReveal();
     }, 300);
   }
 
-  function openStampBook() {
+  function openStampBook(opts) {
+    stampViewState = { role: 'self', label: null, stamps: null, purchases: null };
+    stampCurrentTab = 'book';
     renderStampBook();
     document.getElementById('stamp-book-bg').style.display = 'flex';
   }
   function closeStampBook() {
     document.getElementById('stamp-book-bg').style.display = 'none';
   }
+  async function openStudentStampBook(studentId, studentLabel) {
+    if (!supabaseClient) return;
+    try {
+      const [stampRes, purchRes] = await Promise.all([
+        supabaseClient.from('stamps').select('*').eq('user_id', studentId),
+        supabaseClient.from('shop_purchases').select('*').eq('user_id', studentId).limit(0).then(r => r), // teacher can't read
+      ]);
+      const stu = { label: studentLabel, stamps: stampRes.data || [], purchases: [] };
+      studentStampsCache[studentId] = stu.stamps;
+      stampViewState = { role: 'student-view', label: studentLabel, stamps: stu.stamps, purchases: [] };
+      stampCurrentTab = 'book';
+      renderStampBook();
+      document.getElementById('stamp-book-bg').style.display = 'flex';
+    } catch(e) { console.error('open student stamp book failed', e); alert('打不开学生的印谱：' + (e.message || '')); }
+  }
   window.openStampBook = openStampBook;
   window.closeStampBook = closeStampBook;
+  window.openStudentStampBook = openStudentStampBook;
   window.dismissStampReveal = dismissStampReveal;
 
+  function switchStampTab(tab) {
+    stampCurrentTab = tab;
+    document.querySelectorAll('.stamp-modal-tab').forEach(el => {
+      el.classList.toggle('active', el.dataset.tab === tab);
+    });
+    renderStampBook();
+  }
+  window.switchStampTab = switchStampTab;
+
   function renderStampBook() {
-    const ctx = stampContext();
-    // Build the effective catalog: unlockable stamps + already-earned song-complete rows.
+    // Determine which set of stamps + purchases + role we're rendering.
+    const isStudentView = stampViewState.role === 'student-view';
+    const viewStamps = isStudentView ? stampViewState.stamps : earnedStamps;
+    const viewPurchases = isStudentView ? [] : shopPurchases;
+    // Role determines catalog: when viewing a student's book we always use the
+    // student catalog regardless of the current user's own role.
+    const role = isStudentView ? 'student' : userRole;
+    const catalog = catalogForRole(role);
+    const catLabels = catLabelsForRole(role);
+
+    // Head: title, subtitle, count, balance
+    const titleEl = document.getElementById('stamp-book-title');
+    const titleBadge = document.getElementById('stamp-book-title-badge');
+    if (isStudentView) {
+      titleEl.textContent = stampViewState.label + ' · 印 谱';
+    } else {
+      titleEl.textContent = '印 谱';
+    }
+    const totalEarned = computeTotalEarned(viewStamps);
+    const balance = computeBalance(viewStamps, viewPurchases);
+    const unclaimedCount = computeUnclaimedCount(viewStamps);
+    const title = titleFor(totalEarned, role);
+    titleBadge.textContent = title;
+    titleBadge.style.display = '';
+    document.getElementById('stamp-balance-num').textContent = balance;
+
+    // Update tab badge
+    const tabBadge = document.getElementById('stamp-tab-unclaimed');
+    if (!isStudentView && unclaimedCount > 0) {
+      tabBadge.textContent = unclaimedCount;
+      tabBadge.style.display = '';
+    } else {
+      tabBadge.style.display = 'none';
+    }
+    // Hide shop tab for student-view mode
+    const tabsEl = document.getElementById('stamp-modal-tabs');
+    const shopTab = tabsEl.querySelector('[data-tab="shop"]');
+    if (shopTab) shopTab.style.display = isStudentView ? 'none' : '';
+
+    if (stampCurrentTab === 'shop' && !isStudentView) {
+      renderShopTab(balance);
+      return;
+    }
+
+    // ── Build items (one per catalog entry — parameterized shows per-instance)
     const items = [];
-    for (const st of STAMP_CATALOG) {
+    for (const st of catalog) {
       if (st.parameterized) {
-        const rows = earnedStamps.filter(r => r.stamp_code.startsWith(st.code + ':'));
+        const rows = viewStamps.filter(r => r.stamp_code.startsWith(st.code + ':'));
         for (const r of rows) {
-          items.push({ def: st, code: r.stamp_code, meta: r.meta || {}, earned: true, awarded_at: r.awarded_at });
+          items.push({ def: st, code: r.stamp_code, meta: r.meta || {},
+            tierEarned: r.tier || 1, tierRow: r, unclaimed: !r.claimed_at });
         }
-        if (!rows.length) {
-          items.push({ def: st, code: st.code, meta: {}, earned: false });
-        }
-      } else {
-        const earned = earnedStampCodes.has(st.code);
-        const row = earnedStamps.find(r => r.stamp_code === st.code);
-        items.push({ def: st, code: st.code, meta: {}, earned, awarded_at: row && row.awarded_at });
+        if (!rows.length) items.push({ def: st, code: st.code, meta: {}, tierEarned: 0 });
+      } else if (st.tiers) {
+        const rows = viewStamps.filter(r => r.stamp_code === st.code);
+        const tierEarned = rows.reduce((m, r) => Math.max(m, r.tier || 1), 0);
+        const unclaimedRows = rows.filter(r => !r.claimed_at);
+        const unclaimedXp = unclaimedRows.reduce((s, r) => s + (r.xp_earned || 0), 0);
+        items.push({ def: st, code: st.code, tierEarned,
+          unclaimed: unclaimedRows.length > 0, unclaimedXp,
+          tierMax: st.tiers.length });
       }
     }
-    const earnedCount = items.filter(i => i.earned).length;
+    const earnedCount = items.filter(i => i.tierEarned > 0).length;
+    const totalItems = items.length;
     document.getElementById('stamp-count-num').textContent = earnedCount;
-    document.getElementById('stamp-count-total').textContent = items.length;
+    document.getElementById('stamp-count-total').textContent = totalItems;
 
-    // ── Next-up hero card: three closest unearned stamps with progress info.
-    const upcoming = STAMP_CATALOG
-      .filter(st => !st.parameterized && !earnedStampCodes.has(st.code) && st.progress)
-      .map(st => {
-        const p = st.progress(ctx);
-        return { st, p, distance: Math.max(0, p.target - p.current) };
-      })
-      .sort((a, b) => a.distance - b.distance)
-      .slice(0, 3);
+    // ── Next-up: 3 items closest to next tier (self view only)
+    const ctx = isStudentView ? null : (role === 'teacher' ? teacherStampContext() : stampContext());
     let nextHtml = '';
-    if (upcoming.length) {
-      const cells = upcoming.map(u => {
-        const pct = Math.min(100, Math.round((u.p.current / u.p.target) * 100));
-        return `<div class="stamp-next-row">
-          <div class="stamp-next-svg">${u.st.svg(56, {})}</div>
-          <div class="stamp-next-info">
-            <div class="stamp-next-name">${escHtml(u.st.name)}</div>
-            <div class="stamp-next-hint">${escHtml(u.p.hint)}</div>
-            <div class="stamp-next-bar"><span style="width:${pct}%"></span></div>
-            <div class="stamp-next-frac">${u.p.current} / ${u.p.target}</div>
-          </div>
+    if (!isStudentView && ctx) {
+      const upcoming = items
+        .filter(it => !it.def.parameterized && it.def.tiers && it.tierEarned < it.def.tiers.length)
+        .map(it => {
+          const nextTier = it.def.tiers[it.tierEarned];
+          const val = ctx[it.def.metric] || 0;
+          const need = Math.max(0, nextTier.at - val);
+          return { it, nextTier, val, need };
+        })
+        .sort((a, b) => a.need - b.need)
+        .slice(0, 3);
+      if (upcoming.length) {
+        const cells = upcoming.map(u => {
+          const pct = Math.min(100, Math.round((u.val / u.nextTier.at) * 100));
+          const nextLabel = u.it.tierEarned === 0
+            ? `${u.it.def.name}`
+            : `${u.it.def.name} · ${tierGlyph(u.it.tierEarned + 1)}级`;
+          return `<div class="stamp-next-row">
+            <div class="stamp-next-svg">${u.it.def.svg(56, u.it.tierEarned + 1, {})}</div>
+            <div class="stamp-next-info">
+              <div class="stamp-next-name">${escHtml(nextLabel)}</div>
+              <div class="stamp-next-hint">还差 ${u.need} · <b style="color:#B92923;">+${u.nextTier.xp} 宝</b></div>
+              <div class="stamp-next-bar"><span style="width:${pct}%"></span></div>
+              <div class="stamp-next-frac">${u.val} / ${u.nextTier.at}</div>
+            </div>
+          </div>`;
+        }).join('');
+        const claimAllBtn = unclaimedCount > 0
+          ? `<div style="margin-bottom:12px;text-align:right;">
+              <button class="shop-item-buy" onclick="claimAllStamps()">⚡ 一键收取 ${unclaimedCount} 枚</button>
+             </div>`
+          : '';
+        nextHtml = `${claimAllBtn}<div class="stamp-next-card">
+          <div class="stamp-next-head">离你最近的印</div>
+          ${cells}
         </div>`;
-      }).join('');
-      nextHtml = `<div class="stamp-next-card">
-        <div class="stamp-next-head">离你最近的印</div>
-        ${cells}
-      </div>`;
+      } else if (unclaimedCount > 0) {
+        nextHtml = `<div style="margin-bottom:16px;text-align:right;">
+          <button class="shop-item-buy" onclick="claimAllStamps()">⚡ 一键收取 ${unclaimedCount} 枚</button>
+        </div>`;
+      }
     }
 
-    // ── Grouped grid by category (6 cats)
+    // ── Grouped grid by category
     const byCat = {};
-    for (const it of items) {
-      (byCat[it.def.cat] = byCat[it.def.cat] || []).push(it);
-    }
-    const catOrder = ['streak', 'cumulative', 'weekly', 'time', 'specialty', 'hidden'];
+    for (const it of items) (byCat[it.def.cat] = byCat[it.def.cat] || []).push(it);
+    const catOrder = role === 'teacher'
+      ? ['t_teach', 't_raise', 't_care']
+      : ['streak', 'cumulative', 'weekly', 'time', 'specialty', 'hidden'];
     const catNums = ['壹', '貳', '叁', '肆', '伍', '陸'];
     const gridsHtml = catOrder.filter(c => byCat[c]).map((c, idx) => {
       const num = catNums[idx] || '';
-      const cells = byCat[c].map(it => {
-        if (it.earned) {
-          const subLine = it.meta && it.meta.title ? `《${escHtml(String(it.meta.title))}》` : escHtml(it.def.sub);
-          return `<div class="stamp-cell">
-            ${it.def.svg(76, it.meta)}
-            <div class="stamp-caption">${escHtml(it.def.name)}</div>
-            <div class="stamp-sub">${subLine}</div>
-          </div>`;
-        }
-        // Hidden category: obscure the name so it's truly a surprise.
-        if (it.def.cat === 'hidden') {
-          return `<div class="stamp-cell locked">
-            <div class="stamp-slot">尚未启封</div>
-            <div class="stamp-caption">?  ?  ?</div>
-            <div class="stamp-sub">${escHtml(it.def.sub)}</div>
-          </div>`;
-        }
-        return `<div class="stamp-cell locked">
-          <div class="stamp-slot">待得</div>
-          <div class="stamp-caption">${escHtml(it.def.name)}</div>
-          <div class="stamp-sub">${escHtml(it.def.sub)}</div>
-        </div>`;
-      }).join('');
-      return `<div class="stamp-cat-label"><span class="cat-num">${num}</span>${STAMP_CAT_LABELS[c]}</div>
+      const cells = byCat[c].map(it => renderStampCell(it, role)).join('');
+      return `<div class="stamp-cat-label"><span class="cat-num">${num}</span>${catLabels[c]}</div>
               <div class="stamp-grid">${cells}</div>`;
     }).join('');
 
-    document.getElementById('stamp-book-body').innerHTML = nextHtml + gridsHtml;
+    // ── Idle seals owned via shop, appended as a bonus section (self only)
+    let idleHtml = '';
+    if (!isStudentView) {
+      const idleOwned = SHOP_ITEMS.filter(i => i.cat === 'idle' && ownedItemCodes.has(i.code) && i.svg);
+      if (idleOwned.length) {
+        const cells = idleOwned.map(it => `<div class="stamp-cell">
+          <div class="stamp-svg-wrap">${it.svg(76)}</div>
+          <div class="stamp-caption">${escHtml(it.name)}</div>
+          <div class="stamp-sub">${escHtml(it.sub || '')}</div>
+        </div>`).join('');
+        idleHtml = `<div class="stamp-cat-label"><span class="cat-num">閒</span>闲章</div>
+                    <div class="stamp-grid">${cells}</div>`;
+      }
+    }
+
+    document.getElementById('stamp-book-body').innerHTML = nextHtml + gridsHtml + idleHtml;
+  }
+
+  function renderStampCell(it, role) {
+    const isTeacher = role === 'teacher';
+    const teacherCls = isTeacher ? ' teacher-seal' : '';
+    if (it.def.parameterized) {
+      // Song-complete: each row is a distinct cell
+      if (it.tierEarned > 0) {
+        const cls = 'stamp-cell' + teacherCls + (it.unclaimed ? ' unclaimed' : '');
+        const claimBtn = it.unclaimed
+          ? `<div class="stamp-claim-badge" onclick="event.stopPropagation();claimStampChain('${escHtml(it.code)}')">+${it.tierRow.xp_earned} 宝 · 收</div>`
+          : '';
+        const sub = it.meta && it.meta.title ? `《${escHtml(String(it.meta.title))}》` : escHtml(it.def.sub);
+        return `<div class="${cls}" data-stamp-code="${escHtml(it.code)}" ${it.unclaimed ? `onclick="claimStampChain('${escHtml(it.code)}')"` : ''}>
+          <div class="stamp-svg-wrap">${it.def.svg(76, 1, it.meta)}${claimBtn}</div>
+          <div class="stamp-caption">${escHtml(it.def.name)}</div>
+          <div class="stamp-sub">${sub}</div>
+        </div>`;
+      }
+      return `<div class="stamp-cell locked${teacherCls}">
+        <div class="stamp-slot">待得</div>
+        <div class="stamp-caption">${escHtml(it.def.name)}</div>
+        <div class="stamp-sub">${escHtml(it.def.sub)}</div>
+      </div>`;
+    }
+
+    if (it.tierEarned === 0) {
+      if (it.def.cat === 'hidden') {
+        return `<div class="stamp-cell locked${teacherCls}">
+          <div class="stamp-slot">未启封</div>
+          <div class="stamp-caption">? ? ?</div>
+          <div class="stamp-sub">${escHtml(it.def.sub)}</div>
+        </div>`;
+      }
+      return `<div class="stamp-cell locked${teacherCls}">
+        <div class="stamp-slot">待得</div>
+        <div class="stamp-caption">${escHtml(it.def.name)}</div>
+        <div class="stamp-sub">${escHtml(it.def.sub)}</div>
+      </div>`;
+    }
+
+    // Earned (possibly multiple tiers)
+    const cls = 'stamp-cell' + teacherCls + (it.unclaimed ? ' unclaimed' : '');
+    const tierBadge = it.tierEarned > 1 ? `<span class="stamp-tier-badge">${tierGlyph(it.tierEarned)}</span>` : '';
+    const claimBtn = it.unclaimed
+      ? `<div class="stamp-claim-badge" onclick="event.stopPropagation();claimStampChain('${escHtml(it.code)}')">+${it.unclaimedXp} 宝 · 收</div>`
+      : '';
+    // Tier progression dots (only if multi-tier)
+    let dots = '';
+    if (it.tierMax > 1) {
+      const arr = Array.from({length: it.tierMax}, (_, i) =>
+        `<span class="stamp-tier-dot ${i < it.tierEarned ? 'on' : ''}"></span>`).join('');
+      dots = `<div class="stamp-tier-dots">${arr}</div>`;
+    }
+    const nextTier = it.def.tiers && it.def.tiers[it.tierEarned];
+    const subLine = nextTier
+      ? `${tierGlyph(it.tierEarned)}级 · 再至 ${nextTier.at} → +${nextTier.xp} 宝`
+      : `${tierGlyph(it.tierEarned)}级 · 满级`;
+    const clickHandler = it.unclaimed ? `onclick="claimStampChain('${escHtml(it.code)}')"` : '';
+    return `<div class="${cls}" data-stamp-code="${escHtml(it.code)}" ${clickHandler}>
+      <div class="stamp-svg-wrap">${it.def.svg(76, it.tierEarned, {})}${tierBadge}${claimBtn}</div>
+      <div class="stamp-caption">${escHtml(it.def.name)}</div>
+      <div class="stamp-sub">${subLine}</div>
+      ${dots}
+    </div>`;
+  }
+
+  function renderShopTab(balance) {
+    const byCat = {};
+    for (const it of SHOP_ITEMS) (byCat[it.cat] = byCat[it.cat] || []).push(it);
+    const catOrder = ['idle', 'skin', 'font', 'custom'];
+    const html = catOrder.filter(c => byCat[c]).map((c, idx) => {
+      const num = ['壹', '貳', '叁', '肆'][idx] || '';
+      const cells = byCat[c].map(it => {
+        const owned = ownedItemCodes.has(it.code);
+        const disabled = !owned && balance < it.cost;
+        const btn = owned
+          ? `<button class="shop-item-buy" disabled>已入囊</button>`
+          : `<button class="shop-item-buy" ${disabled ? 'disabled' : ''} onclick="buyShopItem('${it.code}')">${it.cost} 宝</button>`;
+        const visual = it.svg
+          ? it.svg(44)
+          : `<div style="width:44px;height:44px;border:1.5px dashed #B8A47F;border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:'Noto Serif SC',serif;color:#B8A47F;font-size:11px;">${escHtml(it.name.slice(0,2))}</div>`;
+        return `<div class="shop-item${owned ? ' owned' : ''}">
+          <div class="shop-item-visual">${visual}</div>
+          <div class="shop-item-info">
+            <div class="shop-item-name">${escHtml(it.name)}</div>
+            <div class="shop-item-sub">${escHtml(it.sub || '')}</div>
+          </div>
+          ${btn}
+        </div>`;
+      }).join('');
+      return `<div class="shop-cat-label"><span class="cat-num" style="color:#B92923;margin-right:10px;font-weight:600;">${num}</span>${SHOP_CAT_LABELS[c]}</div>
+              <div class="shop-grid">${cells}</div>`;
+    }).join('');
+    document.getElementById('stamp-book-body').innerHTML = html;
   }
 
 
@@ -7338,7 +8048,7 @@
     // doesn't pop in after the network round-trip and shove the songs down.
     if (userRole === 'student') renderStudentHomeworkSection();
     await Promise.all([loadHomeworkAll(), loadMyStudents(), loadStamps()]);
-    if (userRole === 'student') { evaluateStamps(); }
+    evaluateStamps();
     if (userRole === 'teacher') {
       renderTeacherStudentsSection();
       document.getElementById('student-homework-section').style.display = 'none';
@@ -7487,8 +8197,7 @@
       const todayObj = new Date(today + 'T00:00:00');
       const wday = ['周日','周一','周二','周三','周四','周五','周六'][todayObj.getDay()];
       const dateLabel = `${todayObj.getMonth()+1} 月 ${todayObj.getDate()} 日`;
-      sectionTitle.innerHTML = `<span>今天 · ${wday} · ${dateLabel}</span>
-        <button class="stamp-book-btn" onclick="openStampBook()" title="印谱"><span class="stamp-dot"></span>印谱</button>`;
+      sectionTitle.innerHTML = `<span>今天 · ${wday} · ${dateLabel}</span>`;
     }
 
     let activeHtml = '';
@@ -7547,8 +8256,60 @@
         </details>`;
     }
 
-    list.innerHTML = activeHtml + archivedHtml;
+    const shelfHtml = renderStampShelfCard();
+    list.innerHTML = shelfHtml + activeHtml + archivedHtml;
     centerTodayInStrips(list);
+  }
+
+  // A small "印谱 · 8 / 30" shelf card at the top of the student home,
+  // with up to 4 recent seal previews and a big tap area. Replaces the
+  // former tiny button hidden in the section title.
+  function renderStampShelfCard(opts) {
+    opts = opts || {};
+    const role = opts.role || userRole || 'student';
+    const catalog = catalogForRole(role);
+    const totalStamps = catalog.reduce((n, s) => n + (s.parameterized ? 0 : 1), 0);
+    const distinctEarned = new Set(earnedStamps.map(r => r.stamp_code)).size;
+    const balance = computeBalance(earnedStamps, shopPurchases);
+    const totalEarned = computeTotalEarned(earnedStamps);
+    const unclaimedCount = computeUnclaimedCount(earnedStamps);
+    const title = titleFor(totalEarned, role);
+    const recent = [...earnedStamps]
+      .sort((a, b) => (b.awarded_at || '').localeCompare(a.awarded_at || ''))
+      .slice(0, 4);
+    const seals = recent.map(row => {
+      const def = catalog.find(s => s.code === row.stamp_code
+        || (s.parameterized && row.stamp_code.startsWith(s.code + ':')));
+      if (!def) return '';
+      return `<div class="stamp-shelf-seal">${def.svg(44, row.tier || 1, row.meta || {})}</div>`;
+    }).join('');
+    const empty = !distinctEarned;
+    const teaserSeal = empty
+      ? `<div class="stamp-shelf-seal empty">${stampSvg.box('印', 44)}</div>`
+      : '';
+    const unclaimedPill = unclaimedCount > 0
+      ? `<span style="color:#B92923;font-weight:600;">· ⚡ ${unclaimedCount} 待收</span>`
+      : '';
+    const line = empty
+      ? '尚未启印 · 首次打卡即得'
+      : `<b>${distinctEarned}</b> / ${totalStamps} · <b>${balance}</b> 宝 ${unclaimedPill}`;
+    return `<div class="stamp-shelf" onclick="openStampBook()">
+      <div class="stamp-shelf-left">
+        <div class="stamp-shelf-title">印 谱 · <span style="color:#B98A2D;font-family:'Kaiti SC',serif;font-size:13px;letter-spacing:0.15em;">${title}</span></div>
+        <div class="stamp-shelf-count">${line}</div>
+      </div>
+      <div class="stamp-shelf-strip">${empty ? teaserSeal : seals}</div>
+      <div class="stamp-shelf-arrow">›</div>
+    </div>`;
+  }
+
+  // Teacher home doesn't use the homework shelf, so provide a stand-alone
+  // container that renderTeacherStudentsSection can call.
+  function updateTeacherStampShelf() {
+    const el = document.getElementById('teacher-stamp-shelf');
+    if (!el) return;
+    if (userRole !== 'teacher') { el.innerHTML = ''; return; }
+    el.innerHTML = renderStampShelfCard({ role: 'teacher' });
   }
 
   function centerTodayInStrips(root) {
@@ -8167,9 +8928,14 @@
     }
     const subText = subParts.join(' · ');
     const linkIdJs = s.linkId ? String(s.linkId) : '';
-    const headerActionBtn = linked
+    const studentIdJs = s.id ? String(s.id) : '';
+    const stampBookBtn = linked
+      ? `<button class="sv-unlink-btn" onclick="openStudentStampBook('${studentIdJs}','${nameJs}')" title="看 ${nameJs} 的印谱" style="border-color:#C4924A;color:#B98A2D;">📜 看印谱</button>`
+      : '';
+    const unlinkOrInviteBtn = linked
       ? `<button class="sv-unlink-btn" onclick="unlinkStudentByTeacher('${linkIdJs}','${nameJs}')" title="取消和这个学生的关联">取消关联</button>`
       : `<button class="btn btn-primary" onclick="openStudentInviteModal('${nameJs}')">+ 邀请加入</button>`;
+    const headerActionBtn = stampBookBtn + unlinkOrInviteBtn;
     const headerHtml = `
       <button class="sv-back" onclick="closeStudentMainView()">← 全部学生</button>
       <div class="sv-header">
@@ -8514,19 +9280,23 @@
     // Tweak the song-search placeholder for students (no other students concept)
     const searchEl = document.getElementById('project-search');
     if (searchEl) searchEl.placeholder = userRole === 'student' ? '搜索歌曲…' : '搜索歌曲、学生…';
+    const teacherStampShelf = document.getElementById('teacher-stamp-shelf');
     if (userRole === 'teacher') {
       badge.textContent = '老师'; badge.style.display = '';
       if (subtitle) subtitle.textContent = '给学生标注、留作业';
       if (assignBtn) assignBtn.style.display = '';
       if (studentTeachersSec) studentTeachersSec.style.display = 'none';
       if (studentHwSec) studentHwSec.style.display = 'none';
+      if (teacherStampShelf) { teacherStampShelf.style.display = ''; updateTeacherStampShelf(); }
     } else if (userRole === 'student') {
       badge.textContent = '学生'; badge.style.display = '';
       if (subtitle) subtitle.textContent = '练习、打卡、复习老师的批注';
       if (assignBtn) assignBtn.style.display = 'none';
       if (teacherSec) teacherSec.style.display = 'none';
+      if (teacherStampShelf) teacherStampShelf.style.display = 'none';
     } else {
       badge.style.display = 'none';
+      if (teacherStampShelf) teacherStampShelf.style.display = 'none';
     }
   }
 
