@@ -2326,6 +2326,50 @@
     }
     .stamp-cat-label + .stamp-cat-label { margin-top: 24px; }
     .stamp-cat-label .cat-num { color: #B92923; margin-right: 10px; font-weight: 600; }
+    .stamp-next-card {
+      background: linear-gradient(180deg, #FDF6E0 0%, #F5E9CA 100%);
+      border: 1px solid rgba(139,115,85,0.35);
+      border-radius: 8px;
+      padding: 16px 18px 14px;
+      margin-bottom: 24px;
+      box-shadow: inset 0 0 30px rgba(184,132,49,0.06);
+    }
+    .stamp-next-head {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 11px; letter-spacing: 0.3em; color: #B92923;
+      font-weight: 600; margin-bottom: 12px;
+    }
+    .stamp-next-row {
+      display: flex; align-items: center; gap: 14px;
+      padding: 8px 0;
+    }
+    .stamp-next-row + .stamp-next-row {
+      border-top: 1px dashed rgba(139,115,85,0.25);
+    }
+    .stamp-next-svg { flex-shrink: 0; opacity: 0.4; filter: grayscale(0.4); }
+    .stamp-next-info { flex: 1; min-width: 0; }
+    .stamp-next-name {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 14px; color: #2A1F16; letter-spacing: 0.1em; font-weight: 500;
+    }
+    .stamp-next-hint {
+      font-size: 11.5px; color: #8A7355; margin: 2px 0 6px;
+      letter-spacing: 0.02em;
+    }
+    .stamp-next-bar {
+      height: 4px; background: rgba(139,115,85,0.2); border-radius: 2px;
+      overflow: hidden; margin-bottom: 3px;
+    }
+    .stamp-next-bar span {
+      display: block; height: 100%;
+      background: linear-gradient(90deg, #D63A34 0%, #B92923 100%);
+      border-radius: 2px; transition: width .3s;
+    }
+    .stamp-next-frac {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 10.5px; color: #B92923; letter-spacing: 0.05em;
+      font-variant-numeric: tabular-nums;
+    }
     .stamp-grid {
       display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px 12px;
       justify-items: center;
@@ -6529,6 +6573,12 @@
         <text x="45" y="58" text-anchor="middle" fill="#B92923"
               font-family="Songti SC, STSong, serif" font-size="30" font-weight="700">${char}</text>
       </g></svg>`,
+    boxSolid: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -3} 45 45)">
+        <rect x="18" y="18" width="54" height="54" rx="1.5" fill="#B92923"/>
+        <text x="45" y="58" text-anchor="middle" fill="#FBF3D8"
+              font-family="Songti SC, STSong, serif" font-size="28" font-weight="700">${char}</text>
+      </g></svg>`,
     round2: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
       <g transform="rotate(${opts.rot || -2} 45 45)">
         <circle cx="45" cy="45" r="30" fill="#B92923"/>
@@ -6581,34 +6631,153 @@
         <text x="65" y="42" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="20" font-weight="700">${b}</text>
         <text x="50" y="70" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="10" opacity="0.75">断而復起</text>
       </g></svg>`,
+    // New shapes for v2 density
+    pill: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 60" width="${size}" height="${size * 0.6}">
+      <g transform="rotate(${opts.rot || -3} 50 30)">
+        <rect x="6" y="10" width="88" height="40" rx="20" fill="#B92923"/>
+        <text x="50" y="38" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="18" font-weight="700">${a}${b}</text>
+      </g></svg>`,
+    hex: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -3} 45 45)">
+        <polygon points="45,10 76,28 76,62 45,80 14,62 14,28" fill="#B92923"/>
+        <text x="45" y="42" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${a}</text>
+        <text x="45" y="62" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${b}</text>
+      </g></svg>`,
+    oval: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 80" width="${size}" height="${size * 0.8}">
+      <g transform="rotate(${opts.rot || 2} 50 40)">
+        <ellipse cx="50" cy="40" rx="42" ry="30" fill="#B92923"/>
+        <text x="50" y="37" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${a}</text>
+        <text x="50" y="55" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${b}</text>
+      </g></svg>`,
+    gourd: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 100" width="${size * 0.9}" height="${size}">
+      <g transform="rotate(${opts.rot || -2} 45 50)">
+        <path d="M45 8 Q31 11 31 22 Q31 31 39 36 Q22 42 18 58 Q14 88 45 94 Q76 88 72 58 Q68 42 51 36 Q59 31 59 22 Q59 11 45 8 Z" fill="#B92923"/>
+        <text x="45" y="28" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="11" font-weight="700">${a}</text>
+        <text x="45" y="70" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="18" font-weight="700">${b}</text>
+      </g></svg>`,
+    sunrise: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || 0} 45 45)">
+        <rect x="14" y="14" width="62" height="62" rx="2" fill="#B92923"/>
+        <circle cx="45" cy="52" r="12" fill="#FBF3D8" opacity="0.9"/>
+        <rect x="20" y="62" width="50" height="1.5" fill="#FBF3D8"/>
+        <path d="M18 50 L26 50 M64 50 L72 50 M45 30 L45 38 M28 34 L34 40 M56 40 L62 34" stroke="#FBF3D8" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+        <text x="45" y="76" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="9" font-weight="700">${char}</text>
+      </g></svg>`,
+    crescent: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -6} 45 45)">
+        <rect x="14" y="14" width="62" height="62" rx="2" fill="#B92923"/>
+        <path d="M56 26 A22 22 0 1 0 56 66 A16 22 0 1 1 56 26 Z" fill="#FBF3D8" opacity="0.92"/>
+        <text x="30" y="76" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="9" font-weight="700">${char}</text>
+      </g></svg>`,
+    sunmoon: (size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || 0} 45 45)">
+        <rect x="14" y="14" width="62" height="62" rx="2" fill="#B92923"/>
+        <circle cx="30" cy="36" r="8" fill="#FBF3D8"/>
+        <path d="M64 30 A9 9 0 1 0 64 46 A6 9 0 1 1 64 30 Z" fill="#FBF3D8"/>
+        <text x="45" y="72" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="11" font-weight="700">晝夜</text>
+      </g></svg>`,
+    star: (size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -4} 45 45)">
+        <circle cx="45" cy="45" r="32" fill="#B92923"/>
+        <path d="M45 22 L49 40 L67 40 L52 51 L57 68 L45 58 L33 68 L38 51 L23 40 L41 40 Z" fill="#FBF3D8" opacity="0.92"/>
+      </g></svg>`,
+    mystery: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -2} 45 45)">
+        <rect x="18" y="18" width="54" height="54" rx="1.5" fill="#B92923"/>
+        <text x="45" y="60" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="30" font-weight="700">${char}</text>
+      </g></svg>`,
   };
 
   // Trigger context: derived from current homeworkAsStudent + homeworkChecksByHw.
+  // Everything used by stamp rules should be a plain field on the returned object.
   function stampContext() {
+    const today = todayDateStr();
     let cumulative = 0;
-    const allDates = new Set();
+    const dateSet = new Set();
+    let earlyCount = 0, nightCount = 0;
+    const dailyEarly = {}, dailyLate = {};
+    const hwFirstDate = {};   // hw_id -> earliest checked date
     for (const hwId of Object.keys(homeworkChecksByHw)) {
       for (const [d, c] of Object.entries(homeworkChecksByHw[hwId])) {
-        if (c && c.completed) { cumulative++; allDates.add(d); }
+        if (!c || !c.completed) continue;
+        cumulative++;
+        dateSet.add(d);
+        if (c.completed_at) {
+          const h = new Date(c.completed_at).getHours();
+          if (h < 8) { earlyCount++; dailyEarly[d] = true; }
+          else if (h >= 22) { nightCount++; dailyLate[d] = true; }
+        }
+        if (!hwFirstDate[hwId] || d < hwFirstDate[hwId]) hwFirstDate[hwId] = d;
       }
     }
-    // Current streak: consecutive days ending today (or the most-recent checked day)
-    // with at least one homework checked. Anchor to today; count back.
+    const bothTimeCount = Object.keys(dailyEarly).filter(d => dailyLate[d]).length;
+
+    // Streak: consecutive days ending today (or yesterday if today not checked yet).
     let streak = 0;
-    const today = todayDateStr();
     let cursor = today;
-    if (!allDates.has(cursor)) {
-      // Also try starting from yesterday so streak doesn't reset before today's check.
+    if (!dateSet.has(cursor)) {
       const y = new Date(today + 'T00:00:00'); y.setDate(y.getDate() - 1);
       cursor = y.getFullYear() + '-' + String(y.getMonth()+1).padStart(2,'0') + '-' + String(y.getDate()).padStart(2,'0');
     }
-    while (allDates.has(cursor)) {
+    while (dateSet.has(cursor)) {
       streak++;
-      const cur = new Date(cursor + 'T00:00:00');
-      cur.setDate(cur.getDate() - 1);
+      const cur = new Date(cursor + 'T00:00:00'); cur.setDate(cur.getDate() - 1);
       cursor = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0') + '-' + String(cur.getDate()).padStart(2,'0');
     }
-    // Songs completed: homework whose done fraction >= 80%
+
+    // Current ISO week (Mon-Sun): count checked days and whether it's full.
+    const nowD = new Date(today + 'T00:00:00');
+    const daySinceMon = (nowD.getDay() + 6) % 7; // 0=Mon .. 6=Sun
+    const monday = new Date(nowD); monday.setDate(nowD.getDate() - daySinceMon);
+    const weekDates = [];
+    for (let i = 0; i < 7; i++) {
+      const dt = new Date(monday); dt.setDate(monday.getDate() + i);
+      weekDates.push(dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0'));
+    }
+    const weekChecked = weekDates.filter(d => dateSet.has(d)).length;
+    const weekFull = weekChecked === 7;
+    const weekendChecked = weekDates.filter((d, i) => (i === 5 || i === 6) && dateSet.has(d)).length;
+
+    // Consecutive full weeks going back from this one.
+    let weekStreak = weekFull ? 1 : 0;
+    if (weekFull) {
+      let pm = new Date(monday);
+      while (true) {
+        pm.setDate(pm.getDate() - 7);
+        let all = true;
+        for (let i = 0; i < 7; i++) {
+          const dt = new Date(pm); dt.setDate(pm.getDate() + i);
+          const ds = dt.getFullYear() + '-' + String(dt.getMonth()+1).padStart(2,'0') + '-' + String(dt.getDate()).padStart(2,'0');
+          if (!dateSet.has(ds)) { all = false; break; }
+        }
+        if (all) weekStreak++; else break;
+      }
+    }
+
+    // This month: full or count so far.
+    const y = nowD.getFullYear(); const m = nowD.getMonth();
+    const lastDay = new Date(y, m + 1, 0).getDate();
+    let monthChecked = 0;
+    for (let d = 1; d <= lastDay; d++) {
+      const ds = y + '-' + String(m+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+      if (dateSet.has(ds)) monthChecked++;
+    }
+    const monthFull = monthChecked === lastDay;
+
+    // Today's active homeworks + full-house (all active today are checked today).
+    const activeToday = homeworkAsStudent.filter(h =>
+      !h.archived_at && h.start_date <= today && h.end_date >= today
+    );
+    const activeCheckedToday = activeToday.filter(h => {
+      const c = (homeworkChecksByHw[h.id] || {})[today];
+      return c && c.completed;
+    });
+    const todayFullHouse = activeToday.length >= 2 && activeCheckedToday.length === activeToday.length;
+
+    // New song check: any homework's first-ever check is today (student practicing a brand-new task).
+    const newSongToday = Object.values(hwFirstDate).some(d => d === today);
+
+    // Songs completed (>=80% of the assigned days).
     const songsCompleted = [];
     for (const h of homeworkAsStudent) {
       const days = dateRangeDays(h.start_date, h.end_date);
@@ -6618,72 +6787,168 @@
         songsCompleted.push({ id: h.id, title: h.title });
       }
     }
-    // Come-back trigger: today has a check AND the previous most-recent check was ≥7 days before.
-    let comeback = false;
-    if (allDates.has(today)) {
-      const sorted = Array.from(allDates).sort();
-      // find max date < today
-      const prev = sorted.filter(d => d < today).pop();
-      if (prev) {
-        const diff = (new Date(today + 'T00:00:00') - new Date(prev + 'T00:00:00')) / 86400000;
-        if (diff >= 7) comeback = true;
-      }
+
+    // Comeback: any historical gap of >=7 days.
+    let comebackCount = 0;
+    const sorted = Array.from(dateSet).sort();
+    for (let i = 1; i < sorted.length; i++) {
+      const diff = (new Date(sorted[i] + 'T00:00:00') - new Date(sorted[i-1] + 'T00:00:00')) / 86400000;
+      if (diff >= 7) comebackCount++;
     }
-    return { streak, cumulative, songsCompleted, comeback };
+
+    return {
+      streak, cumulative, songsCompleted,
+      weekChecked, weekFull, weekStreak, weekendChecked, monthFull, monthChecked, monthTotal: lastDay,
+      earlyCount, nightCount, bothTimeCount,
+      todayFullHouse, activeTodayCount: activeToday.length,
+      newSongToday, comebackCount,
+    };
   }
 
+  // ── Stamp catalog (v2 · 30 印) ──
+  // Fields: code, name, sub, cat, svg(size, meta?), rule(ctx), progress(ctx)?
+  // progress returns { current, target, hint } to power the "next up" preview.
   const STAMP_CATALOG = [
-    // ── Milestone: streak
-    {
-      code: 'streak_3', name: '初心', sub: '连续 3 日', cat: 'streak',
-      svg: (s) => stampSvg.box('初', s), rule: (ctx) => ctx.streak >= 3,
-    },
-    {
-      code: 'streak_7', name: '一周', sub: '连续 7 日', cat: 'streak',
-      svg: (s) => stampSvg.round2('七', '日', s), rule: (ctx) => ctx.streak >= 7,
-    },
-    {
-      code: 'streak_14', name: '两周不断', sub: '连续 14 日', cat: 'streak',
-      svg: (s) => stampSvg.vert3('兩', '周', '不斷', s), rule: (ctx) => ctx.streak >= 14,
-    },
-    {
-      code: 'streak_30', name: '满月印', sub: '连续 30 日', cat: 'streak',
-      svg: (s) => stampSvg.doublering('滿', '月', s), rule: (ctx) => ctx.streak >= 30,
-    },
-    // ── Milestone: cumulative
-    {
-      code: 'cum_30', name: '三十次', sub: '累积 30 次', cat: 'cumulative',
-      svg: (s) => stampSvg.horiz2('卅', '次', s), rule: (ctx) => ctx.cumulative >= 30,
-    },
-    {
-      code: 'cum_100', name: '百日歌心', sub: '累积 100 次', cat: 'cumulative',
-      svg: (s) => stampSvg.grid4(['百', '日', '歌', '心'], s), rule: (ctx) => ctx.cumulative >= 100,
-    },
-    {
-      code: 'cum_365', name: '一年不辍', sub: '累积 365 次', cat: 'cumulative',
-      svg: (s) => stampSvg.doublering('一年', '不輟', s), rule: (ctx) => ctx.cumulative >= 365,
-    },
-    // ── Specialty
-    {
-      code: 'comeback', name: '复归印', sub: '断而复起', cat: 'specialty',
-      svg: (s) => stampSvg.return2('復', '歸', s), rule: (ctx) => ctx.comeback,
-    },
-    // Song-complete: parameterized. Each unique homework earns its own row with meta.homework_id.
-    {
-      code: 'song_complete', parameterized: true, name: '结课印', sub: '一首歌完成', cat: 'specialty',
+    // ═══ 连续之印 (streak) ═══
+    { code: 'first_day', name: '首日印', sub: '首次打卡', cat: 'streak',
+      svg: (s) => stampSvg.box('始', s),
+      rule: (ctx) => ctx.cumulative >= 1,
+      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 1), target: 1, hint: '首次打卡即得' }) },
+    { code: 'streak_3', name: '初心', sub: '连续 3 日', cat: 'streak',
+      svg: (s) => stampSvg.box('初', s),
+      rule: (ctx) => ctx.streak >= 3,
+      progress: (ctx) => ({ current: Math.min(ctx.streak, 3), target: 3, hint: `再连续 ${Math.max(0, 3 - ctx.streak)} 日` }) },
+    { code: 'streak_5', name: '五日印', sub: '连续 5 日', cat: 'streak',
+      svg: (s) => stampSvg.pill('五', '日', s),
+      rule: (ctx) => ctx.streak >= 5,
+      progress: (ctx) => ({ current: Math.min(ctx.streak, 5), target: 5, hint: `再连续 ${Math.max(0, 5 - ctx.streak)} 日` }) },
+    { code: 'streak_7', name: '一周', sub: '连续 7 日', cat: 'streak',
+      svg: (s) => stampSvg.round2('七', '日', s),
+      rule: (ctx) => ctx.streak >= 7,
+      progress: (ctx) => ({ current: Math.min(ctx.streak, 7), target: 7, hint: `再连续 ${Math.max(0, 7 - ctx.streak)} 日` }) },
+    { code: 'streak_10', name: '旬印', sub: '连续 10 日', cat: 'streak',
+      svg: (s) => stampSvg.box('旬', s),
+      rule: (ctx) => ctx.streak >= 10,
+      progress: (ctx) => ({ current: Math.min(ctx.streak, 10), target: 10, hint: `再连续 ${Math.max(0, 10 - ctx.streak)} 日` }) },
+    { code: 'streak_14', name: '两周不断', sub: '连续 14 日', cat: 'streak',
+      svg: (s) => stampSvg.vert3('兩', '周', '不斷', s),
+      rule: (ctx) => ctx.streak >= 14,
+      progress: (ctx) => ({ current: Math.min(ctx.streak, 14), target: 14, hint: `再连续 ${Math.max(0, 14 - ctx.streak)} 日` }) },
+    { code: 'streak_21', name: '三周', sub: '连续 21 日', cat: 'streak',
+      svg: (s) => stampSvg.hex('三', '周', s),
+      rule: (ctx) => ctx.streak >= 21,
+      progress: (ctx) => ({ current: Math.min(ctx.streak, 21), target: 21, hint: `再连续 ${Math.max(0, 21 - ctx.streak)} 日` }) },
+    { code: 'streak_30', name: '满月印', sub: '连续 30 日', cat: 'streak',
+      svg: (s) => stampSvg.doublering('滿', '月', s),
+      rule: (ctx) => ctx.streak >= 30,
+      progress: (ctx) => ({ current: Math.min(ctx.streak, 30), target: 30, hint: `再连续 ${Math.max(0, 30 - ctx.streak)} 日` }) },
+    { code: 'streak_50', name: '半百印', sub: '连续 50 日', cat: 'streak',
+      svg: (s) => stampSvg.horiz2('五', '十', s),
+      rule: (ctx) => ctx.streak >= 50,
+      progress: (ctx) => ({ current: Math.min(ctx.streak, 50), target: 50, hint: `再连续 ${Math.max(0, 50 - ctx.streak)} 日` }) },
+    { code: 'streak_100', name: '百日不断', sub: '连续 100 日', cat: 'streak',
+      svg: (s) => stampSvg.grid4(['百', '日', '不', '斷'], s),
+      rule: (ctx) => ctx.streak >= 100,
+      progress: (ctx) => ({ current: Math.min(ctx.streak, 100), target: 100, hint: `再连续 ${Math.max(0, 100 - ctx.streak)} 日` }) },
+
+    // ═══ 累积之印 (cumulative) ═══
+    { code: 'cum_10', name: '十次印', sub: '累积 10 次', cat: 'cumulative',
+      svg: (s) => stampSvg.pill('十', '次', s),
+      rule: (ctx) => ctx.cumulative >= 10,
+      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 10), target: 10, hint: `再打卡 ${Math.max(0, 10 - ctx.cumulative)} 次` }) },
+    { code: 'cum_30', name: '三十次', sub: '累积 30 次', cat: 'cumulative',
+      svg: (s) => stampSvg.horiz2('卅', '次', s),
+      rule: (ctx) => ctx.cumulative >= 30,
+      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 30), target: 30, hint: `再打卡 ${Math.max(0, 30 - ctx.cumulative)} 次` }) },
+    { code: 'cum_50', name: '五十次', sub: '累积 50 次', cat: 'cumulative',
+      svg: (s) => stampSvg.oval('五', '十', s),
+      rule: (ctx) => ctx.cumulative >= 50,
+      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 50), target: 50, hint: `再打卡 ${Math.max(0, 50 - ctx.cumulative)} 次` }) },
+    { code: 'cum_100', name: '百日歌心', sub: '累积 100 次', cat: 'cumulative',
+      svg: (s) => stampSvg.grid4(['百', '日', '歌', '心'], s),
+      rule: (ctx) => ctx.cumulative >= 100,
+      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 100), target: 100, hint: `再打卡 ${Math.max(0, 100 - ctx.cumulative)} 次` }) },
+    { code: 'cum_365', name: '一年不辍', sub: '累积 365 次', cat: 'cumulative',
+      svg: (s) => stampSvg.doublering('一年', '不輟', s),
+      rule: (ctx) => ctx.cumulative >= 365,
+      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 365), target: 365, hint: `再打卡 ${Math.max(0, 365 - ctx.cumulative)} 次` }) },
+    { code: 'cum_500', name: '五百余音', sub: '累积 500 次', cat: 'cumulative',
+      svg: (s) => stampSvg.gourd('五百', '餘音', s),
+      rule: (ctx) => ctx.cumulative >= 500,
+      progress: (ctx) => ({ current: Math.min(ctx.cumulative, 500), target: 500, hint: `再打卡 ${Math.max(0, 500 - ctx.cumulative)} 次` }) },
+
+    // ═══ 周月之印 (weekly / monthly) ═══
+    { code: 'week_full_1', name: '一周不歇', sub: '本周 7 日皆有印', cat: 'weekly',
+      svg: (s) => stampSvg.round2('周', '全', s),
+      rule: (ctx) => ctx.weekFull,
+      progress: (ctx) => ({ current: ctx.weekChecked, target: 7, hint: `本周再打 ${Math.max(0, 7 - ctx.weekChecked)} 天` }) },
+    { code: 'week_streak_4', name: '四周连贯', sub: '连续 4 周皆全', cat: 'weekly',
+      svg: (s) => stampSvg.hex('四', '周', s),
+      rule: (ctx) => ctx.weekStreak >= 4,
+      progress: (ctx) => ({ current: Math.min(ctx.weekStreak, 4), target: 4, hint: `再连续 ${Math.max(0, 4 - ctx.weekStreak)} 周` }) },
+    { code: 'month_full_1', name: '满勤月', sub: '整月每日有印', cat: 'weekly',
+      svg: (s) => stampSvg.doublering('滿', '勤', s),
+      rule: (ctx) => ctx.monthFull,
+      progress: (ctx) => ({ current: ctx.monthChecked, target: ctx.monthTotal, hint: `本月再打 ${Math.max(0, ctx.monthTotal - ctx.monthChecked)} 天` }) },
+    { code: 'weekend_1', name: '周末不歇', sub: '本周六日皆打卡', cat: 'weekly',
+      svg: (s) => stampSvg.pill('周', '末', s),
+      rule: (ctx) => ctx.weekendChecked >= 2,
+      progress: (ctx) => ({ current: ctx.weekendChecked, target: 2, hint: `周末再打 ${Math.max(0, 2 - ctx.weekendChecked)} 天` }) },
+
+    // ═══ 时辰之印 (time-of-day) ═══
+    { code: 'early_bird_5', name: '早鸟印', sub: '晨间 5 次（早 8 点前）', cat: 'time',
+      svg: (s) => stampSvg.sunrise('晨', s),
+      rule: (ctx) => ctx.earlyCount >= 5,
+      progress: (ctx) => ({ current: Math.min(ctx.earlyCount, 5), target: 5, hint: `再晨间打 ${Math.max(0, 5 - ctx.earlyCount)} 次` }) },
+    { code: 'night_owl_5', name: '夜歌印', sub: '夜间 5 次（晚 10 点后）', cat: 'time',
+      svg: (s) => stampSvg.crescent('夜', s),
+      rule: (ctx) => ctx.nightCount >= 5,
+      progress: (ctx) => ({ current: Math.min(ctx.nightCount, 5), target: 5, hint: `再夜间打 ${Math.max(0, 5 - ctx.nightCount)} 次` }) },
+    { code: 'both_time_3', name: '昼夜俱到', sub: '同日晨与夜 3 次', cat: 'time',
+      svg: (s) => stampSvg.sunmoon(s),
+      rule: (ctx) => ctx.bothTimeCount >= 3,
+      progress: (ctx) => ({ current: Math.min(ctx.bothTimeCount, 3), target: 3, hint: `再同日昼夜 ${Math.max(0, 3 - ctx.bothTimeCount)} 次` }) },
+
+    // ═══ 专项之印 (specialty) ═══
+    { code: 'full_house_1', name: '满堂印', sub: '今日所有任务皆打', cat: 'specialty',
+      svg: (s) => stampSvg.star(s),
+      rule: (ctx) => ctx.todayFullHouse },
+    { code: 'new_song_1', name: '新歌初染', sub: '首次打新任务', cat: 'specialty',
+      svg: (s) => stampSvg.boxSolid('新', s),
+      rule: (ctx) => ctx.newSongToday },
+    { code: 'comeback', name: '复归印', sub: '断而复起', cat: 'specialty',
+      svg: (s) => stampSvg.return2('復', '歸', s),
+      rule: (ctx) => ctx.comebackCount >= 1 },
+    { code: 'comeback_3', name: '三返印', sub: '复归 3 次', cat: 'specialty',
+      svg: (s) => stampSvg.horiz2('三', '返', s),
+      rule: (ctx) => ctx.comebackCount >= 3,
+      progress: (ctx) => ({ current: Math.min(ctx.comebackCount, 3), target: 3, hint: `再复归 ${Math.max(0, 3 - ctx.comebackCount)} 次` }) },
+    { code: 'song_complete', parameterized: true, name: '结课印', sub: '一首歌完成', cat: 'specialty',
       svg: (s, meta) => stampSvg.scroll('結課', (meta && meta.title) ? escHtml(String(meta.title).slice(0, 8)) : '', s),
-      // Returns an array of {code, meta} tuples to award
       ruleParam: (ctx) => ctx.songsCompleted.map(sc => ({
         code: 'song_complete:' + sc.id,
         meta: { homework_id: sc.id, title: sc.title }
-      })),
-    },
+      })) },
+
+    // ═══ 藏印 (hidden · deterministic surprise) ═══
+    { code: 'mystery_1', name: '藏印壹 · 缘', sub: '暗藏于某一次', cat: 'hidden',
+      svg: (s) => stampSvg.mystery('緣', s),
+      rule: (ctx) => ctx.cumulative >= 12 },
+    { code: 'mystery_2', name: '藏印贰 · 遇', sub: '暗藏于某一次', cat: 'hidden',
+      svg: (s) => stampSvg.mystery('遇', s),
+      rule: (ctx) => ctx.cumulative >= 42 },
+    { code: 'mystery_3', name: '藏印叁 · 恒', sub: '暗藏于某一次', cat: 'hidden',
+      svg: (s) => stampSvg.mystery('恆', s),
+      rule: (ctx) => ctx.cumulative >= 88 },
   ];
 
   const STAMP_CAT_LABELS = {
     streak: '连续之印',
     cumulative: '累积之印',
+    weekly: '周月之印',
+    time: '时辰之印',
     specialty: '专项之印',
+    hidden: '藏之印',
   };
 
   async function loadStamps() {
@@ -6782,16 +7047,15 @@
   window.dismissStampReveal = dismissStampReveal;
 
   function renderStampBook() {
+    const ctx = stampContext();
     // Build the effective catalog: unlockable stamps + already-earned song-complete rows.
     const items = [];
     for (const st of STAMP_CATALOG) {
       if (st.parameterized) {
-        // For each earned song-complete row, add a cell.
         const rows = earnedStamps.filter(r => r.stamp_code.startsWith(st.code + ':'));
         for (const r of rows) {
           items.push({ def: st, code: r.stamp_code, meta: r.meta || {}, earned: true, awarded_at: r.awarded_at });
         }
-        // If none earned yet, still show one placeholder so users see the shape.
         if (!rows.length) {
           items.push({ def: st, code: st.code, meta: {}, earned: false });
         }
@@ -6805,13 +7069,44 @@
     document.getElementById('stamp-count-num').textContent = earnedCount;
     document.getElementById('stamp-count-total').textContent = items.length;
 
+    // ── Next-up hero card: three closest unearned stamps with progress info.
+    const upcoming = STAMP_CATALOG
+      .filter(st => !st.parameterized && !earnedStampCodes.has(st.code) && st.progress)
+      .map(st => {
+        const p = st.progress(ctx);
+        return { st, p, distance: Math.max(0, p.target - p.current) };
+      })
+      .sort((a, b) => a.distance - b.distance)
+      .slice(0, 3);
+    let nextHtml = '';
+    if (upcoming.length) {
+      const cells = upcoming.map(u => {
+        const pct = Math.min(100, Math.round((u.p.current / u.p.target) * 100));
+        return `<div class="stamp-next-row">
+          <div class="stamp-next-svg">${u.st.svg(56, {})}</div>
+          <div class="stamp-next-info">
+            <div class="stamp-next-name">${escHtml(u.st.name)}</div>
+            <div class="stamp-next-hint">${escHtml(u.p.hint)}</div>
+            <div class="stamp-next-bar"><span style="width:${pct}%"></span></div>
+            <div class="stamp-next-frac">${u.p.current} / ${u.p.target}</div>
+          </div>
+        </div>`;
+      }).join('');
+      nextHtml = `<div class="stamp-next-card">
+        <div class="stamp-next-head">离你最近的印</div>
+        ${cells}
+      </div>`;
+    }
+
+    // ── Grouped grid by category (6 cats)
     const byCat = {};
     for (const it of items) {
       (byCat[it.def.cat] = byCat[it.def.cat] || []).push(it);
     }
-    const catOrder = ['streak', 'cumulative', 'specialty'];
-    const html = catOrder.filter(c => byCat[c]).map((c, idx) => {
-      const num = ['壹', '貳', '叁'][idx] || '';
+    const catOrder = ['streak', 'cumulative', 'weekly', 'time', 'specialty', 'hidden'];
+    const catNums = ['壹', '貳', '叁', '肆', '伍', '陸'];
+    const gridsHtml = catOrder.filter(c => byCat[c]).map((c, idx) => {
+      const num = catNums[idx] || '';
       const cells = byCat[c].map(it => {
         if (it.earned) {
           const subLine = it.meta && it.meta.title ? `《${escHtml(String(it.meta.title))}》` : escHtml(it.def.sub);
@@ -6819,6 +7114,14 @@
             ${it.def.svg(76, it.meta)}
             <div class="stamp-caption">${escHtml(it.def.name)}</div>
             <div class="stamp-sub">${subLine}</div>
+          </div>`;
+        }
+        // Hidden category: obscure the name so it's truly a surprise.
+        if (it.def.cat === 'hidden') {
+          return `<div class="stamp-cell locked">
+            <div class="stamp-slot">尚未启封</div>
+            <div class="stamp-caption">?  ?  ?</div>
+            <div class="stamp-sub">${escHtml(it.def.sub)}</div>
           </div>`;
         }
         return `<div class="stamp-cell locked">
@@ -6830,7 +7133,8 @@
       return `<div class="stamp-cat-label"><span class="cat-num">${num}</span>${STAMP_CAT_LABELS[c]}</div>
               <div class="stamp-grid">${cells}</div>`;
     }).join('');
-    document.getElementById('stamp-book-body').innerHTML = html;
+
+    document.getElementById('stamp-book-body').innerHTML = nextHtml + gridsHtml;
   }
 
 
