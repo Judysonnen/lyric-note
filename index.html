@@ -2447,6 +2447,98 @@
     .book-chapter-foot::before, .book-chapter-foot::after {
       content: "—"; margin: 0 6px; color: #B8A47F;
     }
+
+    /* Book pagination — single page shown, flips between pages */
+    .book-body { display: flex; flex-direction: column; min-height: 420px; }
+    .book-page-frame {
+      perspective: 1500px; flex: 1; position: relative;
+      min-height: 380px;
+    }
+    .book-page {
+      transform-style: preserve-3d;
+      transform-origin: center center;
+      backface-visibility: hidden;
+      min-height: 380px;
+      will-change: transform;
+    }
+    @keyframes bookFlipNext {
+      0%   { transform: rotateY(0deg);   box-shadow: none; }
+      35%  { transform: rotateY(-88deg); box-shadow: -18px 0 28px rgba(70,45,20,0.28); }
+      65%  { transform: rotateY(-92deg); box-shadow:  18px 0 28px rgba(70,45,20,0.28); }
+      100% { transform: rotateY(0deg);   box-shadow: none; }
+    }
+    @keyframes bookFlipPrev {
+      0%   { transform: rotateY(0deg);   box-shadow: none; }
+      35%  { transform: rotateY(88deg);  box-shadow:  18px 0 28px rgba(70,45,20,0.28); }
+      65%  { transform: rotateY(92deg);  box-shadow: -18px 0 28px rgba(70,45,20,0.28); }
+      100% { transform: rotateY(0deg);   box-shadow: none; }
+    }
+    .book-page.flipping-next { animation: bookFlipNext 0.65s cubic-bezier(0.5,0,0.5,1); }
+    .book-page.flipping-prev { animation: bookFlipPrev 0.65s cubic-bezier(0.5,0,0.5,1); }
+
+    .book-nav {
+      margin-top: 20px; padding-top: 14px;
+      border-top: 1px dashed rgba(139,115,85,0.35);
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 8px;
+    }
+    .book-nav-btn {
+      background: none; border: 1px solid rgba(139,115,85,0.35);
+      color: #B92923; font-family: "Noto Serif SC", serif;
+      font-size: 13px; letter-spacing: 0.2em;
+      cursor: pointer; padding: 6px 14px; border-radius: 6px;
+      transition: all .15s;
+    }
+    .book-nav-btn:hover:not(:disabled) {
+      background: rgba(199,103,84,0.08);
+      border-color: #B92923;
+    }
+    .book-nav-btn:disabled {
+      color: #B8A47F; cursor: not-allowed;
+      border-color: rgba(139,115,85,0.15);
+      opacity: 0.5;
+    }
+    .book-page-counter {
+      font-family: "Noto Serif SC", serif;
+      font-size: 12px; color: #8A7355; letter-spacing: 0.28em;
+      font-variant-numeric: tabular-nums;
+    }
+    /* Cover page (front + colophon) */
+    .book-cover {
+      text-align: center; padding: 30px 20px 20px;
+    }
+    .book-cover-title {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 30px; letter-spacing: 0.4em; color: #2A1F16;
+      font-weight: 500; margin-bottom: 6px;
+    }
+    .book-cover-sub {
+      font-family: "Kaiti SC", "STKaiti", serif;
+      font-size: 15px; letter-spacing: 0.2em; color: #B98A2D;
+      margin-bottom: 20px;
+    }
+    .book-cover-stats {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      margin: 20px 0;
+    }
+    .book-cover-stat {
+      padding: 12px 8px;
+      border: 1px solid rgba(139,115,85,0.25);
+      border-radius: 6px;
+    }
+    .book-cover-stat-num {
+      font-family: "Noto Serif SC", serif;
+      font-size: 24px; color: #B92923; font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+    .book-cover-stat-label {
+      font-size: 10px; color: #8A7355; letter-spacing: 0.2em;
+      margin-top: 4px;
+    }
+    /* When on book tab, don't scroll the modal body — pages are fixed-size */
+    body.book-mode .stamp-modal-body {
+      overflow: hidden; padding-bottom: 20px;
+    }
     .stamp-next-card {
       background: linear-gradient(180deg, #FDF6E0 0%, #F5E9CA 100%);
       border: 1px solid rgba(139,115,85,0.35);
@@ -8357,11 +8449,13 @@
   function openStampBook(opts) {
     stampViewState = { role: 'self', label: null, stamps: null, purchases: null };
     stampCurrentTab = 'book';
+    bookCurrentPage = 0;
     renderStampBook();
     document.getElementById('stamp-book-bg').style.display = 'flex';
   }
   function closeStampBook() {
     document.getElementById('stamp-book-bg').style.display = 'none';
+    document.body.classList.remove('book-mode');
   }
   async function openStudentStampBook(studentId, studentLabel) {
     if (!supabaseClient) return;
@@ -8374,6 +8468,7 @@
       studentStampsCache[studentId] = stu.stamps;
       stampViewState = { role: 'student-view', label: studentLabel, stamps: stu.stamps, purchases: [] };
       stampCurrentTab = 'book';
+      bookCurrentPage = 0;
       renderStampBook();
       document.getElementById('stamp-book-bg').style.display = 'flex';
     } catch(e) { console.error('open student stamp book failed', e); alert('打不开学生的印谱：' + (e.message || '')); }
@@ -8388,6 +8483,8 @@
     document.querySelectorAll('.stamp-modal-tab').forEach(el => {
       el.classList.toggle('active', el.dataset.tab === tab);
     });
+    // Book-mode class only applied when we're on the book tab.
+    if (tab !== 'book') document.body.classList.remove('book-mode');
     renderStampBook();
   }
   window.switchStampTab = switchStampTab;
@@ -8470,9 +8567,9 @@
 
     // ── Next-up: 3 items closest to next tier (self view only)
     const ctx = isStudentView ? null : (role === 'teacher' ? teacherStampContext() : stampContext());
-    let nextHtml = '';
+    let upcoming = [];
     if (!isStudentView && ctx) {
-      const upcoming = items
+      upcoming = items
         .filter(it => !it.def.parameterized && it.def.tiers && it.tierEarned < it.def.tiers.length)
         .map(it => {
           const nextTier = it.def.tiers[it.tierEarned];
@@ -8482,64 +8579,223 @@
         })
         .sort((a, b) => a.need - b.need)
         .slice(0, 3);
-      if (upcoming.length) {
-        const cells = upcoming.map(u => {
-          const pct = Math.min(100, Math.round((u.val / u.nextTier.at) * 100));
-          const nextLabel = u.it.tierEarned === 0
-            ? `${u.it.def.name}`
-            : `${u.it.def.name} · ${tierGlyph(u.it.tierEarned + 1)}级`;
-          return `<div class="stamp-next-row">
-            <div class="stamp-next-svg">${u.it.def.svg(56, u.it.tierEarned + 1, {})}</div>
-            <div class="stamp-next-info">
-              <div class="stamp-next-name">${escHtml(nextLabel)}</div>
-              <div class="stamp-next-hint">还差 ${u.need} · <b style="color:#B92923;">+${u.nextTier.xp} 宝</b></div>
-              <div class="stamp-next-bar"><span style="width:${pct}%"></span></div>
-              <div class="stamp-next-frac">${u.val} / ${u.nextTier.at}</div>
-            </div>
-          </div>`;
-        }).join('');
-        const claimAllBtn = unclaimedCount > 0
-          ? `<div style="margin-bottom:12px;text-align:right;">
-              <button class="shop-item-buy" onclick="claimAllStamps()">⚡ 一键收取 ${unclaimedCount} 枚</button>
-             </div>`
-          : '';
-        nextHtml = `${claimAllBtn}<div class="stamp-next-card">
-          <div class="stamp-next-head">离你最近的印</div>
-          ${cells}
-        </div>`;
-      } else if (unclaimedCount > 0) {
-        nextHtml = `<div style="margin-bottom:16px;text-align:right;">
-          <button class="shop-item-buy" onclick="claimAllStamps()">⚡ 一键收取 ${unclaimedCount} 枚</button>
-        </div>`;
-      }
     }
 
-    // ── Grouped grid by category
+    // ── Paginated book: build pages, render current, add nav.
     const byCat = {};
     for (const it of items) (byCat[it.def.cat] = byCat[it.def.cat] || []).push(it);
     const catOrder = role === 'teacher'
       ? ['t_teach', 't_raise', 't_care']
       : ['streak', 'cumulative', 'weekly', 'time', 'specialty', 'form', 'junzi', 'hidden'];
     const catNums = ['壹', '貳', '叁', '肆', '伍', '陸', '柒', '捌'];
-    const gridsHtml = catOrder.filter(c => byCat[c]).map((c, idx) => {
-      const num = catNums[idx] || '';
-      const cellsList = byCat[c];
-      const cells = cellsList.map(it => renderStampCell(it, role)).join('');
-      const earned = cellsList.filter(it => it.tierEarned > 0).length;
-      return `<div class="book-chapter">
-                <div class="book-chapter-num">卷之 ${num}</div>
-                <div class="book-chapter-title">${catLabels[c]}</div>
-              </div>
-              <div class="stamp-grid">${cells}</div>
-              <div class="book-chapter-foot">共 ${cellsList.length} 印 · 已得 ${earned}</div>`;
-    }).join('');
+    const STAMPS_PER_PAGE = 6;
 
-    // ── Festival seals (year-bound) — earned rows only, oldest → newest.
-    let festivalHtml = '';
-    const festivalRows = viewStamps.filter(r => r.stamp_code.startsWith('festival_'));
+    const festivalRows = viewStamps
+      .filter(r => r.stamp_code.startsWith('festival_'))
+      .sort((a, b) => a.awarded_at.localeCompare(b.awarded_at));
+    let idleCells = [];
+    if (!isStudentView) {
+      const idleOwned = SHOP_ITEMS.filter(i => i.cat === 'idle' && ownedItemCodes.has(i.code) && i.svg);
+      const customPurch = shopPurchases.find(p => p.item_code === 'custom_seal');
+      const customChars = customPurch && customPurch.meta && customPurch.meta.chars;
+      idleCells = idleOwned.map(it => ({ type: 'idle', svg: it.svg(76), name: it.name, sub: it.sub || '' }));
+      if (customChars) {
+        const chars = String(customChars).slice(0, 4).padEnd(4, '　').split('');
+        idleCells.push({ type: 'idle', svg: stampSvg.grid4(chars, 76),
+          name: String(customChars), sub: '自选定制印' });
+      }
+    }
+
+    // Build the ordered page list
+    const pages = [];
+    // Cover page: title + stats + next-up + claim-all
+    if (!isStudentView) {
+      pages.push({
+        type: 'cover',
+        title, totalEarned, balance, unclaimedCount, earnedCount, totalItems,
+        upcoming: upcoming || [], isEmpty: earnedCount === 0,
+      });
+    } else {
+      pages.push({
+        type: 'cover-student-view',
+        studentLabel: stampViewState.label, title, totalEarned, balance,
+        earnedCount, totalItems,
+      });
+    }
+    // One or more pages per category
+    catOrder.filter(c => byCat[c]).forEach((cat, idx) => {
+      const catItems = byCat[cat];
+      const totalPagesInCat = Math.max(1, Math.ceil(catItems.length / STAMPS_PER_PAGE));
+      const earnedInCat = catItems.filter(it => it.tierEarned > 0).length;
+      for (let p = 0; p < totalPagesInCat; p++) {
+        pages.push({
+          type: 'chapter', role,
+          catNum: catNums[idx] || '',
+          catLabel: catLabels[cat],
+          isFirstPage: p === 0,
+          isLastPage: p === totalPagesInCat - 1,
+          items: catItems.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE),
+          totalInCat: catItems.length,
+          earnedInCat,
+        });
+      }
+    });
+    // Festival pages
     if (festivalRows.length) {
-      festivalRows.sort((a, b) => a.awarded_at.localeCompare(b.awarded_at));
-      const cells = festivalRows.map(r => {
+      const totalPagesInFest = Math.max(1, Math.ceil(festivalRows.length / STAMPS_PER_PAGE));
+      for (let p = 0; p < totalPagesInFest; p++) {
+        pages.push({
+          type: 'festival',
+          isFirstPage: p === 0,
+          isLastPage: p === totalPagesInFest - 1,
+          rows: festivalRows.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE),
+          total: festivalRows.length,
+        });
+      }
+    }
+    // Idle pages
+    if (idleCells.length) {
+      const totalPagesInIdle = Math.max(1, Math.ceil(idleCells.length / STAMPS_PER_PAGE));
+      for (let p = 0; p < totalPagesInIdle; p++) {
+        pages.push({
+          type: 'idle',
+          isFirstPage: p === 0,
+          isLastPage: p === totalPagesInIdle - 1,
+          cells: idleCells.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE),
+          total: idleCells.length,
+        });
+      }
+    }
+    bookPages = pages;
+    if (bookCurrentPage >= bookPages.length) bookCurrentPage = bookPages.length - 1;
+    if (bookCurrentPage < 0) bookCurrentPage = 0;
+
+    document.body.classList.add('book-mode');
+    document.getElementById('stamp-book-body').innerHTML = `
+      <div class="book-body">
+        <div class="book-page-frame">
+          <div class="book-page" id="book-page">${renderBookPageContent(bookPages[bookCurrentPage])}</div>
+        </div>
+        <div class="book-nav" id="book-nav">${renderBookNav()}</div>
+      </div>`;
+  }
+
+  function renderBookNav() {
+    const disabledPrev = bookCurrentPage === 0 ? 'disabled' : '';
+    const disabledNext = bookCurrentPage >= bookPages.length - 1 ? 'disabled' : '';
+    return `<button class="book-nav-btn" onclick="bookPrev()" ${disabledPrev}>‹ 上一页</button>
+      <span class="book-page-counter">第 ${bookCurrentPage + 1} / ${bookPages.length} 页</span>
+      <button class="book-nav-btn" onclick="bookNext()" ${disabledNext}>下一页 ›</button>`;
+  }
+
+  function renderBookPageContent(page) {
+    if (!page) return '';
+    if (page.type === 'cover') {
+      if (page.isEmpty) {
+        return `<div class="stamp-empty">
+          <div class="stamp-empty-svg">${stampSvg.box('印', 92)}</div>
+          <div class="stamp-empty-title">尚未启印</div>
+          <div class="stamp-empty-body">
+            印是打卡挣的。<br/>
+            <b>今天完成第一次打卡</b>，你会得到<br/>
+            「首日印」<b>+5 宝</b>，印谱正式开卷。<br/>
+            之后每一次打卡都可能让某枚印<br/>
+            升级、变亮、被收进这本册子。
+          </div>
+        </div>`;
+      }
+      const upcomingHtml = page.upcoming.length
+        ? `<div class="stamp-next-card" style="margin-top:20px;">
+            <div class="stamp-next-head">离你最近的印</div>
+            ${page.upcoming.map(u => {
+              const pct = Math.min(100, Math.round((u.val / u.nextTier.at) * 100));
+              const nextLabel = u.it.tierEarned === 0
+                ? `${u.it.def.name}`
+                : `${u.it.def.name} · ${tierGlyph(u.it.tierEarned + 1)}级`;
+              return `<div class="stamp-next-row">
+                <div class="stamp-next-svg">${u.it.def.svg(56, u.it.tierEarned + 1, {})}</div>
+                <div class="stamp-next-info">
+                  <div class="stamp-next-name">${escHtml(nextLabel)}</div>
+                  <div class="stamp-next-hint">还差 ${u.need} · <b style="color:#B92923;">+${u.nextTier.xp} 宝</b></div>
+                  <div class="stamp-next-bar"><span style="width:${pct}%"></span></div>
+                  <div class="stamp-next-frac">${u.val} / ${u.nextTier.at}</div>
+                </div>
+              </div>`;
+            }).join('')}
+          </div>`
+        : '';
+      const claimAllBtn = page.unclaimedCount > 0
+        ? `<button class="shop-item-buy" onclick="claimAllStamps()" style="margin-top:16px;">⚡ 一键收取 ${page.unclaimedCount} 枚</button>`
+        : '';
+      return `<div class="book-cover">
+        <div class="book-cover-title">印 谱</div>
+        <div class="book-cover-sub">${escHtml(page.title)}</div>
+        <div class="book-cover-stats">
+          <div class="book-cover-stat">
+            <div class="book-cover-stat-num">${page.earnedCount}</div>
+            <div class="book-cover-stat-label">已得印数</div>
+          </div>
+          <div class="book-cover-stat">
+            <div class="book-cover-stat-num">${page.balance}</div>
+            <div class="book-cover-stat-label">宝 余额</div>
+          </div>
+          <div class="book-cover-stat">
+            <div class="book-cover-stat-num">${page.unclaimedCount}</div>
+            <div class="book-cover-stat-label">待 收</div>
+          </div>
+        </div>
+        ${claimAllBtn}
+        ${upcomingHtml}
+      </div>`;
+    }
+    if (page.type === 'cover-student-view') {
+      return `<div class="book-cover">
+        <div class="book-cover-title">印 谱</div>
+        <div class="book-cover-sub">${escHtml(page.studentLabel)} · ${escHtml(page.title)}</div>
+        <div class="book-cover-stats">
+          <div class="book-cover-stat">
+            <div class="book-cover-stat-num">${page.earnedCount}</div>
+            <div class="book-cover-stat-label">已得印数</div>
+          </div>
+          <div class="book-cover-stat">
+            <div class="book-cover-stat-num">${page.totalEarned}</div>
+            <div class="book-cover-stat-label">累计宝</div>
+          </div>
+          <div class="book-cover-stat">
+            <div class="book-cover-stat-num">${page.balance}</div>
+            <div class="book-cover-stat-label">余额</div>
+          </div>
+        </div>
+        <div style="margin-top:20px;font-family:Kaiti SC,serif;color:#8A7355;font-size:13px;letter-spacing:0.1em;">翻页查看她各卷收印</div>
+      </div>`;
+    }
+    if (page.type === 'chapter') {
+      const header = page.isFirstPage
+        ? `<div class="book-chapter">
+            <div class="book-chapter-num">卷之 ${page.catNum}</div>
+            <div class="book-chapter-title">${page.catLabel}</div>
+          </div>`
+        : `<div class="book-chapter">
+            <div class="book-chapter-num">卷之 ${page.catNum} · 续</div>
+            <div class="book-chapter-title">${page.catLabel}</div>
+          </div>`;
+      const cells = page.items.map(it => renderStampCell(it, page.role)).join('');
+      const footer = page.isLastPage
+        ? `<div class="book-chapter-foot">共 ${page.totalInCat} 印 · 已得 ${page.earnedInCat}</div>`
+        : '';
+      return `${header}<div class="stamp-grid">${cells}</div>${footer}`;
+    }
+    if (page.type === 'festival') {
+      const header = page.isFirstPage
+        ? `<div class="book-chapter">
+            <div class="book-chapter-num">卷之 節</div>
+            <div class="book-chapter-title">节日之印</div>
+          </div>`
+        : `<div class="book-chapter">
+            <div class="book-chapter-num">卷之 節 · 续</div>
+            <div class="book-chapter-title">节日之印</div>
+          </div>`;
+      const cells = page.rows.map(r => {
         const def = stampDefForCode(r.stamp_code);
         if (!def) return '';
         const unclaimed = !r.claimed_at;
@@ -8557,61 +8813,76 @@
           ${claimBtn}
         </div>`;
       }).join('');
-      festivalHtml = `<div class="book-chapter">
-                        <div class="book-chapter-num">卷之 節</div>
-                        <div class="book-chapter-title">节日之印</div>
-                      </div>
-                      <div class="stamp-grid">${cells}</div>
-                      <div class="book-chapter-foot">共 ${festivalRows.length} 印 · 皆得</div>`;
+      const footer = page.isLastPage
+        ? `<div class="book-chapter-foot">共 ${page.total} 印 · 皆得</div>`
+        : '';
+      return `${header}<div class="stamp-grid">${cells}</div>${footer}`;
     }
-
-    // ── Idle seals owned via shop, appended as a bonus section (self only)
-    let idleHtml = '';
-    if (!isStudentView) {
-      const idleOwned = SHOP_ITEMS.filter(i => i.cat === 'idle' && ownedItemCodes.has(i.code) && i.svg);
-      const customPurch = shopPurchases.find(p => p.item_code === 'custom_seal');
-      const customChars = customPurch && customPurch.meta && customPurch.meta.chars;
-      const idleCells = idleOwned.map(it => `<div class="stamp-cell claimable-earned">
-        <div class="stamp-svg-wrap">${it.svg(76)}</div>
-        <div class="stamp-caption">${escHtml(it.name)}</div>
-        <div class="stamp-sub">${escHtml(it.sub || '')}</div>
-      </div>`);
-      if (customChars) {
-        const chars = String(customChars).slice(0, 4).padEnd(4, '　').split('');
-        idleCells.push(`<div class="stamp-cell claimable-earned">
-          <div class="stamp-svg-wrap">${stampSvg.grid4(chars, 76)}</div>
-          <div class="stamp-caption">${escHtml(String(customChars))}</div>
-          <div class="stamp-sub">自选定制印</div>
-        </div>`);
-      }
-      if (idleCells.length) {
-        idleHtml = `<div class="book-chapter">
-                      <div class="book-chapter-num">卷之 閒</div>
-                      <div class="book-chapter-title">闲章</div>
-                    </div>
-                    <div class="stamp-grid">${idleCells.join('')}</div>
-                    <div class="book-chapter-foot">共 ${idleCells.length} 印</div>`;
-      }
+    if (page.type === 'idle') {
+      const header = page.isFirstPage
+        ? `<div class="book-chapter">
+            <div class="book-chapter-num">卷之 閒</div>
+            <div class="book-chapter-title">闲章</div>
+          </div>`
+        : `<div class="book-chapter">
+            <div class="book-chapter-num">卷之 閒 · 续</div>
+            <div class="book-chapter-title">闲章</div>
+          </div>`;
+      const cells = page.cells.map(c => `<div class="stamp-cell claimable-earned">
+        <div class="stamp-svg-wrap">${c.svg}</div>
+        <div class="stamp-caption">${escHtml(c.name)}</div>
+        <div class="stamp-sub">${escHtml(c.sub)}</div>
+      </div>`).join('');
+      const footer = page.isLastPage
+        ? `<div class="book-chapter-foot">共 ${page.total} 印</div>`
+        : '';
+      return `${header}<div class="stamp-grid">${cells}</div>${footer}`;
     }
-
-    // Onboarding when totally empty
-    let emptyHtml = '';
-    if (!isStudentView && earnedCount === 0) {
-      emptyHtml = `<div class="stamp-empty">
-        <div class="stamp-empty-svg">${stampSvg.box('印', 92)}</div>
-        <div class="stamp-empty-title">尚未启印</div>
-        <div class="stamp-empty-body">
-          印是打卡挣的。<br/>
-          <b>今天完成第一次打卡</b>，你会得到<br/>
-          「首日印」<b>+5 宝</b>，印谱正式开卷。<br/>
-          之后每一次打卡都可能让某枚印<br/>
-          升级、变亮、被收进这本册子。
-        </div>
-      </div>`;
-    }
-
-    document.getElementById('stamp-book-body').innerHTML = emptyHtml + nextHtml + gridsHtml + festivalHtml + idleHtml;
+    return '';
   }
+
+  function bookNext() {
+    if (bookAnimating || bookCurrentPage >= bookPages.length - 1) return;
+    bookAnimating = true;
+    playRustleSound();
+    const pageEl = document.getElementById('book-page');
+    pageEl.classList.add('flipping-next');
+    setTimeout(() => {
+      bookCurrentPage++;
+      pageEl.innerHTML = renderBookPageContent(bookPages[bookCurrentPage]);
+      document.getElementById('book-nav').innerHTML = renderBookNav();
+    }, 285);
+    setTimeout(() => {
+      pageEl.classList.remove('flipping-next');
+      bookAnimating = false;
+    }, 660);
+  }
+  function bookPrev() {
+    if (bookAnimating || bookCurrentPage === 0) return;
+    bookAnimating = true;
+    playRustleSound();
+    const pageEl = document.getElementById('book-page');
+    pageEl.classList.add('flipping-prev');
+    setTimeout(() => {
+      bookCurrentPage--;
+      pageEl.innerHTML = renderBookPageContent(bookPages[bookCurrentPage]);
+      document.getElementById('book-nav').innerHTML = renderBookNav();
+    }, 285);
+    setTimeout(() => {
+      pageEl.classList.remove('flipping-prev');
+      bookAnimating = false;
+    }, 660);
+  }
+  window.bookNext = bookNext;
+  window.bookPrev = bookPrev;
+
+  // Arrow-key navigation while the printbook is open on the book tab.
+  document.addEventListener('keydown', (e) => {
+    const bg = document.getElementById('stamp-book-bg');
+    if (!bg || bg.style.display !== 'flex' || stampCurrentTab !== 'book') return;
+    if (e.key === 'ArrowLeft') { e.preventDefault(); bookPrev(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); bookNext(); }
+  });
 
   function renderStampCell(it, role) {
     const isTeacher = role === 'teacher';
