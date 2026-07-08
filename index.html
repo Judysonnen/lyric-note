@@ -2448,33 +2448,37 @@
       content: "—"; margin: 0 6px; color: #B8A47F;
     }
 
-    /* Book pagination — single page shown, flips between pages */
+    /* Book pagination — page slides horizontally with a gentle fade */
     .book-body { display: flex; flex-direction: column; min-height: 420px; }
     .book-page-frame {
-      perspective: 1500px; flex: 1; position: relative;
+      flex: 1; position: relative;
       min-height: 380px;
+      overflow: hidden;
     }
     .book-page {
-      transform-style: preserve-3d;
-      transform-origin: center center;
-      backface-visibility: hidden;
       min-height: 380px;
-      will-change: transform;
+      opacity: 1;
+      transform: translateX(0);
+      transition: transform 0.32s cubic-bezier(0.3, 0, 0.2, 1), opacity 0.32s;
     }
-    @keyframes bookFlipNext {
-      0%   { transform: rotateY(0deg);   box-shadow: none; }
-      35%  { transform: rotateY(-88deg); box-shadow: -18px 0 28px rgba(70,45,20,0.28); }
-      65%  { transform: rotateY(-92deg); box-shadow:  18px 0 28px rgba(70,45,20,0.28); }
-      100% { transform: rotateY(0deg);   box-shadow: none; }
+    .book-page.slide-out-left {
+      transform: translateX(-8%);
+      opacity: 0;
     }
-    @keyframes bookFlipPrev {
-      0%   { transform: rotateY(0deg);   box-shadow: none; }
-      35%  { transform: rotateY(88deg);  box-shadow:  18px 0 28px rgba(70,45,20,0.28); }
-      65%  { transform: rotateY(92deg);  box-shadow: -18px 0 28px rgba(70,45,20,0.28); }
-      100% { transform: rotateY(0deg);   box-shadow: none; }
+    .book-page.slide-out-right {
+      transform: translateX(8%);
+      opacity: 0;
     }
-    .book-page.flipping-next { animation: bookFlipNext 0.65s cubic-bezier(0.5,0,0.5,1); }
-    .book-page.flipping-prev { animation: bookFlipPrev 0.65s cubic-bezier(0.5,0,0.5,1); }
+    .book-page.slide-in-right {
+      transform: translateX(8%);
+      opacity: 0;
+      transition: none;
+    }
+    .book-page.slide-in-left {
+      transform: translateX(-8%);
+      opacity: 0;
+      transition: none;
+    }
 
     .book-nav {
       margin-top: 20px; padding-top: 14px;
@@ -2483,57 +2487,96 @@
       gap: 8px;
     }
     .book-nav-btn {
-      background: none; border: 1px solid rgba(139,115,85,0.35);
+      background: none; border: none;
       color: #B92923; font-family: "Noto Serif SC", serif;
       font-size: 13px; letter-spacing: 0.2em;
-      cursor: pointer; padding: 6px 14px; border-radius: 6px;
-      transition: all .15s;
+      cursor: pointer; padding: 4px 8px; border-radius: 4px;
+      transition: color .15s, opacity .15s;
     }
-    .book-nav-btn:hover:not(:disabled) {
-      background: rgba(199,103,84,0.08);
-      border-color: #B92923;
-    }
+    .book-nav-btn:hover:not(:disabled) { color: #8E1F1B; }
     .book-nav-btn:disabled {
-      color: #B8A47F; cursor: not-allowed;
-      border-color: rgba(139,115,85,0.15);
-      opacity: 0.5;
+      color: #B8A47F; cursor: not-allowed; opacity: 0.45;
     }
     .book-page-counter {
       font-family: "Noto Serif SC", serif;
-      font-size: 12px; color: #8A7355; letter-spacing: 0.28em;
+      font-size: 11.5px; color: #8A7355; letter-spacing: 0.32em;
       font-variant-numeric: tabular-nums;
     }
-    /* Cover page (front + colophon) */
+    /* Cover page: elegant title + flowing stat line, no boxes */
     .book-cover {
-      text-align: center; padding: 30px 20px 20px;
+      text-align: center; padding: 44px 20px 24px;
     }
     .book-cover-title {
       font-family: "Noto Serif SC", "Songti SC", serif;
-      font-size: 30px; letter-spacing: 0.4em; color: #2A1F16;
-      font-weight: 500; margin-bottom: 6px;
+      font-size: 34px; letter-spacing: 0.5em; color: #2A1F16;
+      font-weight: 500; margin-bottom: 8px;
     }
     .book-cover-sub {
       font-family: "Kaiti SC", "STKaiti", serif;
-      font-size: 15px; letter-spacing: 0.2em; color: #B98A2D;
-      margin-bottom: 20px;
+      font-size: 14px; letter-spacing: 0.35em; color: #B98A2D;
+      margin-bottom: 32px;
+    }
+    .book-cover-sub::before, .book-cover-sub::after {
+      content: "—"; margin: 0 12px; color: #C9B5A0;
     }
     .book-cover-stats {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
-      margin: 20px 0;
-    }
-    .book-cover-stat {
-      padding: 12px 8px;
-      border: 1px solid rgba(139,115,85,0.25);
-      border-radius: 6px;
-    }
-    .book-cover-stat-num {
+      display: flex; justify-content: center; align-items: baseline;
+      gap: 36px;
       font-family: "Noto Serif SC", serif;
-      font-size: 24px; color: #B92923; font-weight: 600;
-      font-variant-numeric: tabular-nums;
+      color: #4E3E2E;
+      font-size: 13.5px; letter-spacing: 0.15em;
+      padding: 20px 0 24px;
     }
-    .book-cover-stat-label {
-      font-size: 10px; color: #8A7355; letter-spacing: 0.2em;
-      margin-top: 4px;
+    .book-cover-stat b {
+      color: #B92923;
+      font-size: 22px; font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      margin: 0 4px;
+    }
+    .book-cover-stat .of {
+      color: #B8A47F; font-size: 11px; margin-left: 4px;
+    }
+    .book-cover-actions { margin-top: 8px; }
+    /* 离你最近的印 — plain rows, no card, no colored bars */
+    .book-cover-upcoming {
+      margin-top: 28px;
+      padding-top: 18px;
+      border-top: 1px dashed rgba(139,115,85,0.35);
+    }
+    .book-cover-upcoming-title {
+      font-family: "Noto Serif SC", serif;
+      font-size: 11px; letter-spacing: 0.4em; color: #B92923;
+      font-weight: 600; margin-bottom: 14px;
+    }
+    .book-cover-upcoming-title::before,
+    .book-cover-upcoming-title::after {
+      content: "—"; margin: 0 10px; color: #C9B5A0;
+    }
+    .upcoming-row {
+      display: grid; grid-template-columns: 48px 1fr auto; gap: 12px;
+      align-items: center; padding: 10px 12px;
+      font-family: "Noto Serif SC", serif;
+    }
+    .upcoming-row + .upcoming-row {
+      border-top: 1px dashed rgba(184,164,127,0.4);
+    }
+    .upcoming-row-svg { opacity: 0.35; filter: grayscale(0.4); }
+    .upcoming-row-name {
+      font-size: 13.5px; color: #2A1F16; letter-spacing: 0.14em;
+      font-weight: 500;
+    }
+    .upcoming-row-dots {
+      color: #C9B5A0; font-size: 10px; letter-spacing: 0.2em;
+      margin-top: 3px; font-variant-numeric: tabular-nums;
+    }
+    .upcoming-row-dots b { color: #B92923; font-weight: 600; }
+    .upcoming-row-xp {
+      font-size: 12px; color: #B92923; letter-spacing: 0.06em;
+      font-weight: 600; text-align: right; white-space: nowrap;
+    }
+    .upcoming-row-xp .frac {
+      display: block; color: #B8A47F; font-size: 10px; font-weight: 500;
+      margin-top: 2px; letter-spacing: 0.05em;
     }
     /* When on book tab, don't scroll the modal body — pages are fixed-size */
     body.book-mode .stamp-modal-body {
@@ -8705,44 +8748,37 @@
         </div>`;
       }
       const upcomingHtml = page.upcoming.length
-        ? `<div class="stamp-next-card" style="margin-top:20px;">
-            <div class="stamp-next-head">离你最近的印</div>
+        ? `<div class="book-cover-upcoming">
+            <div class="book-cover-upcoming-title">离你最近的印</div>
             ${page.upcoming.map(u => {
-              const pct = Math.min(100, Math.round((u.val / u.nextTier.at) * 100));
               const nextLabel = u.it.tierEarned === 0
                 ? `${u.it.def.name}`
                 : `${u.it.def.name} · ${tierGlyph(u.it.tierEarned + 1)}级`;
-              return `<div class="stamp-next-row">
-                <div class="stamp-next-svg">${u.it.def.svg(56, u.it.tierEarned + 1, {})}</div>
-                <div class="stamp-next-info">
-                  <div class="stamp-next-name">${escHtml(nextLabel)}</div>
-                  <div class="stamp-next-hint">还差 ${u.need} · <b style="color:#B92923;">+${u.nextTier.xp} 宝</b></div>
-                  <div class="stamp-next-bar"><span style="width:${pct}%"></span></div>
-                  <div class="stamp-next-frac">${u.val} / ${u.nextTier.at}</div>
+              return `<div class="upcoming-row">
+                <div class="upcoming-row-svg">${u.it.def.svg(40, u.it.tierEarned + 1, {})}</div>
+                <div>
+                  <div class="upcoming-row-name">${escHtml(nextLabel)}</div>
+                  <div class="upcoming-row-dots">还差 <b>${u.need}</b> · +${u.nextTier.xp} 宝</div>
+                </div>
+                <div class="upcoming-row-xp">
+                  ${u.val} <span style="color:#C9B5A0;">/</span> ${u.nextTier.at}
                 </div>
               </div>`;
             }).join('')}
           </div>`
         : '';
       const claimAllBtn = page.unclaimedCount > 0
-        ? `<button class="shop-item-buy" onclick="claimAllStamps()" style="margin-top:16px;">⚡ 一键收取 ${page.unclaimedCount} 枚</button>`
+        ? `<div class="book-cover-actions">
+            <button class="book-nav-btn" onclick="claimAllStamps()" style="border:1px solid #B92923;padding:6px 16px;border-radius:99px;">⚡ 一键收取 ${page.unclaimedCount} 枚</button>
+          </div>`
         : '';
       return `<div class="book-cover">
         <div class="book-cover-title">印 谱</div>
         <div class="book-cover-sub">${escHtml(page.title)}</div>
         <div class="book-cover-stats">
-          <div class="book-cover-stat">
-            <div class="book-cover-stat-num">${page.earnedCount}</div>
-            <div class="book-cover-stat-label">已得印数</div>
-          </div>
-          <div class="book-cover-stat">
-            <div class="book-cover-stat-num">${page.balance}</div>
-            <div class="book-cover-stat-label">宝 余额</div>
-          </div>
-          <div class="book-cover-stat">
-            <div class="book-cover-stat-num">${page.unclaimedCount}</div>
-            <div class="book-cover-stat-label">待 收</div>
-          </div>
+          <div class="book-cover-stat">已得 <b>${page.earnedCount}</b> <span class="of">/ ${page.totalItems}</span></div>
+          <div class="book-cover-stat">宝 <b>${page.balance}</b></div>
+          <div class="book-cover-stat">待收 <b>${page.unclaimedCount}</b></div>
         </div>
         ${claimAllBtn}
         ${upcomingHtml}
@@ -8753,18 +8789,9 @@
         <div class="book-cover-title">印 谱</div>
         <div class="book-cover-sub">${escHtml(page.studentLabel)} · ${escHtml(page.title)}</div>
         <div class="book-cover-stats">
-          <div class="book-cover-stat">
-            <div class="book-cover-stat-num">${page.earnedCount}</div>
-            <div class="book-cover-stat-label">已得印数</div>
-          </div>
-          <div class="book-cover-stat">
-            <div class="book-cover-stat-num">${page.totalEarned}</div>
-            <div class="book-cover-stat-label">累计宝</div>
-          </div>
-          <div class="book-cover-stat">
-            <div class="book-cover-stat-num">${page.balance}</div>
-            <div class="book-cover-stat-label">余额</div>
-          </div>
+          <div class="book-cover-stat">已得 <b>${page.earnedCount}</b> <span class="of">/ ${page.totalItems}</span></div>
+          <div class="book-cover-stat">累计 <b>${page.totalEarned}</b> 宝</div>
+          <div class="book-cover-stat">余额 <b>${page.balance}</b></div>
         </div>
         <div style="margin-top:20px;font-family:Kaiti SC,serif;color:#8A7355;font-size:13px;letter-spacing:0.1em;">翻页查看她各卷收印</div>
       </div>`;
@@ -8841,38 +8868,32 @@
     return '';
   }
 
-  function bookNext() {
-    if (bookAnimating || bookCurrentPage >= bookPages.length - 1) return;
+  function bookGoto(nextIndex, direction) {
+    if (bookAnimating) return;
+    if (nextIndex < 0 || nextIndex >= bookPages.length || nextIndex === bookCurrentPage) return;
     bookAnimating = true;
     playRustleSound();
     const pageEl = document.getElementById('book-page');
-    pageEl.classList.add('flipping-next');
+    // Phase 1: slide current out
+    pageEl.classList.add(direction === 'next' ? 'slide-out-left' : 'slide-out-right');
     setTimeout(() => {
-      bookCurrentPage++;
+      // Swap content while element is off-screen
+      bookCurrentPage = nextIndex;
+      pageEl.classList.remove('slide-out-left', 'slide-out-right');
+      pageEl.classList.add(direction === 'next' ? 'slide-in-right' : 'slide-in-left');
       pageEl.innerHTML = renderBookPageContent(bookPages[bookCurrentPage]);
       document.getElementById('book-nav').innerHTML = renderBookNav();
-    }, 285);
-    setTimeout(() => {
-      pageEl.classList.remove('flipping-next');
-      bookAnimating = false;
-    }, 660);
+      // Phase 2: reflow, then slide in
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          pageEl.classList.remove('slide-in-right', 'slide-in-left');
+        });
+      });
+      setTimeout(() => { bookAnimating = false; }, 340);
+    }, 320);
   }
-  function bookPrev() {
-    if (bookAnimating || bookCurrentPage === 0) return;
-    bookAnimating = true;
-    playRustleSound();
-    const pageEl = document.getElementById('book-page');
-    pageEl.classList.add('flipping-prev');
-    setTimeout(() => {
-      bookCurrentPage--;
-      pageEl.innerHTML = renderBookPageContent(bookPages[bookCurrentPage]);
-      document.getElementById('book-nav').innerHTML = renderBookNav();
-    }, 285);
-    setTimeout(() => {
-      pageEl.classList.remove('flipping-prev');
-      bookAnimating = false;
-    }, 660);
-  }
+  function bookNext() { bookGoto(bookCurrentPage + 1, 'next'); }
+  function bookPrev() { bookGoto(bookCurrentPage - 1, 'prev'); }
   window.bookNext = bookNext;
   window.bookPrev = bookPrev;
 
