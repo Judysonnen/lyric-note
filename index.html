@@ -7205,6 +7205,117 @@
         <rect x="21" y="21" width="48" height="48" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
         <text x="45" y="45.5" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="32" font-weight="700">${char}</text>
       </g></svg>`,
+    // 形制拓展 · non-square shapes for special seals
+    plumFlower: (charA, charB, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || 5} 50 50)">
+        <g fill="${STAMP_INK}">
+          <circle cx="50" cy="24" r="19"/><circle cx="76" cy="42" r="19"/>
+          <circle cx="66" cy="72" r="19"/><circle cx="34" cy="72" r="19"/>
+          <circle cx="24" cy="42" r="19"/><circle cx="50" cy="50" r="20"/>
+        </g>
+        <text x="50" y="46" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="13" font-weight="700">${charA}</text>
+        <text x="50" y="60" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="13" font-weight="700">${charB}</text>
+      </g></svg>`,
+    fan: (charA, charB, size, opts = {}) => `<svg viewBox="0 0 110 90" width="${size}" height="${size * 90/110}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || -3} 55 45)">
+        <path d="M55 12 L92 68 Q55 82 18 68 Z" fill="${STAMP_INK}"/>
+        <path d="M55 12 L34 62 M55 12 L48 66 M55 12 L62 66 M55 12 L76 62" stroke="${STAMP_PAPER}" stroke-width="0.8" opacity="0.35"/>
+        <text x="55" y="50" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="Kaiti SC, STKaiti, serif" font-size="13" font-weight="700">${charA}</text>
+        <text x="55" y="65" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="Kaiti SC, STKaiti, serif" font-size="11" opacity="0.9">${charB}</text>
+      </g></svg>`,
+    cloudHead: (charA, charB, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || -4} 50 50)">
+        <path d="M14 40 Q14 28 24 26 Q28 16 40 18 Q46 8 56 14 Q68 8 74 20 Q88 22 86 36 L86 68 Q88 80 76 82 Q70 92 58 88 Q50 96 42 88 Q30 92 24 82 Q12 80 14 68 Z" fill="${STAMP_INK}"/>
+        <text x="50" y="46" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="15" font-weight="700">${charA}</text>
+        <text x="50" y="63" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="11" opacity="0.9">${charB}</text>
+      </g></svg>`,
+    ruyi: (charA, charB, size, opts = {}) => `<svg viewBox="0 0 100 90" width="${size}" height="${size * 0.9}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || -6} 50 45)">
+        <path d="M14 42 Q14 30 22 24 Q28 14 40 18 Q44 14 50 20 Q56 14 60 18 Q72 14 78 24 Q86 30 86 42 Q86 54 78 60 Q72 70 60 66 Q56 70 50 64 Q44 70 40 66 Q28 70 22 60 Q14 54 14 42 Z" fill="${STAMP_INK}"/>
+        <text x="50" y="46" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="Kaiti SC, STKaiti, serif" font-size="14" font-weight="700">${charA}${charB}</text>
+      </g></svg>`,
+    willowLeaf: (char, size, opts = {}) => `<svg viewBox="0 0 90 110" width="${size * 0.82}" height="${size}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || 8} 45 55)">
+        <path d="M45 8 Q78 32 74 68 Q60 96 45 100 Q30 96 16 68 Q12 32 45 8 Z" fill="${STAMP_INK}"/>
+        <path d="M45 14 L45 96" stroke="${STAMP_PAPER}" stroke-width="0.8" opacity="0.4"/>
+        <path d="M45 30 L58 26 M45 42 L62 38 M45 56 L64 52 M45 70 L60 66 M45 30 L32 26 M45 42 L28 38 M45 56 L26 52 M45 70 L30 66" stroke="${STAMP_PAPER}" stroke-width="0.5" opacity="0.35"/>
+        <text x="45" y="60" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="16" font-weight="700">${char}</text>
+      </g></svg>`,
+    bell: (charA, charB, size, opts = {}) => `<svg viewBox="0 0 100 110" width="${size * 0.9}" height="${size}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || -2} 50 55)">
+        <path d="M50 10 L54 20 L46 20 Z" fill="${STAMP_INK}"/>
+        <path d="M22 30 Q22 18 50 18 Q78 18 78 30 L78 82 Q78 96 50 96 Q22 96 22 82 Z" fill="${STAMP_INK}"/>
+        <text x="50" y="50" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="14" font-weight="700">${charA}</text>
+        <text x="50" y="72" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="14" font-weight="700">${charB}</text>
+      </g></svg>`,
+    tile: (chars, size, opts = {}) => {
+      const [a, b, c, d] = chars;
+      return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
+        <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || 0} 50 50)">
+          <path d="M50 12 A38 38 0 0 1 88 50 L50 50 Z" fill="${STAMP_INK}"/>
+          <path d="M88 50 A38 38 0 0 1 50 88 L50 50 Z" fill="${STAMP_INK}"/>
+          <path d="M50 88 A38 38 0 0 1 12 50 L50 50 Z" fill="${STAMP_INK}"/>
+          <path d="M12 50 A38 38 0 0 1 50 12 L50 50 Z" fill="${STAMP_INK}"/>
+          <circle cx="50" cy="50" r="8" fill="${STAMP_PAPER}"/>
+          <text x="70" y="34" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="12" font-weight="700">${a}</text>
+          <text x="70" y="66" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="12" font-weight="700">${b}</text>
+          <text x="30" y="34" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="12" font-weight="700">${c}</text>
+          <text x="30" y="66" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="12" font-weight="700">${d}</text>
+        </g></svg>`;
+    },
+    // 四君子印 · 梅 兰 竹 菊 with decorative plant art
+    junziMei: (size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || -3} 50 50)">
+        <rect x="10" y="10" width="80" height="80" rx="2.5" fill="${STAMP_INK}"/>
+        <rect x="16" y="16" width="68" height="68" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <path d="M20 76 Q40 60 62 44 Q76 34 82 22" stroke="${STAMP_PAPER}" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <circle cx="30" cy="70" r="3.5" fill="${STAMP_PAPER}"/>
+        <circle cx="46" cy="56" r="4" fill="${STAMP_PAPER}"/>
+        <circle cx="60" cy="46" r="3" fill="${STAMP_PAPER}"/>
+        <circle cx="72" cy="32" r="4" fill="${STAMP_PAPER}"/>
+        <text x="72" y="80" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="14" font-weight="700">梅</text>
+      </g></svg>`,
+    junziLan: (size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || 2} 50 50)">
+        <rect x="10" y="10" width="80" height="80" rx="2.5" fill="${STAMP_INK}"/>
+        <rect x="16" y="16" width="68" height="68" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <path d="M50 78 Q26 60 22 30" stroke="${STAMP_PAPER}" stroke-width="1.5" fill="none" opacity="0.75"/>
+        <path d="M50 78 Q64 62 60 34" stroke="${STAMP_PAPER}" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <path d="M50 78 Q76 62 80 34" stroke="${STAMP_PAPER}" stroke-width="1.5" fill="none" opacity="0.6"/>
+        <path d="M50 78 Q40 60 30 44" stroke="${STAMP_PAPER}" stroke-width="1.2" fill="none" opacity="0.5"/>
+        <ellipse cx="38" cy="40" rx="3" ry="2" fill="${STAMP_PAPER}"/>
+        <text x="26" y="80" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="14" font-weight="700">蘭</text>
+      </g></svg>`,
+    junziZhu: (size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || -2} 50 50)">
+        <rect x="10" y="10" width="80" height="80" rx="2.5" fill="${STAMP_INK}"/>
+        <rect x="16" y="16" width="68" height="68" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <rect x="30" y="18" width="6" height="70" fill="${STAMP_PAPER}" opacity="0.75"/>
+        <rect x="60" y="24" width="6" height="60" fill="${STAMP_PAPER}" opacity="0.65"/>
+        <line x1="30" y1="34" x2="36" y2="34" stroke="${STAMP_INK}" stroke-width="1.5"/>
+        <line x1="30" y1="52" x2="36" y2="52" stroke="${STAMP_INK}" stroke-width="1.5"/>
+        <line x1="30" y1="70" x2="36" y2="70" stroke="${STAMP_INK}" stroke-width="1.5"/>
+        <line x1="60" y1="40" x2="66" y2="40" stroke="${STAMP_INK}" stroke-width="1.2"/>
+        <line x1="60" y1="60" x2="66" y2="60" stroke="${STAMP_INK}" stroke-width="1.2"/>
+        <path d="M36 30 Q46 26 50 20" stroke="${STAMP_PAPER}" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <path d="M36 48 Q48 42 52 34" stroke="${STAMP_PAPER}" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <path d="M66 36 Q76 34 80 28" stroke="${STAMP_PAPER}" stroke-width="1.2" fill="none" opacity="0.6"/>
+        <text x="80" y="80" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="14" font-weight="700">竹</text>
+      </g></svg>`,
+    junziJu: (size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
+      <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || 4} 50 50)">
+        <rect x="10" y="10" width="80" height="80" rx="2.5" fill="${STAMP_INK}"/>
+        <rect x="16" y="16" width="68" height="68" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <g fill="${STAMP_PAPER}" opacity="0.85">
+          <ellipse cx="50" cy="30" rx="4" ry="10"/>
+          <ellipse cx="50" cy="30" rx="10" ry="4"/>
+          <ellipse cx="50" cy="30" rx="7" ry="10" transform="rotate(45 50 30)"/>
+          <ellipse cx="50" cy="30" rx="7" ry="10" transform="rotate(-45 50 30)"/>
+          <circle cx="50" cy="30" r="4" fill="${STAMP_INK}"/>
+        </g>
+        <path d="M50 40 L50 78 M50 55 L40 65 M50 62 L60 72" stroke="${STAMP_PAPER}" stroke-width="1.5" fill="none" opacity="0.7"/>
+        <text x="72" y="80" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="14" font-weight="700">菊</text>
+      </g></svg>`,
   };
 
   // Extra state introduced in v2: tiers, shop, teacher/student split.
@@ -7350,8 +7461,11 @@
     }
 
     // Full months count over history: any prior month + this month if complete.
+    // Also record which calendar months (1-12) have ever been full — used by the
+    // 四君子印 (梅=Dec, 兰=Mar, 竹=Jun, 菊=Sep).
     let monthFullCount = 0;
-    if (monthFull) monthFullCount++;
+    const fullMonthsByCalMonth = { 1:0, 2:0, 3:0, 4:0, 5:0, 6:0, 7:0, 8:0, 9:0, 10:0, 11:0, 12:0 };
+    if (monthFull) { monthFullCount++; fullMonthsByCalMonth[m + 1]++; }
     if (dateSet.size) {
       const minDate = sorted[0];
       const startYear = parseInt(minDate.slice(0,4)); const startMon = parseInt(minDate.slice(5,7)) - 1;
@@ -7363,11 +7477,15 @@
           const ds = cy + '-' + String(cm+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
           if (!dateSet.has(ds)) { allDone = false; break; }
         }
-        if (allDone) monthFullCount++;
+        if (allDone) { monthFullCount++; fullMonthsByCalMonth[cm + 1]++; }
         cm++;
         if (cm > 11) { cm = 0; cy++; }
       }
     }
+    const hadFullDec = fullMonthsByCalMonth[12] > 0 ? 1 : 0;
+    const hadFullMar = fullMonthsByCalMonth[3]  > 0 ? 1 : 0;
+    const hadFullJun = fullMonthsByCalMonth[6]  > 0 ? 1 : 0;
+    const hadFullSep = fullMonthsByCalMonth[9]  > 0 ? 1 : 0;
 
     // New-song count: any homework with a recorded first-check date.
     const newSongCount = Object.keys(hwFirstDate).length;
@@ -7378,6 +7496,7 @@
       weekChecked, weekFull, weekStreak,
       weekendChecked, weekendCount,
       monthFull, monthChecked, monthTotal: lastDay, monthFullCount,
+      hadFullDec, hadFullMar, hadFullJun, hadFullSep,
       earlyCount, nightCount, bothTimeCount,
       todayFullHouse, activeTodayCount: activeToday.length,
       newSongToday, newSongCount, comebackCount,
@@ -7531,6 +7650,34 @@
       svg: (s) => stampSvg.mystery('遇', s), metric: 'cumulative', tiers: [{at: 42, xp: 60}] },
     { code: 'mystery_3', name: '藏印叁 · 恒', sub: '暗藏于某一次', cat: 'hidden',
       svg: (s) => stampSvg.mystery('恆', s), metric: 'cumulative', tiers: [{at: 88, xp: 100}] },
+
+    // ═══ 形制拓展 · shape-diverse bonus seals (fired parallel to main tiers)
+    { code: 'form_chunxin', name: '春信印', sub: '梅花五瓣 · 周末不歇 5 次', cat: 'form',
+      svg: (s) => stampSvg.plumFlower('春', '信', s), metric: 'weekendCount', tiers: [{at: 5, xp: 30}] },
+    { code: 'form_qingfeng', name: '清风徐来', sub: '折扇形 · 夜歌 10 次', cat: 'form',
+      svg: (s) => stampSvg.fan('清風', '徐來', s), metric: 'nightCount', tiers: [{at: 10, xp: 40}] },
+    { code: 'form_xiangyun', name: '祥云歌起', sub: '云头形 · 首次结课', cat: 'form',
+      svg: (s) => stampSvg.cloudHead('祥雲', '歌起', s), metric: 'songsCompletedCount', tiers: [{at: 1, xp: 50}] },
+    { code: 'form_ruyi', name: '如意印', sub: '如意云形 · 昼夜俱到 5 次', cat: 'form',
+      svg: (s) => stampSvg.ruyi('如', '意', s), metric: 'bothTimeCount', tiers: [{at: 5, xp: 40}] },
+    { code: 'form_xinya', name: '新芽印', sub: '柳叶形 · 打过 3 个新任务', cat: 'form',
+      svg: (s) => stampSvg.willowLeaf('新', s), metric: 'newSongCount', tiers: [{at: 3, xp: 30}] },
+    { code: 'form_zhongming', name: '钟鸣歌成', sub: '铜钟形 · 满勤月 1 次', cat: 'form',
+      svg: (s) => stampSvg.bell('鐘鳴', '歌成', s), metric: 'monthFullCount', tiers: [{at: 1, xp: 60}] },
+    { code: 'form_changle', name: '长乐未央', sub: '汉瓦当形 · 累积 200 次', cat: 'form',
+      svg: (s) => stampSvg.tile(['長','樂','未','央'], s), metric: 'cumulative', tiers: [{at: 200, xp: 120}] },
+    { code: 'form_fulu', name: '福禄印', sub: '葫芦形 · 完成 3 首歌', cat: 'form',
+      svg: (s) => stampSvg.gourd('福', '祿', s), metric: 'songsCompletedCount', tiers: [{at: 3, xp: 80}] },
+
+    // ═══ 四君子印 · seasonal (unlocked on full-attendance in specific month)
+    { code: 'junzi_mei', name: '梅印 · 冬', sub: '腊月满勤 · 十二月全打卡', cat: 'junzi',
+      svg: (s) => stampSvg.junziMei(s), metric: 'hadFullDec', tiers: [{at: 1, xp: 100}] },
+    { code: 'junzi_lan', name: '兰印 · 春', sub: '仲春满勤 · 三月全打卡', cat: 'junzi',
+      svg: (s) => stampSvg.junziLan(s), metric: 'hadFullMar', tiers: [{at: 1, xp: 100}] },
+    { code: 'junzi_zhu', name: '竹印 · 夏', sub: '仲夏满勤 · 六月全打卡', cat: 'junzi',
+      svg: (s) => stampSvg.junziZhu(s), metric: 'hadFullJun', tiers: [{at: 1, xp: 100}] },
+    { code: 'junzi_ju', name: '菊印 · 秋', sub: '仲秋满勤 · 九月全打卡', cat: 'junzi',
+      svg: (s) => stampSvg.junziJu(s), metric: 'hadFullSep', tiers: [{at: 1, xp: 100}] },
   ];
 
   const STAMP_CAT_LABELS = {
@@ -7540,6 +7687,8 @@
     time: '时辰之印',
     specialty: '专项之印',
     hidden: '藏之印',
+    form: '形制之印',
+    junzi: '四君子印',
   };
 
   // ═══ Teacher catalog · 老师端 ═══
@@ -8017,6 +8166,8 @@
     'cum_100', 'cum_365', 'cum_500',
     'song_complete',
     'mystery_1', 'mystery_2', 'mystery_3',
+    'form_zhongming', 'form_changle', 'form_fulu',
+    'junzi_mei', 'junzi_lan', 'junzi_zhu', 'junzi_ju',
     't_mirror_streak30', 't_mirror_streak100', 't_mirror_song_complete',
     't_taoli', 't_disciples',
   ]);
@@ -8218,8 +8369,8 @@
     for (const it of items) (byCat[it.def.cat] = byCat[it.def.cat] || []).push(it);
     const catOrder = role === 'teacher'
       ? ['t_teach', 't_raise', 't_care']
-      : ['streak', 'cumulative', 'weekly', 'time', 'specialty', 'hidden'];
-    const catNums = ['壹', '貳', '叁', '肆', '伍', '陸'];
+      : ['streak', 'cumulative', 'weekly', 'time', 'specialty', 'form', 'junzi', 'hidden'];
+    const catNums = ['壹', '貳', '叁', '肆', '伍', '陸', '柒', '捌'];
     const gridsHtml = catOrder.filter(c => byCat[c]).map((c, idx) => {
       const num = catNums[idx] || '';
       const cells = byCat[c].map(it => renderStampCell(it, role)).join('');
