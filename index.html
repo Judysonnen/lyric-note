@@ -6705,6 +6705,17 @@
     }
 
     list.innerHTML = activeHtml + archivedHtml;
+    centerTodayInStrips(list);
+  }
+
+  function centerTodayInStrips(root) {
+    const strips = (root || document).querySelectorAll('.hw-strip');
+    strips.forEach(strip => {
+      const todayCell = strip.querySelector('.hw-day[data-today="1"]');
+      if (!todayCell) return;
+      const target = todayCell.offsetLeft + todayCell.offsetWidth / 2 - strip.clientWidth / 2;
+      strip.scrollLeft = Math.max(0, target);
+    });
   }
 
   function renderHomeworkStripCard(h, today) {
@@ -6731,7 +6742,7 @@
       let click = '';
       if (!isFuture) click = `onclick="toggleDayCheck('${h.id}','${d}')"`;
       const titleStr = done ? '已完成 · 点击取消' : (isToday ? '今天 · 点击标记完成' : (isMissed ? '未完成 · 点击补卡' : '未到'));
-      return `<div class="hw-day ${cls}" ${click} title="${d} · ${titleStr}">
+      return `<div class="hw-day ${cls}" ${click} title="${d} · ${titleStr}"${isToday ? ' data-today="1"' : ''}>
         <span class="hw-day-wday">${wd}</span>
         <div class="hw-day-circle"><span class="hw-day-num">${num}</span></div>
       </div>`;
