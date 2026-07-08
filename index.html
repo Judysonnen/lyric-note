@@ -2379,7 +2379,12 @@
       display: flex; flex-direction: column; align-items: center; gap: 6px;
       text-align: center; cursor: default;
     }
-    .stamp-cell.locked svg { opacity: 0.25; filter: grayscale(1); }
+    .stamp-cell svg.seal-svg {
+      filter: drop-shadow(0 1.5px 2px rgba(139,45,30,0.18));
+      transition: transform .2s;
+    }
+    .stamp-cell:not(.locked):hover svg.seal-svg { transform: scale(1.06); }
+    .stamp-cell.locked svg { opacity: 0.22; filter: grayscale(1); }
     .stamp-slot {
       width: 68px; height: 68px; border: 1.2px dashed #B8A47F; border-radius: 4px;
       display: flex; align-items: center; justify-content: center;
@@ -6566,125 +6571,148 @@
   let _stampRevealing = false;
 
   // Renderers return an SVG string sized to `size` px.
+  // All text uses dominant-baseline="central" so glyph optical center aligns
+  // with the coordinate — CJK metrics otherwise look several px too low.
+  const STAMP_INK = '#B92923';
+  const STAMP_INK_DEEP = '#8E1F1B';
+  const STAMP_PAPER = '#FBF3D8';
+  const SERIF = 'Songti SC, STSong, STZhongsong, serif';
   const stampSvg = {
-    box: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+    box: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || -3} 45 45)">
-        <rect x="18" y="18" width="54" height="54" rx="1.5" fill="none" stroke="#B92923" stroke-width="4.5"/>
-        <text x="45" y="58" text-anchor="middle" fill="#B92923"
-              font-family="Songti SC, STSong, serif" font-size="30" font-weight="700">${char}</text>
+        <rect x="15" y="15" width="60" height="60" rx="2.5" fill="none" stroke="${STAMP_INK}" stroke-width="4.5"/>
+        <rect x="21" y="21" width="48" height="48" rx="1" fill="none" stroke="${STAMP_INK}" stroke-width="0.7" opacity="0.35"/>
+        <text x="45" y="45.5" text-anchor="middle" dominant-baseline="central" fill="${STAMP_INK}"
+              font-family="${SERIF}" font-size="30" font-weight="700">${char}</text>
       </g></svg>`,
-    boxSolid: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+    boxSolid: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || -3} 45 45)">
-        <rect x="18" y="18" width="54" height="54" rx="1.5" fill="#B92923"/>
-        <text x="45" y="58" text-anchor="middle" fill="#FBF3D8"
-              font-family="Songti SC, STSong, serif" font-size="28" font-weight="700">${char}</text>
+        <rect x="15" y="15" width="60" height="60" rx="2.5" fill="${STAMP_INK}"/>
+        <rect x="20" y="20" width="50" height="50" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <text x="45" y="45.5" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}"
+              font-family="${SERIF}" font-size="30" font-weight="700">${char}</text>
       </g></svg>`,
-    round2: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+    round2: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || -2} 45 45)">
-        <circle cx="45" cy="45" r="30" fill="#B92923"/>
-        <text x="45" y="42" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="15" font-weight="700">${a}</text>
-        <text x="45" y="58" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="15" font-weight="700">${b}</text>
+        <circle cx="45" cy="45" r="31" fill="${STAMP_INK}"/>
+        <circle cx="45" cy="45" r="26" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <text x="45" y="33" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="16" font-weight="700">${a}</text>
+        <text x="45" y="57" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="16" font-weight="700">${b}</text>
       </g></svg>`,
-    vert3: (a, b, c, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+    vert3: (a, b, c, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || 3} 45 45)">
-        <rect x="26" y="12" width="38" height="66" fill="#B92923"/>
-        <text x="45" y="34" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${a}</text>
-        <text x="45" y="52" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${b}</text>
-        <text x="45" y="70" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="10" font-weight="500" opacity="0.85">${c}</text>
+        <rect x="24" y="10" width="42" height="70" rx="1.5" fill="${STAMP_INK}"/>
+        <rect x="28" y="14" width="34" height="62" rx="0.5" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.6" opacity="0.35"/>
+        <text x="45" y="27" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="15" font-weight="700">${a}</text>
+        <text x="45" y="46" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="15" font-weight="700">${b}</text>
+        <text x="45" y="65" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="10.5" font-weight="600" opacity="0.9">${c}</text>
       </g></svg>`,
-    doublering: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+    doublering: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || -3} 45 45)">
-        <circle cx="45" cy="45" r="34" fill="none" stroke="#B92923" stroke-width="5.5"/>
-        <circle cx="45" cy="45" r="38" fill="none" stroke="#B92923" stroke-width="1.5" opacity="0.5"/>
-        <text x="45" y="42" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="18" font-weight="700">${a}</text>
-        <text x="45" y="62" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="18" font-weight="700">${b}</text>
+        <circle cx="45" cy="45" r="36" fill="none" stroke="${STAMP_INK}" stroke-width="5.5"/>
+        <circle cx="45" cy="45" r="30" fill="none" stroke="${STAMP_INK}" stroke-width="1.2" opacity="0.5"/>
+        <text x="45" y="34" text-anchor="middle" dominant-baseline="central" fill="${STAMP_INK}" font-family="${SERIF}" font-size="18" font-weight="700">${a}</text>
+        <text x="45" y="57" text-anchor="middle" dominant-baseline="central" fill="${STAMP_INK}" font-family="${SERIF}" font-size="18" font-weight="700">${b}</text>
       </g></svg>`,
-    horiz2: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+    horiz2: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || -4} 45 45)">
-        <rect x="12" y="26" width="66" height="38" fill="#B92923"/>
-        <text x="30" y="55" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="24" font-weight="700">${a}</text>
-        <text x="60" y="55" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="24" font-weight="700">${b}</text>
+        <rect x="10" y="24" width="70" height="42" rx="2" fill="${STAMP_INK}"/>
+        <rect x="14" y="28" width="62" height="34" rx="0.5" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <text x="28" y="45" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="24" font-weight="700">${a}</text>
+        <text x="62" y="45" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="24" font-weight="700">${b}</text>
       </g></svg>`,
     grid4: (chars, size, opts = {}) => {
       const [a, b, c, d] = chars;
-      return `<svg viewBox="0 0 100 100" width="${size}" height="${size}">
+      return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
         <g transform="rotate(${opts.rot || -5} 50 50)">
-          <rect x="8" y="8" width="84" height="84" rx="2" fill="#B92923"/>
-          <line x1="50" y1="12" x2="50" y2="88" stroke="#FBF3D8" stroke-width="0.7" opacity="0.4"/>
-          <line x1="12" y1="50" x2="88" y2="50" stroke="#FBF3D8" stroke-width="0.7" opacity="0.4"/>
-          <text x="29" y="38" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="22" font-weight="700">${a}</text>
-          <text x="71" y="38" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="22" font-weight="700">${b}</text>
-          <text x="29" y="76" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="22" font-weight="700">${c}</text>
-          <text x="71" y="76" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="22" font-weight="700">${d}</text>
+          <rect x="6" y="6" width="88" height="88" rx="2.5" fill="${STAMP_INK}"/>
+          <rect x="12" y="12" width="76" height="76" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+          <line x1="50" y1="12" x2="50" y2="88" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+          <line x1="12" y1="50" x2="88" y2="50" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+          <text x="31" y="31" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="22" font-weight="700">${a}</text>
+          <text x="69" y="31" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="22" font-weight="700">${b}</text>
+          <text x="31" y="69" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="22" font-weight="700">${c}</text>
+          <text x="69" y="69" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="22" font-weight="700">${d}</text>
         </g></svg>`;
     },
-    scroll: (topText, botText, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}">
+    scroll: (topText, botText, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || -3} 50 50)">
-        <path d="M15 26 Q50 12 85 26 L82 74 Q50 88 18 74 Z" fill="#B92923"/>
-        <text x="50" y="46" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${topText}</text>
-        <text x="50" y="70" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="9" font-weight="500" opacity="0.9">${botText}</text>
+        <path d="M12 24 Q50 10 88 24 L84 76 Q50 90 16 76 Z" fill="${STAMP_INK}"/>
+        <path d="M18 30 Q50 20 82 30 L80 70 Q50 82 20 70 Z" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <text x="50" y="43" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="16" font-weight="700">${topText}</text>
+        ${botText ? `<text x="50" y="63" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="9.5" font-weight="600" opacity="0.9">${botText}</text>` : ''}
       </g></svg>`,
-    return2: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}">
+    return2: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || 2} 50 50)">
-        <rect x="16" y="16" width="68" height="68" rx="2" fill="none" stroke="#B92923" stroke-width="3"/>
-        <text x="35" y="42" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="20" font-weight="700">${a}</text>
-        <text x="65" y="42" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="20" font-weight="700">${b}</text>
-        <text x="50" y="70" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="10" opacity="0.75">断而復起</text>
+        <rect x="14" y="14" width="72" height="72" rx="2.5" fill="none" stroke="${STAMP_INK}" stroke-width="3.5"/>
+        <rect x="20" y="20" width="60" height="60" rx="1" fill="none" stroke="${STAMP_INK}" stroke-width="0.7" opacity="0.4"/>
+        <text x="35" y="43" text-anchor="middle" dominant-baseline="central" fill="${STAMP_INK}" font-family="${SERIF}" font-size="20" font-weight="700">${a}</text>
+        <text x="65" y="43" text-anchor="middle" dominant-baseline="central" fill="${STAMP_INK}" font-family="${SERIF}" font-size="20" font-weight="700">${b}</text>
+        <text x="50" y="68" text-anchor="middle" dominant-baseline="central" fill="${STAMP_INK}" font-family="${SERIF}" font-size="10" opacity="0.8">断而復起</text>
       </g></svg>`,
-    // New shapes for v2 density
-    pill: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 60" width="${size}" height="${size * 0.6}">
+    pill: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 60" width="${size}" height="${size * 0.6}" class="seal-svg">
       <g transform="rotate(${opts.rot || -3} 50 30)">
-        <rect x="6" y="10" width="88" height="40" rx="20" fill="#B92923"/>
-        <text x="50" y="38" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="18" font-weight="700">${a}${b}</text>
+        <rect x="6" y="8" width="88" height="44" rx="22" fill="${STAMP_INK}"/>
+        <rect x="11" y="13" width="78" height="34" rx="17" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <text x="50" y="30.5" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="19" font-weight="700">${a}${b}</text>
       </g></svg>`,
-    hex: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+    hex: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || -3} 45 45)">
-        <polygon points="45,10 76,28 76,62 45,80 14,62 14,28" fill="#B92923"/>
-        <text x="45" y="42" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${a}</text>
-        <text x="45" y="62" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${b}</text>
+        <polygon points="45,8 78,26 78,64 45,82 12,64 12,26" fill="${STAMP_INK}"/>
+        <polygon points="45,15 71,29 71,61 45,75 19,61 19,29" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <text x="45" y="34" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="15" font-weight="700">${a}</text>
+        <text x="45" y="57" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="15" font-weight="700">${b}</text>
       </g></svg>`,
-    oval: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 80" width="${size}" height="${size * 0.8}">
+    oval: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 80" width="${size}" height="${size * 0.8}" class="seal-svg">
       <g transform="rotate(${opts.rot || 2} 50 40)">
-        <ellipse cx="50" cy="40" rx="42" ry="30" fill="#B92923"/>
-        <text x="50" y="37" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${a}</text>
-        <text x="50" y="55" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${b}</text>
+        <ellipse cx="50" cy="40" rx="44" ry="32" fill="${STAMP_INK}"/>
+        <ellipse cx="50" cy="40" rx="37" ry="26" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <text x="50" y="30" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="16" font-weight="700">${a}</text>
+        <text x="50" y="50" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="16" font-weight="700">${b}</text>
       </g></svg>`,
-    gourd: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 100" width="${size * 0.9}" height="${size}">
+    gourd: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 100" width="${size * 0.9}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || -2} 45 50)">
-        <path d="M45 8 Q31 11 31 22 Q31 31 39 36 Q22 42 18 58 Q14 88 45 94 Q76 88 72 58 Q68 42 51 36 Q59 31 59 22 Q59 11 45 8 Z" fill="#B92923"/>
-        <text x="45" y="28" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="11" font-weight="700">${a}</text>
-        <text x="45" y="70" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="18" font-weight="700">${b}</text>
+        <path d="M45 8 Q30 12 30 22 Q30 31 39 36 Q22 42 18 60 Q14 90 45 96 Q76 90 72 60 Q68 42 51 36 Q60 31 60 22 Q60 12 45 8 Z" fill="${STAMP_INK}"/>
+        <text x="45" y="24" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="11" font-weight="700">${a}</text>
+        <text x="45" y="66" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="18" font-weight="700">${b}</text>
       </g></svg>`,
-    sunrise: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
-      <g transform="rotate(${opts.rot || 0} 45 45)">
-        <rect x="14" y="14" width="62" height="62" rx="2" fill="#B92923"/>
-        <circle cx="45" cy="52" r="12" fill="#FBF3D8" opacity="0.9"/>
-        <rect x="20" y="62" width="50" height="1.5" fill="#FBF3D8"/>
-        <path d="M18 50 L26 50 M64 50 L72 50 M45 30 L45 38 M28 34 L34 40 M56 40 L62 34" stroke="#FBF3D8" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <text x="45" y="76" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="9" font-weight="700">${char}</text>
-      </g></svg>`,
-    crescent: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
-      <g transform="rotate(${opts.rot || -6} 45 45)">
-        <rect x="14" y="14" width="62" height="62" rx="2" fill="#B92923"/>
-        <path d="M56 26 A22 22 0 1 0 56 66 A16 22 0 1 1 56 26 Z" fill="#FBF3D8" opacity="0.92"/>
-        <text x="30" y="76" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="9" font-weight="700">${char}</text>
-      </g></svg>`,
-    sunmoon: (size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
-      <g transform="rotate(${opts.rot || 0} 45 45)">
-        <rect x="14" y="14" width="62" height="62" rx="2" fill="#B92923"/>
-        <circle cx="30" cy="36" r="8" fill="#FBF3D8"/>
-        <path d="M64 30 A9 9 0 1 0 64 46 A6 9 0 1 1 64 30 Z" fill="#FBF3D8"/>
-        <text x="45" y="72" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="11" font-weight="700">晝夜</text>
-      </g></svg>`,
-    star: (size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
-      <g transform="rotate(${opts.rot || -4} 45 45)">
-        <circle cx="45" cy="45" r="32" fill="#B92923"/>
-        <path d="M45 22 L49 40 L67 40 L52 51 L57 68 L45 58 L33 68 L38 51 L23 40 L41 40 Z" fill="#FBF3D8" opacity="0.92"/>
-      </g></svg>`,
-    mystery: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+    sunrise: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
       <g transform="rotate(${opts.rot || -2} 45 45)">
-        <rect x="18" y="18" width="54" height="54" rx="1.5" fill="#B92923"/>
-        <text x="45" y="60" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="30" font-weight="700">${char}</text>
+        <rect x="12" y="12" width="66" height="66" rx="2.5" fill="${STAMP_INK}"/>
+        <rect x="18" y="18" width="54" height="54" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <circle cx="45" cy="48" r="11" fill="${STAMP_PAPER}"/>
+        <rect x="22" y="58" width="46" height="1.6" fill="${STAMP_PAPER}"/>
+        <path d="M45 30 L45 36 M28 36 L33 41 M62 36 L57 41 M20 47 L26 47 M64 47 L70 47" stroke="${STAMP_PAPER}" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        <text x="45" y="70" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="9" font-weight="700">${char}</text>
+      </g></svg>`,
+    crescent: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
+      <g transform="rotate(${opts.rot || -5} 45 45)">
+        <rect x="12" y="12" width="66" height="66" rx="2.5" fill="${STAMP_INK}"/>
+        <rect x="18" y="18" width="54" height="54" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <path d="M56 26 A22 22 0 1 0 56 64 A15 22 0 1 1 56 26 Z" fill="${STAMP_PAPER}"/>
+        <circle cx="30" cy="30" r="1" fill="${STAMP_PAPER}" opacity="0.8"/>
+        <circle cx="34" cy="60" r="0.8" fill="${STAMP_PAPER}" opacity="0.7"/>
+        <text x="30" y="70" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="9" font-weight="700">${char}</text>
+      </g></svg>`,
+    sunmoon: (size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
+      <g transform="rotate(${opts.rot || 0} 45 45)">
+        <rect x="12" y="12" width="66" height="66" rx="2.5" fill="${STAMP_INK}"/>
+        <rect x="18" y="18" width="54" height="54" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <circle cx="30" cy="35" r="9" fill="${STAMP_PAPER}"/>
+        <path d="M64 30 A10 10 0 1 0 64 48 A7 10 0 1 1 64 30 Z" fill="${STAMP_PAPER}"/>
+        <text x="45" y="66" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="12" font-weight="700">晝夜</text>
+      </g></svg>`,
+    star: (size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
+      <g transform="rotate(${opts.rot || -4} 45 45)">
+        <circle cx="45" cy="45" r="34" fill="${STAMP_INK}"/>
+        <circle cx="45" cy="45" r="28" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <path d="M45 20 L49.5 39 L69 39 L53 51 L58.5 70 L45 58.5 L31.5 70 L37 51 L21 39 L40.5 39 Z" fill="${STAMP_PAPER}"/>
+      </g></svg>`,
+    mystery: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}" class="seal-svg">
+      <g transform="rotate(${opts.rot || -2} 45 45)">
+        <rect x="15" y="15" width="60" height="60" rx="2.5" fill="${STAMP_INK}"/>
+        <rect x="21" y="21" width="48" height="48" rx="1" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <text x="45" y="45.5" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="32" font-weight="700">${char}</text>
       </g></svg>`,
   };
 
