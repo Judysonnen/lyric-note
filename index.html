@@ -3754,7 +3754,12 @@
     if (localStorage.getItem('lyricnote_state')) {
       migrateOldState();
     }
-    // Auth will decide whether to show login or home screen
+    // Auth will decide whether to show login or home screen. Preview mode
+    // short-circuits everything so we can inspect seal art without earning.
+    if (new URLSearchParams(location.search).get('preview') === 'stamps') {
+      renderStampPreview();
+      return;
+    }
     initCloudSync();
     document.addEventListener('click', onDocClick);
     // Handle ?join=<token> shared-project link (after a brief delay so auth has a chance to restore)
@@ -8132,6 +8137,274 @@
     }).join('');
     document.getElementById('stamp-book-body').innerHTML = html;
   }
+
+  // ═══ Preview mode (?preview=stamps in the URL) ═══
+  // Renders every seal art + every UI state without needing to earn anything.
+  function renderStampPreview() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('home-screen').style.display = 'none';
+    document.getElementById('editor-view').style.display = 'none';
+
+    // Set a fake userRole so evaluate/render code paths behave.
+    userRole = 'student';
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'max-width:960px;margin:32px auto;padding:24px;color:var(--text);';
+    wrap.innerHTML = `
+      <h1 style="font-family:var(--font-display);letter-spacing:0.18em;font-size:26px;margin:0 0 6px;">印章 · 预览</h1>
+      <p style="color:var(--muted);margin:0 0 24px;font-size:13px;">
+        全部印章、全部状态 · 加 <code>?preview=stamps</code> 进入 · 移除即恢复常规。
+      </p>
+
+      <section style="margin-bottom:36px;">
+        <h2 style="font-family:var(--font-display);font-size:17px;letter-spacing:0.2em;color:#B92923;margin:0 0 4px;">壹 · 学生印 · 每级并列</h2>
+        <p style="color:var(--muted);font-size:12px;margin:0 0 16px;">每一格是「已至该级 · 已收取」状态。点击任意一枚看故事卡。</p>
+        <div id="preview-student-catalog"></div>
+      </section>
+
+      <section style="margin-bottom:36px;">
+        <h2 style="font-family:var(--font-display);font-size:17px;letter-spacing:0.2em;color:#B98A2D;margin:0 0 4px;">貳 · 老师印 · 每级并列</h2>
+        <p style="color:var(--muted);font-size:12px;margin:0 0 16px;">带「师」角标 + 金色光晕。</p>
+        <div id="preview-teacher-catalog"></div>
+      </section>
+
+      <section style="margin-bottom:36px;">
+        <h2 style="font-family:var(--font-display);font-size:17px;letter-spacing:0.2em;color:var(--text-soft);margin:0 0 4px;">叁 · 印肆商品</h2>
+        <div id="preview-shop-catalog"></div>
+      </section>
+
+      <section style="margin-bottom:36px;">
+        <h2 style="font-family:var(--font-display);font-size:17px;letter-spacing:0.2em;color:var(--text-soft);margin:0 0 16px;">肆 · 触发解锁动画</h2>
+        <div id="preview-reveal-btns" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+      </section>
+
+      <section style="margin-bottom:36px;">
+        <h2 style="font-family:var(--font-display);font-size:17px;letter-spacing:0.2em;color:var(--text-soft);margin:0 0 16px;">伍 · 其他状态</h2>
+        <div style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button class="shop-item-buy" onclick="previewShowEmptyModal()">空印谱（首次引导）</button>
+          <button class="shop-item-buy" onclick="previewShowFullModal()">完整印谱（全部已得）</button>
+          <button class="shop-item-buy" onclick="previewShowStoryCard()">故事卡</button>
+          <button class="shop-item-buy" onclick="previewShowUnclaimedModal()">印谱（多枚待收）</button>
+          <button class="shop-item-buy" onclick="previewShowTeacherModal()">老师印谱</button>
+        </div>
+      </section>
+
+      <section style="margin-bottom:36px;">
+        <h2 style="font-family:var(--font-display);font-size:17px;letter-spacing:0.2em;color:var(--text-soft);margin:0 0 16px;">陸 · Shelf 卡</h2>
+        <div style="max-width:460px;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:6px;letter-spacing:0.15em;">学生 · 有数据</div>
+          <div id="preview-shelf-student"></div>
+          <div style="font-size:12px;color:var(--muted);margin:20px 0 6px;letter-spacing:0.15em;">学生 · 空态</div>
+          <div id="preview-shelf-student-empty"></div>
+          <div style="font-size:12px;color:var(--muted);margin:20px 0 6px;letter-spacing:0.15em;">老师</div>
+          <div id="preview-shelf-teacher"></div>
+        </div>
+      </section>
+    `;
+    document.body.appendChild(wrap);
+
+    // Student catalog — one row per stamp, one cell per tier
+    const studentHtml = STAMP_CATALOG.map(st => {
+      if (st.parameterized) {
+        return `<div style="margin:16px 0;">
+          <div style="font-family:var(--font-display);font-size:14px;letter-spacing:0.15em;color:var(--text);margin-bottom:8px;">${escHtml(st.name)} <span style="color:var(--muted);font-size:11px;">· ${escHtml(st.sub)}</span></div>
+          <div class="stamp-grid" style="grid-template-columns:repeat(3, 1fr);">
+            <div class="stamp-cell claimable-earned" onclick="alert('这是范例')">
+              <div class="stamp-svg-wrap">${st.svg(76, 1, {title: '假如我们还爱着'})}</div>
+              <div class="stamp-caption">${escHtml(st.name)}</div>
+              <div class="stamp-sub">《假如我们还爱着》</div>
+            </div>
+          </div>
+        </div>`;
+      }
+      const cells = (st.tiers || [{at:1, xp:0}]).map((t, i) => {
+        const tier = i + 1;
+        const tierBadge = tier > 1 ? `<span class="stamp-tier-badge">${tierGlyph(tier)}</span>` : '';
+        const dots = st.tiers.length > 1 ? `<div class="stamp-tier-dots">${
+          st.tiers.map((_, j) => `<span class="stamp-tier-dot ${j <= i ? 'on' : ''}"></span>`).join('')
+        }</div>` : '';
+        return `<div class="stamp-cell claimable-earned">
+          <div class="stamp-svg-wrap">${st.svg(76, tier, {})}${tierBadge}</div>
+          <div class="stamp-caption">${escHtml(st.name)}</div>
+          <div class="stamp-sub">${tierGlyph(tier)}级 · 达 ${t.at} · +${t.xp} 宝</div>
+          ${dots}
+        </div>`;
+      }).join('');
+      return `<div style="margin:16px 0;">
+        <div style="font-family:var(--font-display);font-size:14px;letter-spacing:0.15em;color:var(--text);margin-bottom:8px;">${escHtml(st.name)} <span style="color:var(--muted);font-size:11px;">· ${escHtml(st.sub)}</span></div>
+        <div class="stamp-grid" style="grid-template-columns:repeat(${Math.min(st.tiers.length, 5)}, 1fr);">${cells}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('preview-student-catalog').innerHTML = studentHtml;
+
+    // Teacher catalog
+    const teacherHtml = TEACHER_STAMP_CATALOG.map(st => {
+      const cells = st.tiers.map((t, i) => {
+        const tier = i + 1;
+        const tierBadge = tier > 1 ? `<span class="stamp-tier-badge">${tierGlyph(tier)}</span>` : '';
+        return `<div class="stamp-cell teacher-seal claimable-earned">
+          <div class="stamp-svg-wrap">${st.svg(76, tier, {})}${tierBadge}</div>
+          <div class="stamp-caption">${escHtml(st.name)}</div>
+          <div class="stamp-sub">${tierGlyph(tier)}级 · 达 ${t.at} · +${t.xp} 宝</div>
+        </div>`;
+      }).join('');
+      return `<div style="margin:16px 0;">
+        <div style="font-family:var(--font-display);font-size:14px;letter-spacing:0.15em;color:var(--text);margin-bottom:8px;">${escHtml(st.name)} <span style="color:var(--muted);font-size:11px;">· ${escHtml(st.sub)}</span></div>
+        <div class="stamp-grid" style="grid-template-columns:repeat(${Math.min(st.tiers.length, 5)}, 1fr);">${cells}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('preview-teacher-catalog').innerHTML = teacherHtml;
+
+    // Shop
+    const shopHtml = SHOP_ITEMS.map(it => {
+      const visual = it.svg ? it.svg(64) : `<div class="stamp-slot" style="width:64px;height:64px;">${escHtml(it.name.slice(0,2))}</div>`;
+      return `<div class="stamp-cell claimable-earned">
+        <div class="stamp-svg-wrap">${visual}</div>
+        <div class="stamp-caption">${escHtml(it.name)}</div>
+        <div class="stamp-sub">${it.cost} 宝 · ${escHtml(it.sub || '')}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('preview-shop-catalog').innerHTML =
+      `<div class="stamp-grid" style="grid-template-columns:repeat(4, 1fr);">${shopHtml}</div>`;
+
+    // Reveal buttons — cover normal, grand, teacher, song, mystery, teacher-mirror
+    const revealSamples = [
+      { code: 'streak_3', label: '普通 · 初心 · 一级', tier: 1, xp: 10 },
+      { code: 'streak_7', label: '普通 · 一周 · 一级', tier: 1, xp: 25 },
+      { code: 'streak_30', label: '大印 · 满月印', tier: 1, xp: 150 },
+      { code: 'streak_100', label: '大印 · 百日不断', tier: 1, xp: 800 },
+      { code: 'cum_100', label: '大印 · 百日歌心', tier: 1, xp: 150 },
+      { code: 'full_house', label: '多级 · 满堂印 · 三级', tier: 3, xp: 40 },
+      { code: 'full_house', label: '多级 · 满堂印 · 五级', tier: 5, xp: 250 },
+      { code: 'song_complete', label: '大印 · 结课印', tier: 1, xp: 20, meta: { title: '假如我们还爱着' } },
+      { code: 'mystery_1', label: '大印 · 藏印壹', tier: 1, xp: 30 },
+      { code: 't_mirror_streak30', label: '老师 · 育徒满月', tier: 1, xp: 50, role: 'teacher' },
+      { code: 't_taoli', label: '老师 · 桃李成蹊', tier: 2, xp: 300, role: 'teacher' },
+      { code: 't_first_hw', label: '老师 · 授业开门', tier: 1, xp: 10, role: 'teacher' },
+    ];
+    document.getElementById('preview-reveal-btns').innerHTML = revealSamples.map((s, i) =>
+      `<button class="shop-item-buy" style="font-size:12px;" onclick="previewFireReveal(${i})">${escHtml(s.label)} · +${s.xp} 宝</button>`
+    ).join('');
+    window._previewRevealSamples = revealSamples;
+
+    // Shelf card mocks
+    // Student with data — inject fake earnedStamps for the mock
+    const originalEarned = earnedStamps;
+    const originalPurch = shopPurchases;
+    earnedStamps = [
+      { stamp_code: 'streak_3', tier: 1, awarded_at: '2026-07-01', claimed_at: '2026-07-01T00:00:00Z', xp_earned: 10, meta: {} },
+      { stamp_code: 'streak_7', tier: 1, awarded_at: '2026-07-05', claimed_at: '2026-07-05T00:00:00Z', xp_earned: 25, meta: {} },
+      { stamp_code: 'cum_10', tier: 1, awarded_at: '2026-07-05', claimed_at: '2026-07-05T00:00:00Z', xp_earned: 10, meta: {} },
+      { stamp_code: 'full_house', tier: 2, awarded_at: '2026-07-05', claimed_at: null, xp_earned: 15, meta: {} },
+    ];
+    shopPurchases = [];
+    document.getElementById('preview-shelf-student').innerHTML = renderStampShelfCard({ role: 'student' });
+    // Empty student
+    const savedEarned = earnedStamps; earnedStamps = [];
+    document.getElementById('preview-shelf-student-empty').innerHTML = renderStampShelfCard({ role: 'student' });
+    // Teacher
+    earnedStamps = [
+      { stamp_code: 't_first_hw', tier: 1, awarded_at: '2026-07-01', claimed_at: '2026-07-01T00:00:00Z', xp_earned: 10, meta: {} },
+      { stamp_code: 't_disciples', tier: 2, awarded_at: '2026-07-05', claimed_at: null, xp_earned: 60, meta: {} },
+    ];
+    document.getElementById('preview-shelf-teacher').innerHTML = renderStampShelfCard({ role: 'teacher' });
+    // Restore
+    earnedStamps = originalEarned;
+    shopPurchases = originalPurch;
+  }
+
+  function previewFireReveal(idx) {
+    const s = window._previewRevealSamples[idx];
+    if (!s) return;
+    const catalog = s.role === 'teacher' ? TEACHER_STAMP_CATALOG : STAMP_CATALOG;
+    const def = catalog.find(d => d.code === s.code);
+    if (!def) return alert('未找到 ' + s.code);
+    _stampQueue.push({ def, tier: s.tier, xp: s.xp, meta: s.meta || {} });
+    playNextStampReveal();
+  }
+  window.previewFireReveal = previewFireReveal;
+
+  function previewShowEmptyModal() {
+    stampViewState = { role: 'self', label: null, stamps: null, purchases: null };
+    stampCurrentTab = 'book';
+    const orig = earnedStamps; earnedStamps = [];
+    renderStampBook();
+    document.getElementById('stamp-book-bg').style.display = 'flex';
+    earnedStamps = orig;
+  }
+  window.previewShowEmptyModal = previewShowEmptyModal;
+
+  function previewShowFullModal() {
+    stampViewState = { role: 'self', label: null, stamps: null, purchases: null };
+    stampCurrentTab = 'book';
+    const orig = earnedStamps; const origP = shopPurchases;
+    // Award every non-parameterized stamp at max tier, all claimed
+    earnedStamps = [];
+    for (const st of STAMP_CATALOG) {
+      if (st.parameterized) {
+        earnedStamps.push({ stamp_code: 'song_complete:demo', tier: 1, awarded_at: '2026-07-01', claimed_at: '2026-07-01T00:00:00Z', xp_earned: 20, meta: {title: '假如我们还爱着'} });
+      } else {
+        for (let i = 0; i < st.tiers.length; i++) {
+          earnedStamps.push({ stamp_code: st.code, tier: i + 1, awarded_at: '2026-07-01', claimed_at: '2026-07-01T00:00:00Z', xp_earned: st.tiers[i].xp, meta: {} });
+        }
+      }
+    }
+    shopPurchases = SHOP_ITEMS.filter(i => i.cat === 'idle').map(i => ({ item_code: i.code, cost: i.cost }));
+    ownedItemCodes = new Set(shopPurchases.map(p => p.item_code));
+    renderStampBook();
+    document.getElementById('stamp-book-bg').style.display = 'flex';
+    // Note: kept in this state until reload so shelf/modal look filled while browsing
+    earnedStamps = orig;
+    shopPurchases = origP;
+    ownedItemCodes = new Set(origP.map(p => p.item_code));
+  }
+  window.previewShowFullModal = previewShowFullModal;
+
+  function previewShowStoryCard() {
+    const orig = earnedStamps;
+    earnedStamps = [
+      { stamp_code: 'streak_30', tier: 1, awarded_at: '2026-06-15T09:12:00Z', claimed_at: '2026-06-15T09:12:00Z', xp_earned: 150, meta: {} },
+    ];
+    openStampStory('streak_30');
+    earnedStamps = orig;
+  }
+  window.previewShowStoryCard = previewShowStoryCard;
+
+  function previewShowUnclaimedModal() {
+    stampViewState = { role: 'self', label: null, stamps: null, purchases: null };
+    stampCurrentTab = 'book';
+    const orig = earnedStamps;
+    earnedStamps = [
+      { stamp_code: 'streak_3', tier: 1, awarded_at: '2026-07-01', claimed_at: null, xp_earned: 10, meta: {} },
+      { stamp_code: 'streak_7', tier: 1, awarded_at: '2026-07-05', claimed_at: null, xp_earned: 25, meta: {} },
+      { stamp_code: 'full_house', tier: 1, awarded_at: '2026-07-02', claimed_at: null, xp_earned: 5, meta: {} },
+      { stamp_code: 'full_house', tier: 2, awarded_at: '2026-07-06', claimed_at: null, xp_earned: 15, meta: {} },
+      { stamp_code: 'early_bird', tier: 1, awarded_at: '2026-07-03', claimed_at: null, xp_earned: 10, meta: {} },
+    ];
+    renderStampBook();
+    document.getElementById('stamp-book-bg').style.display = 'flex';
+    earnedStamps = orig;
+  }
+  window.previewShowUnclaimedModal = previewShowUnclaimedModal;
+
+  function previewShowTeacherModal() {
+    const savedRole = userRole; userRole = 'teacher';
+    stampViewState = { role: 'self', label: null, stamps: null, purchases: null };
+    stampCurrentTab = 'book';
+    const orig = earnedStamps;
+    earnedStamps = [
+      { stamp_code: 't_first_hw', tier: 1, awarded_at: '2026-06-01', claimed_at: '2026-06-01T00:00:00Z', xp_earned: 10, meta: {} },
+      { stamp_code: 't_hw_batch', tier: 2, awarded_at: '2026-06-15', claimed_at: null, xp_earned: 40, meta: {} },
+      { stamp_code: 't_disciples', tier: 1, awarded_at: '2026-06-01', claimed_at: '2026-06-01T00:00:00Z', xp_earned: 20, meta: {} },
+      { stamp_code: 't_mirror_streak7', tier: 1, awarded_at: '2026-06-20', claimed_at: null, xp_earned: 10, meta: {} },
+    ];
+    renderStampBook();
+    document.getElementById('stamp-book-bg').style.display = 'flex';
+    earnedStamps = orig;
+    userRole = savedRole;
+  }
+  window.previewShowTeacherModal = previewShowTeacherModal;
+  window.renderStampPreview = renderStampPreview;
 
 
   function todayDateStr() {
