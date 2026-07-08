@@ -2452,16 +2452,16 @@
     .book-toc {
       position: sticky; top: 0; z-index: 5;
       display: flex; gap: 4px; overflow-x: auto;
-      padding: 8px 10px 10px;
-      margin: -8px -14px 8px;
-      background: linear-gradient(180deg, rgba(249,241,220,0.98) 0%, rgba(249,241,220,0.85) 90%, transparent 100%);
-      backdrop-filter: blur(4px);
-      border-bottom: 1px dashed rgba(139,115,85,0.28);
+      padding: 10px 12px;
+      margin: -24px -26px 16px -44px;
+      background: #F9F1DC;
+      border-bottom: 1px solid rgba(139,115,85,0.32);
       scrollbar-width: none;
+      box-shadow: 0 6px 12px -8px rgba(70,45,20,0.18);
     }
     .book-toc::-webkit-scrollbar { display: none; }
-    body.skin-sangpi .book-toc { background: linear-gradient(180deg, rgba(226,200,140,0.98), rgba(226,200,140,0.7) 90%, transparent); }
-    body.skin-saijin .book-toc { background: linear-gradient(180deg, rgba(245,234,198,0.98), rgba(245,234,198,0.7) 90%, transparent); }
+    body.skin-sangpi .book-toc { background: #E2C88C; border-bottom-color: rgba(70,45,20,0.4); }
+    body.skin-saijin .book-toc { background: #F5EAC6; border-bottom-color: rgba(139,115,85,0.4); }
     .book-toc-chip {
       font-family: "Noto Serif SC", "Songti SC", serif;
       font-size: 12px; letter-spacing: 0.14em; color: #8A7355;
