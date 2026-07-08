@@ -2366,39 +2366,11 @@
     }
     .stamp-modal-head .stamp-count b { color: #B92923; font-size: 15px; }
     .stamp-modal-body {
-      padding: 24px 26px 28px 44px; max-height: 70vh; overflow-y: auto;
-      position: relative;
+      padding: 24px 26px 28px; max-height: 70vh; overflow-y: auto;
       background:
         repeating-linear-gradient(102deg, transparent 0 3px, rgba(139,105,50,0.022) 3px 4px),
         repeating-linear-gradient(15deg, transparent 0 5px, rgba(139,105,50,0.018) 5px 6px),
-        radial-gradient(ellipse at top left, rgba(139,80,30,0.05), transparent 60%),
-        radial-gradient(ellipse at bottom right, rgba(139,80,30,0.05), transparent 55%),
         #F9F1DC;
-      box-shadow: inset 12px 0 22px -12px rgba(70,45,20,0.18),
-                  inset -6px 0 12px -8px rgba(70,45,20,0.06);
-    }
-    /* Bound-book spine strip on the left */
-    .stamp-modal-body::before {
-      content: "";
-      position: absolute; left: 0; top: 0; bottom: 0;
-      width: 18px;
-      background:
-        linear-gradient(90deg, rgba(70,45,20,0.32) 0%, rgba(70,45,20,0.12) 55%, transparent 100%),
-        repeating-linear-gradient(0deg, transparent 0 6px, rgba(70,45,20,0.06) 6px 7px);
-      pointer-events: none;
-    }
-    /* Optional page-turn shadow on the right */
-    .stamp-modal-body::after {
-      content: "";
-      position: absolute; right: 0; top: 0; bottom: 0;
-      width: 8px;
-      background: linear-gradient(90deg, transparent 0%, rgba(70,45,20,0.08) 100%);
-      pointer-events: none;
-    }
-    /* Bound sanpgi / saijin variants also keep the spine */
-    body.skin-sangpi .stamp-modal-body,
-    body.skin-saijin .stamp-modal-body {
-      padding-left: 44px; position: relative;
     }
     .stamp-cat-label {
       font-family: "Noto Serif SC", "Songti SC", serif;
