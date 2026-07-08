@@ -7198,10 +7198,10 @@
     },
     scroll: (topText, botText, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
       <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || -3} 50 50)">
-        <path d="M12 24 Q50 10 88 24 L84 76 Q50 90 16 76 Z" fill="${STAMP_INK}"/>
-        <path d="M18 30 Q50 20 82 30 L80 70 Q50 82 20 70 Z" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
-        <text x="50" y="43" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="16" font-weight="700">${topText}</text>
-        ${botText ? `<text x="50" y="63" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="9.5" font-weight="600" opacity="0.9">${botText}</text>` : ''}
+        <path d="M8 22 Q50 8 92 22 L88 78 Q50 92 12 78 Z" fill="${STAMP_INK}"/>
+        <path d="M14 28 Q50 18 86 28 L82 72 Q50 84 18 72 Z" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+        <text x="50" y="42" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="16" font-weight="700">${topText}</text>
+        ${botText ? `<text x="50" y="62" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="7.5" font-weight="600" opacity="0.9">${botText}</text>` : ''}
       </g></svg>`,
     return2: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="seal-svg">
       <g filter="url(#seal-bleed)" transform="rotate(${opts.rot || 2} 50 50)">
@@ -7398,6 +7398,9 @@
   // when a teacher opens a student's book we swap in their rows temporarily.
   let stampViewState = { role: 'self', label: null, stamps: null, purchases: null };
   let stampCurrentTab = 'book';        // 'book' | 'shop' | 'wardrobe'
+  let bookCurrentPage = 0;             // index into bookPages when tab === 'book'
+  let bookPages = [];                  // cached page structure
+  let bookAnimating = false;           // guards flips from queuing up
 
   // Trigger context: derived from current homeworkAsStudent + homeworkChecksByHw.
   // Everything used by stamp rules should be a plain field on the returned object.
@@ -7707,7 +7710,7 @@
       svg: (s) => stampSvg.return2('復', '歸', s), metric: 'comebackCount',
       tiers: [{at: 1, xp: 10}, {at: 3, xp: 30}, {at: 10, xp: 80}] },
     { code: 'song_complete', parameterized: true, name: '结课印', sub: '一首歌完成', cat: 'specialty',
-      svg: (s, tier, meta) => stampSvg.scroll('結課', (meta && meta.title) ? escHtml(String(meta.title).slice(0, 8)) : '', s),
+      svg: (s, tier, meta) => stampSvg.scroll('結課', (meta && meta.title) ? escHtml(String(meta.title).slice(0, 6)) : '', s),
       ruleParam: (ctx) => ctx.songsCompleted.map(sc => ({
         code: 'song_complete:' + sc.id, tier: 1, xp: 20,
         meta: { homework_id: sc.id, title: sc.title }
@@ -8026,6 +8029,31 @@
       osc.start(t + dt); osc.stop(t + dt + 0.6);
     });
   }
+  // Paper rustle — brief filtered noise for book page turns
+  function playRustleSound() {
+    if (!stampProfile.sound_on) return;
+    const ctx = audioCtx(); if (!ctx) return;
+    const t = ctx.currentTime;
+    const buffer = ctx.createBuffer(1, ctx.sampleRate * 0.18, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) {
+      // Weighted noise with a quick attack + long decay
+      const env = Math.pow(1 - i / data.length, 1.8);
+      data[i] = (Math.random() * 2 - 1) * env * 0.5;
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 2400;
+    filter.Q.value = 0.8;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.14, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+    noise.connect(filter).connect(gain).connect(ctx.destination);
+    noise.start(t);
+  }
+
   // Bloom — light ping for daily check-in
   function playBloomSound() {
     if (!stampProfile.sound_on) return;
