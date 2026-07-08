@@ -2497,19 +2497,18 @@
       50% { opacity: 1; transform: scale(1.15); }
     }
     .stamp-claim-badge {
-      position: absolute; bottom: -8px; left: 50%;
-      transform: translateX(-50%);
+      display: inline-flex; align-items: center;
       background: linear-gradient(140deg, #D63A34 0%, #8E1F1B 100%);
       color: #FBF3D8;
       font-family: "Noto Serif SC", "Songti SC", serif;
       font-size: 10.5px; letter-spacing: 0.08em; font-weight: 600;
       padding: 3px 10px; border-radius: 999px;
       white-space: nowrap;
-      box-shadow: 0 2px 6px rgba(139,45,30,0.35);
+      box-shadow: 0 2px 6px rgba(139,45,30,0.28);
       cursor: pointer; transition: transform .12s;
-      z-index: 3;
+      margin-top: 4px;
     }
-    .stamp-claim-badge:hover { transform: translateX(-50%) scale(1.06); }
+    .stamp-claim-badge:hover { transform: scale(1.06); }
     .stamp-cell.unclaimed { cursor: pointer; }
     .stamp-cell.claimable-earned { cursor: pointer; }
 
@@ -7986,9 +7985,10 @@
           ? `claimStampChain('${escHtml(it.code)}')`
           : `openStampStory('${escHtml(it.code)}')`;
         return `<div class="${cls}" data-stamp-code="${escHtml(it.code)}" onclick="${click}">
-          <div class="stamp-svg-wrap">${it.def.svg(76, 1, it.meta)}${claimBtn}</div>
+          <div class="stamp-svg-wrap">${it.def.svg(76, 1, it.meta)}</div>
           <div class="stamp-caption">${escHtml(it.def.name)}</div>
           <div class="stamp-sub">${sub}</div>
+          ${claimBtn}
         </div>`;
       }
       return `<div class="stamp-cell locked${teacherCls}">
@@ -8033,10 +8033,11 @@
       ? `claimStampChain('${escHtml(it.code)}')`
       : `openStampStory('${escHtml(it.code)}')`;
     return `<div class="${cls}" data-stamp-code="${escHtml(it.code)}" onclick="${click}">
-      <div class="stamp-svg-wrap">${it.def.svg(76, it.tierEarned, {})}${tierBadge}${claimBtn}</div>
+      <div class="stamp-svg-wrap">${it.def.svg(76, it.tierEarned, {})}${tierBadge}</div>
       <div class="stamp-caption">${escHtml(it.def.name)}</div>
       <div class="stamp-sub">${subLine}</div>
       ${dots}
+      ${claimBtn}
     </div>`;
   }
 
