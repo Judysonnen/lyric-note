@@ -2448,59 +2448,32 @@
       content: "—"; margin: 0 6px; color: #B8A47F;
     }
 
-    /* Book pagination — page slides horizontally with a gentle fade */
-    .book-body { display: flex; flex-direction: column; min-height: 420px; }
-    .book-page-frame {
-      flex: 1; position: relative;
-      min-height: 380px;
-      overflow: hidden;
+    /* Sticky chapter navigator strip at the top of the book body */
+    .book-toc {
+      position: sticky; top: 0; z-index: 5;
+      display: flex; gap: 4px; overflow-x: auto;
+      padding: 8px 10px 10px;
+      margin: -8px -14px 8px;
+      background: linear-gradient(180deg, rgba(249,241,220,0.98) 0%, rgba(249,241,220,0.85) 90%, transparent 100%);
+      backdrop-filter: blur(4px);
+      border-bottom: 1px dashed rgba(139,115,85,0.28);
+      scrollbar-width: none;
     }
-    .book-page {
-      min-height: 380px;
-      opacity: 1;
-      transform: translateX(0);
-      transition: transform 0.32s cubic-bezier(0.3, 0, 0.2, 1), opacity 0.32s;
+    .book-toc::-webkit-scrollbar { display: none; }
+    body.skin-sangpi .book-toc { background: linear-gradient(180deg, rgba(226,200,140,0.98), rgba(226,200,140,0.7) 90%, transparent); }
+    body.skin-saijin .book-toc { background: linear-gradient(180deg, rgba(245,234,198,0.98), rgba(245,234,198,0.7) 90%, transparent); }
+    .book-toc-chip {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 12px; letter-spacing: 0.14em; color: #8A7355;
+      padding: 5px 10px; border-radius: 4px;
+      white-space: nowrap; cursor: pointer;
+      transition: all .12s;
+      border: 1px solid transparent;
     }
-    .book-page.slide-out-left {
-      transform: translateX(-8%);
-      opacity: 0;
-    }
-    .book-page.slide-out-right {
-      transform: translateX(8%);
-      opacity: 0;
-    }
-    .book-page.slide-in-right {
-      transform: translateX(8%);
-      opacity: 0;
-      transition: none;
-    }
-    .book-page.slide-in-left {
-      transform: translateX(-8%);
-      opacity: 0;
-      transition: none;
-    }
-
-    .book-nav {
-      margin-top: 20px; padding-top: 14px;
-      border-top: 1px dashed rgba(139,115,85,0.35);
-      display: flex; justify-content: space-between; align-items: center;
-      gap: 8px;
-    }
-    .book-nav-btn {
-      background: none; border: none;
-      color: #B92923; font-family: "Noto Serif SC", serif;
-      font-size: 13px; letter-spacing: 0.2em;
-      cursor: pointer; padding: 4px 8px; border-radius: 4px;
-      transition: color .15s, opacity .15s;
-    }
-    .book-nav-btn:hover:not(:disabled) { color: #8E1F1B; }
-    .book-nav-btn:disabled {
-      color: #B8A47F; cursor: not-allowed; opacity: 0.45;
-    }
-    .book-page-counter {
-      font-family: "Noto Serif SC", serif;
-      font-size: 11.5px; color: #8A7355; letter-spacing: 0.32em;
-      font-variant-numeric: tabular-nums;
+    .book-toc-chip:hover { color: #B92923; background: rgba(199,103,84,0.06); }
+    .book-toc-chip.active {
+      color: #B92923; font-weight: 600;
+      border-color: rgba(185,41,35,0.35);
     }
     /* Cover page: elegant title + flowing stat line, no boxes */
     .book-cover {
@@ -8624,14 +8597,13 @@
         .slice(0, 3);
     }
 
-    // ── Paginated book: build pages, render current, add nav.
+    // ── Scrolling book layout: sticky chapter nav + continuous flow.
     const byCat = {};
     for (const it of items) (byCat[it.def.cat] = byCat[it.def.cat] || []).push(it);
     const catOrder = role === 'teacher'
       ? ['t_teach', 't_raise', 't_care']
       : ['streak', 'cumulative', 'weekly', 'time', 'specialty', 'form', 'junzi', 'hidden'];
     const catNums = ['壹', '貳', '叁', '肆', '伍', '陸', '柒', '捌'];
-    const STAMPS_PER_PAGE = 6;
 
     const festivalRows = viewStamps
       .filter(r => r.stamp_code.startsWith('festival_'))
@@ -8641,95 +8613,164 @@
       const idleOwned = SHOP_ITEMS.filter(i => i.cat === 'idle' && ownedItemCodes.has(i.code) && i.svg);
       const customPurch = shopPurchases.find(p => p.item_code === 'custom_seal');
       const customChars = customPurch && customPurch.meta && customPurch.meta.chars;
-      idleCells = idleOwned.map(it => ({ type: 'idle', svg: it.svg(76), name: it.name, sub: it.sub || '' }));
+      idleCells = idleOwned.map(it => ({ svg: it.svg(76), name: it.name, sub: it.sub || '' }));
       if (customChars) {
         const chars = String(customChars).slice(0, 4).padEnd(4, '　').split('');
-        idleCells.push({ type: 'idle', svg: stampSvg.grid4(chars, 76),
+        idleCells.push({ svg: stampSvg.grid4(chars, 76),
           name: String(customChars), sub: '自选定制印' });
       }
     }
+    document.body.classList.remove('book-mode');
 
-    // Build the ordered page list
-    const pages = [];
-    // Cover page: title + stats + next-up + claim-all
+    // Cover / intro block
+    let coverHtml = '';
     if (!isStudentView) {
-      pages.push({
-        type: 'cover',
-        title, totalEarned, balance, unclaimedCount, earnedCount, totalItems,
-        upcoming: upcoming || [], isEmpty: earnedCount === 0,
-      });
+      const upcomingHtml = (upcoming || []).length
+        ? `<div class="book-cover-upcoming">
+            <div class="book-cover-upcoming-title">离你最近的印</div>
+            ${upcoming.map(u => {
+              const nextLabel = u.it.tierEarned === 0
+                ? u.it.def.name
+                : `${u.it.def.name} · ${tierGlyph(u.it.tierEarned + 1)}级`;
+              return `<div class="upcoming-row">
+                <div class="upcoming-row-svg">${u.it.def.svg(40, u.it.tierEarned + 1, {})}</div>
+                <div>
+                  <div class="upcoming-row-name">${escHtml(nextLabel)}</div>
+                  <div class="upcoming-row-dots">还差 <b>${u.need}</b> · +${u.nextTier.xp} 宝</div>
+                </div>
+                <div class="upcoming-row-xp">${u.val} <span style="color:#C9B5A0;">/</span> ${u.nextTier.at}</div>
+              </div>`;
+            }).join('')}
+          </div>`
+        : '';
+      const claimAllBtn = unclaimedCount > 0
+        ? `<div class="book-cover-actions">
+            <button class="book-nav-btn" onclick="claimAllStamps()" style="border:1px solid #B92923;padding:6px 16px;border-radius:99px;">⚡ 一键收取 ${unclaimedCount} 枚</button>
+          </div>`
+        : '';
+      if (earnedCount === 0) {
+        coverHtml = `<div class="stamp-empty">
+          <div class="stamp-empty-svg">${stampSvg.box('印', 92)}</div>
+          <div class="stamp-empty-title">尚未启印</div>
+          <div class="stamp-empty-body">
+            印是打卡挣的。<br/>
+            <b>今天完成第一次打卡</b>，你会得到<br/>
+            「首日印」<b>+5 宝</b>，印谱正式开卷。<br/>
+            之后每一次打卡都可能让某枚印<br/>
+            升级、变亮、被收进这本册子。
+          </div>
+        </div>`;
+      } else {
+        coverHtml = `<div class="book-cover" id="book-anchor-cover">
+          <div class="book-cover-title">印 谱</div>
+          <div class="book-cover-sub">${escHtml(title)}</div>
+          <div class="book-cover-stats">
+            <div class="book-cover-stat">已得 <b>${earnedCount}</b> <span class="of">/ ${totalItems}</span></div>
+            <div class="book-cover-stat">宝 <b>${balance}</b></div>
+            <div class="book-cover-stat">待收 <b>${unclaimedCount}</b></div>
+          </div>
+          ${claimAllBtn}
+          ${upcomingHtml}
+        </div>`;
+      }
     } else {
-      pages.push({
-        type: 'cover-student-view',
-        studentLabel: stampViewState.label, title, totalEarned, balance,
-        earnedCount, totalItems,
-      });
-    }
-    // One or more pages per category
-    catOrder.filter(c => byCat[c]).forEach((cat, idx) => {
-      const catItems = byCat[cat];
-      const totalPagesInCat = Math.max(1, Math.ceil(catItems.length / STAMPS_PER_PAGE));
-      const earnedInCat = catItems.filter(it => it.tierEarned > 0).length;
-      for (let p = 0; p < totalPagesInCat; p++) {
-        pages.push({
-          type: 'chapter', role,
-          catNum: catNums[idx] || '',
-          catLabel: catLabels[cat],
-          isFirstPage: p === 0,
-          isLastPage: p === totalPagesInCat - 1,
-          items: catItems.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE),
-          totalInCat: catItems.length,
-          earnedInCat,
-        });
-      }
-    });
-    // Festival pages
-    if (festivalRows.length) {
-      const totalPagesInFest = Math.max(1, Math.ceil(festivalRows.length / STAMPS_PER_PAGE));
-      for (let p = 0; p < totalPagesInFest; p++) {
-        pages.push({
-          type: 'festival',
-          isFirstPage: p === 0,
-          isLastPage: p === totalPagesInFest - 1,
-          rows: festivalRows.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE),
-          total: festivalRows.length,
-        });
-      }
-    }
-    // Idle pages
-    if (idleCells.length) {
-      const totalPagesInIdle = Math.max(1, Math.ceil(idleCells.length / STAMPS_PER_PAGE));
-      for (let p = 0; p < totalPagesInIdle; p++) {
-        pages.push({
-          type: 'idle',
-          isFirstPage: p === 0,
-          isLastPage: p === totalPagesInIdle - 1,
-          cells: idleCells.slice(p * STAMPS_PER_PAGE, (p + 1) * STAMPS_PER_PAGE),
-          total: idleCells.length,
-        });
-      }
-    }
-    bookPages = pages;
-    if (bookCurrentPage >= bookPages.length) bookCurrentPage = bookPages.length - 1;
-    if (bookCurrentPage < 0) bookCurrentPage = 0;
-
-    document.body.classList.add('book-mode');
-    document.getElementById('stamp-book-body').innerHTML = `
-      <div class="book-body">
-        <div class="book-page-frame">
-          <div class="book-page" id="book-page">${renderBookPageContent(bookPages[bookCurrentPage])}</div>
+      coverHtml = `<div class="book-cover" id="book-anchor-cover">
+        <div class="book-cover-title">印 谱</div>
+        <div class="book-cover-sub">${escHtml(stampViewState.label)} · ${escHtml(title)}</div>
+        <div class="book-cover-stats">
+          <div class="book-cover-stat">已得 <b>${earnedCount}</b> <span class="of">/ ${totalItems}</span></div>
+          <div class="book-cover-stat">累计 <b>${totalEarned}</b> 宝</div>
+          <div class="book-cover-stat">余额 <b>${balance}</b></div>
         </div>
-        <div class="book-nav" id="book-nav">${renderBookNav()}</div>
       </div>`;
+    }
+
+    // Chapter sections
+    const tocChips = [{ id: 'book-anchor-cover', label: '卷首' }];
+    const chapters = catOrder.filter(c => byCat[c]).map((c, idx) => {
+      const num = catNums[idx] || '';
+      const cellsList = byCat[c];
+      const cells = cellsList.map(it => renderStampCell(it, role)).join('');
+      const earned = cellsList.filter(it => it.tierEarned > 0).length;
+      const anchorId = 'book-anchor-' + c;
+      tocChips.push({ id: anchorId, label: `${num} · ${catLabels[c]}` });
+      return `<div id="${anchorId}" class="book-chapter">
+                <div class="book-chapter-num">卷之 ${num}</div>
+                <div class="book-chapter-title">${catLabels[c]}</div>
+              </div>
+              <div class="stamp-grid">${cells}</div>
+              <div class="book-chapter-foot">共 ${cellsList.length} 印 · 已得 ${earned}</div>`;
+    }).join('');
+
+    // Festival section
+    let festivalHtml = '';
+    if (festivalRows.length) {
+      const anchorId = 'book-anchor-festival';
+      tocChips.push({ id: anchorId, label: '節 · 节日之印' });
+      const cells = festivalRows.map(r => {
+        const def = stampDefForCode(r.stamp_code);
+        if (!def) return '';
+        const unclaimed = !r.claimed_at;
+        const cls = 'stamp-cell' + (unclaimed ? ' unclaimed' : ' claimable-earned');
+        const claimBtn = unclaimed
+          ? `<div class="stamp-claim-badge" onclick="event.stopPropagation();claimStampChain('${escHtml(r.stamp_code)}')">+${r.xp_earned} 宝 · 收</div>`
+          : '';
+        const click = unclaimed
+          ? `claimStampChain('${escHtml(r.stamp_code)}')`
+          : `openStampStory('${escHtml(r.stamp_code)}')`;
+        return `<div class="${cls}" data-stamp-code="${escHtml(r.stamp_code)}" onclick="${click}">
+          <div class="stamp-svg-wrap">${def.svg(76, 1, r.meta || {})}</div>
+          <div class="stamp-caption">${escHtml(def.name)}</div>
+          <div class="stamp-sub">${escHtml(def.sub || '')}</div>
+          ${claimBtn}
+        </div>`;
+      }).join('');
+      festivalHtml = `<div id="${anchorId}" class="book-chapter">
+                        <div class="book-chapter-num">卷之 節</div>
+                        <div class="book-chapter-title">节日之印</div>
+                      </div>
+                      <div class="stamp-grid">${cells}</div>
+                      <div class="book-chapter-foot">共 ${festivalRows.length} 印 · 皆得</div>`;
+    }
+
+    // Idle section
+    let idleHtml = '';
+    if (idleCells.length) {
+      const anchorId = 'book-anchor-idle';
+      tocChips.push({ id: anchorId, label: '閒 · 闲章' });
+      const cells = idleCells.map(c => `<div class="stamp-cell claimable-earned">
+        <div class="stamp-svg-wrap">${c.svg}</div>
+        <div class="stamp-caption">${escHtml(c.name)}</div>
+        <div class="stamp-sub">${escHtml(c.sub)}</div>
+      </div>`).join('');
+      idleHtml = `<div id="${anchorId}" class="book-chapter">
+                    <div class="book-chapter-num">卷之 閒</div>
+                    <div class="book-chapter-title">闲章</div>
+                  </div>
+                  <div class="stamp-grid">${cells}</div>
+                  <div class="book-chapter-foot">共 ${idleCells.length} 印</div>`;
+    }
+
+    // Table-of-contents chip strip (sticky at top of scroll area)
+    const tocHtml = tocChips.length > 1
+      ? `<div class="book-toc" id="book-toc">${tocChips.map(c =>
+          `<div class="book-toc-chip" data-anchor="${c.id}" onclick="scrollToBookAnchor('${c.id}')">${escHtml(c.label)}</div>`
+        ).join('')}</div>`
+      : '';
+
+    document.getElementById('stamp-book-body').innerHTML =
+      tocHtml + coverHtml + chapters + festivalHtml + idleHtml;
   }
 
-  function renderBookNav() {
-    const disabledPrev = bookCurrentPage === 0 ? 'disabled' : '';
-    const disabledNext = bookCurrentPage >= bookPages.length - 1 ? 'disabled' : '';
-    return `<button class="book-nav-btn" onclick="bookPrev()" ${disabledPrev}>‹ 上一页</button>
-      <span class="book-page-counter">第 ${bookCurrentPage + 1} / ${bookPages.length} 页</span>
-      <button class="book-nav-btn" onclick="bookNext()" ${disabledNext}>下一页 ›</button>`;
+  function scrollToBookAnchor(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const body = document.getElementById('stamp-book-body');
+    // Offset for the sticky toc (~46 px)
+    const target = el.offsetTop - 52;
+    body.scrollTo({ top: target, behavior: 'smooth' });
   }
+  window.scrollToBookAnchor = scrollToBookAnchor;
 
   function renderBookPageContent(page) {
     if (!page) return '';
