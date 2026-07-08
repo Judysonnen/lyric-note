@@ -2286,56 +2286,56 @@
     /* ── Stamps (印谱) ── */
     .stamp-shelf {
       display: flex; align-items: center; gap: 14px;
-      background: linear-gradient(180deg, #FDF6E0 0%, #F5E9CA 100%);
-      border: 1px solid rgba(139,115,85,0.35);
-      border-radius: 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
       padding: 14px 16px;
       margin-bottom: 14px;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(139,45,30,0.06);
+      box-shadow: var(--shadow);
       transition: all .18s;
       position: relative;
-      overflow: hidden;
-    }
-    .stamp-shelf::before {
-      content: "";
-      position: absolute; inset: 0;
-      background-image:
-        repeating-linear-gradient(102deg, transparent 0 3px, rgba(139,105,50,0.03) 3px 4px);
-      pointer-events: none;
-      border-radius: inherit;
     }
     .stamp-shelf:hover {
-      border-color: #B92923;
+      border-color: var(--primary);
       transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(139,45,30,0.12);
+      box-shadow: var(--shadow-float);
     }
-    .stamp-shelf-left { flex-shrink: 0; min-width: 78px; z-index: 1; }
+    .stamp-shelf-left { flex-shrink: 0; min-width: 78px; }
     .stamp-shelf-title {
-      font-family: "Noto Serif SC", "Songti SC", serif;
-      font-size: 15px; letter-spacing: 0.35em; color: #2A1F16; font-weight: 500;
-      margin-left: 2px;
+      font-family: var(--font-display);
+      font-size: 14px; letter-spacing: 0.28em; color: var(--text); font-weight: 500;
+    }
+    .stamp-shelf-title-badge {
+      font-family: "Kaiti SC", "STKaiti", serif;
+      color: var(--text-soft); font-size: 12px; letter-spacing: 0.1em;
+      font-weight: 500;
     }
     .stamp-shelf-count {
-      font-family: "Noto Serif SC", "Songti SC", serif;
-      font-size: 11px; color: #8A7355; letter-spacing: 0.1em; margin-top: 2px;
+      font-family: var(--font-display);
+      font-size: 11.5px; color: var(--muted); letter-spacing: 0.08em; margin-top: 3px;
     }
     .stamp-shelf-count b {
-      color: #B92923; font-size: 15px; font-variant-numeric: tabular-nums;
+      color: var(--primary); font-size: 14px; font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .stamp-shelf-count .unclaimed-pill {
+      color: var(--primary); font-weight: 600; margin-left: 4px;
     }
     .stamp-shelf-strip {
       flex: 1; display: flex; gap: 6px; align-items: center;
-      overflow: hidden; z-index: 1;
+      overflow: hidden;
     }
     .stamp-shelf-seal { flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
     .stamp-shelf-seal.empty { opacity: 0.28; filter: grayscale(0.6); }
     .stamp-shelf-arrow {
-      font-family: "Noto Serif SC", serif;
-      color: #B92923; font-size: 24px; line-height: 1;
-      flex-shrink: 0; opacity: 0.6; transition: transform .18s;
-      z-index: 1;
+      font-family: var(--font-display);
+      color: var(--muted); font-size: 22px; line-height: 1;
+      flex-shrink: 0; opacity: 0.6; transition: all .18s;
     }
-    .stamp-shelf:hover .stamp-shelf-arrow { transform: translateX(3px); opacity: 1; }
+    .stamp-shelf:hover .stamp-shelf-arrow {
+      transform: translateX(3px); opacity: 1; color: var(--primary);
+    }
 
     .stamp-book-btn {
       background: none; border: 1px solid var(--border);
@@ -8288,14 +8288,14 @@
       ? `<div class="stamp-shelf-seal empty">${stampSvg.box('印', 44)}</div>`
       : '';
     const unclaimedPill = unclaimedCount > 0
-      ? `<span style="color:#B92923;font-weight:600;">· ⚡ ${unclaimedCount} 待收</span>`
+      ? `<span class="unclaimed-pill">· ⚡ ${unclaimedCount} 待收</span>`
       : '';
     const line = empty
       ? '尚未启印 · 首次打卡即得'
-      : `<b>${distinctEarned}</b> / ${totalStamps} · <b>${balance}</b> 宝 ${unclaimedPill}`;
+      : `<b>${distinctEarned}</b> / ${totalStamps} · <b>${balance}</b> 宝${unclaimedPill}`;
     return `<div class="stamp-shelf" onclick="openStampBook()">
       <div class="stamp-shelf-left">
-        <div class="stamp-shelf-title">印 谱 · <span style="color:#B98A2D;font-family:'Kaiti SC',serif;font-size:13px;letter-spacing:0.15em;">${title}</span></div>
+        <div class="stamp-shelf-title">印 谱 · <span class="stamp-shelf-title-badge">${title}</span></div>
         <div class="stamp-shelf-count">${line}</div>
       </div>
       <div class="stamp-shelf-strip">${empty ? teaserSeal : seals}</div>
