@@ -5725,6 +5725,7 @@
     cloudUser = user;
     cloudConnected = true;
     updateCloudDot();
+    hydrateHomeworkCache(user.id);
     pullFromCloud().then(() => {
       if (prevUid === user.id) pushLocalToCloud();
       if (document.getElementById('home-screen').style.display !== 'none') renderHomeScreen();
@@ -6434,9 +6435,39 @@
           homeworkChecksByHw[c.homework_id][c.check_date] = c;
         }
       }
+      saveHomeworkCache();
     } catch(e) {
       console.error('loadHomeworkAll failed', e);
     }
+  }
+
+  // Cache homework state per user so the section renders on first paint instead
+  // of popping in after the cloud round-trip (which pushes the song list down).
+  function homeworkCacheKey(uid) { return 'lyricnote_hw_cache_' + uid; }
+  function saveHomeworkCache() {
+    if (!cloudUser) return;
+    try {
+      const payload = {
+        v: 1,
+        savedAt: new Date().toISOString(),
+        homeworkAsTeacher,
+        homeworkAsStudent,
+        homeworkChecksByHw,
+      };
+      localStorage.setItem(homeworkCacheKey(cloudUser.id), JSON.stringify(payload));
+    } catch(_) {}
+  }
+  function hydrateHomeworkCache(uid) {
+    try {
+      const raw = localStorage.getItem(homeworkCacheKey(uid));
+      if (!raw) return false;
+      const payload = JSON.parse(raw);
+      if (!payload || payload.v !== 1) return false;
+      homeworkAsTeacher = payload.homeworkAsTeacher || [];
+      homeworkAsStudent = payload.homeworkAsStudent || [];
+      homeworkChecksByHw = payload.homeworkChecksByHw || {};
+      return true;
+    } catch(_) { return false; }
   }
 
   async function loadMyStudents() {
@@ -6496,6 +6527,9 @@
       if (stSec) stSec.style.display = 'none';
       return;
     }
+    // Render synchronously from the cached snapshot first so the section
+    // doesn't pop in after the network round-trip and shove the songs down.
+    if (userRole === 'student') renderStudentHomeworkSection();
     await Promise.all([loadHomeworkAll(), loadMyStudents()]);
     if (userRole === 'teacher') {
       renderTeacherStudentsSection();
