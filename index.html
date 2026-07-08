@@ -2282,6 +2282,137 @@
     }
     .hw-rec-btn.recording .hw-rec-dot { animation: hwPulse 1s infinite; }
     @keyframes hwPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+    /* ── Stamps (印谱) ── */
+    .stamp-book-btn {
+      background: none; border: 1px solid var(--border);
+      color: var(--primary); font-size: 11.5px; letter-spacing: 0.15em;
+      padding: 4px 12px; border-radius: 999px; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 5px; transition: all .15s;
+    }
+    .stamp-book-btn:hover { background: var(--primary-light); border-color: var(--primary); }
+    .stamp-book-btn .stamp-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: #B92923; display: inline-block;
+    }
+
+    .stamp-modal { max-width: 540px; padding: 0; background: #F9F1DC; overflow: hidden; }
+    .stamp-modal-head {
+      padding: 24px 26px 16px; border-bottom: 1px solid rgba(139,115,85,0.25);
+      display: flex; align-items: baseline; justify-content: space-between;
+      background:
+        radial-gradient(ellipse at 25% 15%, rgba(184,132,49,0.08), transparent 55%),
+        #F9F1DC;
+    }
+    .stamp-modal-head h3 {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 20px; letter-spacing: 0.28em; margin: 0; color: #2A1F16; font-weight: 500;
+    }
+    .stamp-modal-head .stamp-count {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 12px; color: #8A7355; letter-spacing: 0.12em;
+    }
+    .stamp-modal-head .stamp-count b { color: #B92923; font-size: 15px; }
+    .stamp-modal-body {
+      padding: 24px 26px 28px; max-height: 70vh; overflow-y: auto;
+      background:
+        repeating-linear-gradient(102deg, transparent 0 3px, rgba(139,105,50,0.022) 3px 4px),
+        repeating-linear-gradient(15deg, transparent 0 5px, rgba(139,105,50,0.018) 5px 6px),
+        #F9F1DC;
+    }
+    .stamp-cat-label {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 12px; letter-spacing: 0.28em; color: #8A7355;
+      margin: 4px 0 12px; padding-bottom: 6px; border-bottom: 1px dashed rgba(139,115,85,0.35);
+    }
+    .stamp-cat-label + .stamp-cat-label { margin-top: 24px; }
+    .stamp-cat-label .cat-num { color: #B92923; margin-right: 10px; font-weight: 600; }
+    .stamp-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px 12px;
+      justify-items: center;
+    }
+    @media (max-width: 480px) { .stamp-grid { grid-template-columns: repeat(3, 1fr); } }
+    .stamp-cell {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      text-align: center; cursor: default;
+    }
+    .stamp-cell.locked svg { opacity: 0.25; filter: grayscale(1); }
+    .stamp-slot {
+      width: 68px; height: 68px; border: 1.2px dashed #B8A47F; border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 10px; color: #B8A47F; letter-spacing: 0.2em;
+    }
+    .stamp-caption {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 12px; color: #4E3E2E; letter-spacing: 0.1em;
+    }
+    .stamp-cell.locked .stamp-caption { color: #8A7355; }
+    .stamp-sub {
+      font-size: 10px; color: #8A7355; letter-spacing: 0.03em;
+    }
+
+    /* Reveal moment: full-screen dim + falling stamp */
+    .stamp-reveal-bg {
+      position: fixed; inset: 0; background: rgba(15,10,6,0.72);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10500; opacity: 0; pointer-events: none;
+      transition: opacity .3s;
+    }
+    .stamp-reveal-bg.active { opacity: 1; pointer-events: auto; }
+    .stamp-reveal-inner {
+      display: flex; flex-direction: column; align-items: center; gap: 18px;
+      max-width: 320px; text-align: center;
+    }
+    .stamp-reveal-svg {
+      transform: translateY(-120px) scale(0.6) rotate(-14deg);
+      opacity: 0;
+      filter: drop-shadow(0 20px 40px rgba(0,0,0,0.4));
+    }
+    .stamp-reveal-bg.active .stamp-reveal-svg {
+      animation: stampDrop .9s cubic-bezier(.34,1.56,.64,1) forwards;
+    }
+    @keyframes stampDrop {
+      0%   { transform: translateY(-120px) scale(0.6) rotate(-14deg); opacity: 0; }
+      60%  { transform: translateY(0) scale(1.08) rotate(-3deg); opacity: 1; }
+      75%  { transform: translateY(0) scale(0.95) rotate(-3deg); }
+      100% { transform: translateY(0) scale(1) rotate(-3deg); opacity: 1; }
+    }
+    .stamp-reveal-glow {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(circle at center, rgba(255,220,140,0.35), transparent 45%);
+      opacity: 0;
+    }
+    .stamp-reveal-bg.active .stamp-reveal-glow {
+      animation: stampGlow 1.4s ease-out forwards;
+    }
+    @keyframes stampGlow {
+      0% { opacity: 0; }
+      55% { opacity: 0; }
+      70% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .stamp-reveal-name {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      color: #F1DDA6; font-size: 20px; letter-spacing: 0.35em; font-weight: 500;
+      opacity: 0;
+    }
+    .stamp-reveal-sub {
+      font-family: "Kaiti SC", "STKaiti", serif;
+      color: rgba(241,221,166,0.7); font-size: 13px; letter-spacing: 0.08em;
+      opacity: 0;
+    }
+    .stamp-reveal-bg.active .stamp-reveal-name,
+    .stamp-reveal-bg.active .stamp-reveal-sub {
+      animation: stampTextFade .6s ease-out .7s forwards;
+    }
+    @keyframes stampTextFade { to { opacity: 1; } }
+    .stamp-reveal-hint {
+      color: rgba(241,221,166,0.4); font-size: 11px; letter-spacing: 0.2em;
+      margin-top: 8px; opacity: 0;
+    }
+    .stamp-reveal-bg.active .stamp-reveal-hint {
+      animation: stampTextFade .5s ease-out 1.2s forwards;
+    }
     .hw-audio-player { flex: 1; min-width: 220px; height: 32px; }
     .hw-audio-delete {
       background: none; border: 1px solid var(--border); border-radius: 6px;
@@ -2923,6 +3054,28 @@
       <button class="btn btn-ghost" onclick="closeCreateHomework()">取消</button>
       <button class="btn btn-primary" id="hw-create-confirm" onclick="submitCreateHomework()">布置 <span id="hw-task-count-label">1</span> 个作业</button>
     </div>
+  </div>
+</div>
+
+<!-- Stamp Book Modal (印谱) -->
+<div class="modal-backdrop" id="stamp-book-bg" onclick="if(event.target===this) closeStampBook()" style="display:none;z-index:9300;">
+  <div class="modal stamp-modal">
+    <div class="stamp-modal-head">
+      <h3>印 谱</h3>
+      <div class="stamp-count"><b id="stamp-count-num">0</b> / <span id="stamp-count-total">0</span> 已得</div>
+    </div>
+    <div class="stamp-modal-body" id="stamp-book-body"></div>
+  </div>
+</div>
+
+<!-- Stamp Reveal Overlay -->
+<div class="stamp-reveal-bg" id="stamp-reveal-bg" onclick="dismissStampReveal()">
+  <div class="stamp-reveal-glow"></div>
+  <div class="stamp-reveal-inner">
+    <div class="stamp-reveal-svg" id="stamp-reveal-svg"></div>
+    <div class="stamp-reveal-name" id="stamp-reveal-name"></div>
+    <div class="stamp-reveal-sub" id="stamp-reveal-sub"></div>
+    <div class="stamp-reveal-hint">轻触屏幕继续</div>
   </div>
 </div>
 
@@ -6359,6 +6512,328 @@
   let myStudents = [];          // array of {id, displayName}
   const usernameCache = {};
 
+  // ════════════════════════════════════════════════════════════════════
+  //  STAMPS (印谱)  ── v1: milestone + specialty + song-complete
+  //  Catalog lives here; DB just records what was earned + when.
+  // ════════════════════════════════════════════════════════════════════
+  let earnedStamps = [];               // rows: { stamp_code, awarded_at, meta }
+  let earnedStampCodes = new Set();
+  let _stampQueue = [];                // pending reveal animations
+  let _stampRevealing = false;
+
+  // Renderers return an SVG string sized to `size` px.
+  const stampSvg = {
+    box: (char, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -3} 45 45)">
+        <rect x="18" y="18" width="54" height="54" rx="1.5" fill="none" stroke="#B92923" stroke-width="4.5"/>
+        <text x="45" y="58" text-anchor="middle" fill="#B92923"
+              font-family="Songti SC, STSong, serif" font-size="30" font-weight="700">${char}</text>
+      </g></svg>`,
+    round2: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -2} 45 45)">
+        <circle cx="45" cy="45" r="30" fill="#B92923"/>
+        <text x="45" y="42" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="15" font-weight="700">${a}</text>
+        <text x="45" y="58" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="15" font-weight="700">${b}</text>
+      </g></svg>`,
+    vert3: (a, b, c, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || 3} 45 45)">
+        <rect x="26" y="12" width="38" height="66" fill="#B92923"/>
+        <text x="45" y="34" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${a}</text>
+        <text x="45" y="52" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${b}</text>
+        <text x="45" y="70" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="10" font-weight="500" opacity="0.85">${c}</text>
+      </g></svg>`,
+    doublering: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -3} 45 45)">
+        <circle cx="45" cy="45" r="34" fill="none" stroke="#B92923" stroke-width="5.5"/>
+        <circle cx="45" cy="45" r="38" fill="none" stroke="#B92923" stroke-width="1.5" opacity="0.5"/>
+        <text x="45" y="42" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="18" font-weight="700">${a}</text>
+        <text x="45" y="62" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="18" font-weight="700">${b}</text>
+      </g></svg>`,
+    horiz2: (a, b, size, opts = {}) => `<svg viewBox="0 0 90 90" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -4} 45 45)">
+        <rect x="12" y="26" width="66" height="38" fill="#B92923"/>
+        <text x="30" y="55" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="24" font-weight="700">${a}</text>
+        <text x="60" y="55" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="24" font-weight="700">${b}</text>
+      </g></svg>`,
+    grid4: (chars, size, opts = {}) => {
+      const [a, b, c, d] = chars;
+      return `<svg viewBox="0 0 100 100" width="${size}" height="${size}">
+        <g transform="rotate(${opts.rot || -5} 50 50)">
+          <rect x="8" y="8" width="84" height="84" rx="2" fill="#B92923"/>
+          <line x1="50" y1="12" x2="50" y2="88" stroke="#FBF3D8" stroke-width="0.7" opacity="0.4"/>
+          <line x1="12" y1="50" x2="88" y2="50" stroke="#FBF3D8" stroke-width="0.7" opacity="0.4"/>
+          <text x="29" y="38" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="22" font-weight="700">${a}</text>
+          <text x="71" y="38" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="22" font-weight="700">${b}</text>
+          <text x="29" y="76" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="22" font-weight="700">${c}</text>
+          <text x="71" y="76" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="22" font-weight="700">${d}</text>
+        </g></svg>`;
+    },
+    scroll: (topText, botText, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || -3} 50 50)">
+        <path d="M15 26 Q50 12 85 26 L82 74 Q50 88 18 74 Z" fill="#B92923"/>
+        <text x="50" y="46" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="14" font-weight="700">${topText}</text>
+        <text x="50" y="70" text-anchor="middle" fill="#FBF3D8" font-family="Songti SC, serif" font-size="9" font-weight="500" opacity="0.9">${botText}</text>
+      </g></svg>`,
+    return2: (a, b, size, opts = {}) => `<svg viewBox="0 0 100 100" width="${size}" height="${size}">
+      <g transform="rotate(${opts.rot || 2} 50 50)">
+        <rect x="16" y="16" width="68" height="68" rx="2" fill="none" stroke="#B92923" stroke-width="3"/>
+        <text x="35" y="42" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="20" font-weight="700">${a}</text>
+        <text x="65" y="42" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="20" font-weight="700">${b}</text>
+        <text x="50" y="70" text-anchor="middle" fill="#B92923" font-family="Songti SC, serif" font-size="10" opacity="0.75">断而復起</text>
+      </g></svg>`,
+  };
+
+  // Trigger context: derived from current homeworkAsStudent + homeworkChecksByHw.
+  function stampContext() {
+    let cumulative = 0;
+    const allDates = new Set();
+    for (const hwId of Object.keys(homeworkChecksByHw)) {
+      for (const [d, c] of Object.entries(homeworkChecksByHw[hwId])) {
+        if (c && c.completed) { cumulative++; allDates.add(d); }
+      }
+    }
+    // Current streak: consecutive days ending today (or the most-recent checked day)
+    // with at least one homework checked. Anchor to today; count back.
+    let streak = 0;
+    const today = todayDateStr();
+    let cursor = today;
+    if (!allDates.has(cursor)) {
+      // Also try starting from yesterday so streak doesn't reset before today's check.
+      const y = new Date(today + 'T00:00:00'); y.setDate(y.getDate() - 1);
+      cursor = y.getFullYear() + '-' + String(y.getMonth()+1).padStart(2,'0') + '-' + String(y.getDate()).padStart(2,'0');
+    }
+    while (allDates.has(cursor)) {
+      streak++;
+      const cur = new Date(cursor + 'T00:00:00');
+      cur.setDate(cur.getDate() - 1);
+      cursor = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0') + '-' + String(cur.getDate()).padStart(2,'0');
+    }
+    // Songs completed: homework whose done fraction >= 80%
+    const songsCompleted = [];
+    for (const h of homeworkAsStudent) {
+      const days = dateRangeDays(h.start_date, h.end_date);
+      const checks = homeworkChecksByHw[h.id] || {};
+      const done = days.filter(d => checks[d] && checks[d].completed).length;
+      if (days.length > 0 && done / days.length >= 0.8) {
+        songsCompleted.push({ id: h.id, title: h.title });
+      }
+    }
+    // Come-back trigger: today has a check AND the previous most-recent check was ≥7 days before.
+    let comeback = false;
+    if (allDates.has(today)) {
+      const sorted = Array.from(allDates).sort();
+      // find max date < today
+      const prev = sorted.filter(d => d < today).pop();
+      if (prev) {
+        const diff = (new Date(today + 'T00:00:00') - new Date(prev + 'T00:00:00')) / 86400000;
+        if (diff >= 7) comeback = true;
+      }
+    }
+    return { streak, cumulative, songsCompleted, comeback };
+  }
+
+  const STAMP_CATALOG = [
+    // ── Milestone: streak
+    {
+      code: 'streak_3', name: '初心', sub: '连续 3 日', cat: 'streak',
+      svg: (s) => stampSvg.box('初', s), rule: (ctx) => ctx.streak >= 3,
+    },
+    {
+      code: 'streak_7', name: '一周', sub: '连续 7 日', cat: 'streak',
+      svg: (s) => stampSvg.round2('七', '日', s), rule: (ctx) => ctx.streak >= 7,
+    },
+    {
+      code: 'streak_14', name: '两周不断', sub: '连续 14 日', cat: 'streak',
+      svg: (s) => stampSvg.vert3('兩', '周', '不斷', s), rule: (ctx) => ctx.streak >= 14,
+    },
+    {
+      code: 'streak_30', name: '满月印', sub: '连续 30 日', cat: 'streak',
+      svg: (s) => stampSvg.doublering('滿', '月', s), rule: (ctx) => ctx.streak >= 30,
+    },
+    // ── Milestone: cumulative
+    {
+      code: 'cum_30', name: '三十次', sub: '累积 30 次', cat: 'cumulative',
+      svg: (s) => stampSvg.horiz2('卅', '次', s), rule: (ctx) => ctx.cumulative >= 30,
+    },
+    {
+      code: 'cum_100', name: '百日歌心', sub: '累积 100 次', cat: 'cumulative',
+      svg: (s) => stampSvg.grid4(['百', '日', '歌', '心'], s), rule: (ctx) => ctx.cumulative >= 100,
+    },
+    {
+      code: 'cum_365', name: '一年不辍', sub: '累积 365 次', cat: 'cumulative',
+      svg: (s) => stampSvg.doublering('一年', '不輟', s), rule: (ctx) => ctx.cumulative >= 365,
+    },
+    // ── Specialty
+    {
+      code: 'comeback', name: '复归印', sub: '断而复起', cat: 'specialty',
+      svg: (s) => stampSvg.return2('復', '歸', s), rule: (ctx) => ctx.comeback,
+    },
+    // Song-complete: parameterized. Each unique homework earns its own row with meta.homework_id.
+    {
+      code: 'song_complete', parameterized: true, name: '结课印', sub: '一首歌完成', cat: 'specialty',
+      svg: (s, meta) => stampSvg.scroll('結課', (meta && meta.title) ? escHtml(String(meta.title).slice(0, 8)) : '', s),
+      // Returns an array of {code, meta} tuples to award
+      ruleParam: (ctx) => ctx.songsCompleted.map(sc => ({
+        code: 'song_complete:' + sc.id,
+        meta: { homework_id: sc.id, title: sc.title }
+      })),
+    },
+  ];
+
+  const STAMP_CAT_LABELS = {
+    streak: '连续之印',
+    cumulative: '累积之印',
+    specialty: '专项之印',
+  };
+
+  async function loadStamps() {
+    if (!supabaseClient || !cloudUser) return;
+    try {
+      const { data, error } = await supabaseClient
+        .from('stamps').select('*').eq('user_id', cloudUser.id);
+      if (error) throw error;
+      earnedStamps = data || [];
+      earnedStampCodes = new Set(earnedStamps.map(s => s.stamp_code));
+    } catch(e) { console.error('loadStamps failed', e); }
+  }
+
+  // Evaluate the catalog against current context; award anything newly earned.
+  // Returns array of newly-awarded stamps for the reveal animation.
+  async function evaluateStamps() {
+    if (!supabaseClient || !cloudUser) return [];
+    const ctx = stampContext();
+    const toAward = [];
+    for (const st of STAMP_CATALOG) {
+      if (st.parameterized) {
+        const items = st.ruleParam(ctx) || [];
+        for (const it of items) {
+          if (!earnedStampCodes.has(it.code)) toAward.push({ code: it.code, meta: it.meta, def: st });
+        }
+      } else {
+        if (earnedStampCodes.has(st.code)) continue;
+        if (st.rule(ctx)) toAward.push({ code: st.code, meta: {}, def: st });
+      }
+    }
+    if (!toAward.length) return [];
+    // Insert all newly-earned rows. Use onConflict do-nothing so racing tabs don't error.
+    const rows = toAward.map(a => ({ user_id: cloudUser.id, stamp_code: a.code, meta: a.meta }));
+    try {
+      const { data, error } = await supabaseClient
+        .from('stamps').upsert(rows, { onConflict: 'user_id,stamp_code', ignoreDuplicates: true })
+        .select();
+      if (error) throw error;
+      for (const r of (data || [])) {
+        earnedStamps.push(r);
+        earnedStampCodes.add(r.stamp_code);
+      }
+      // Only reveal ones that were truly new (i.e., returned by insert).
+      const newCodes = new Set((data || []).map(r => r.stamp_code));
+      const revealed = toAward.filter(a => newCodes.has(a.code));
+      queueStampReveals(revealed);
+      return revealed;
+    } catch(e) { console.error('evaluateStamps failed', e); return []; }
+  }
+
+  function stampDefFromCode(code) {
+    const bareCode = code.split(':')[0];
+    return STAMP_CATALOG.find(s => s.code === bareCode || s.code === code);
+  }
+
+  function queueStampReveals(revealed) {
+    for (const a of revealed) _stampQueue.push(a);
+    playNextStampReveal();
+  }
+
+  function playNextStampReveal() {
+    if (_stampRevealing) return;
+    const a = _stampQueue.shift();
+    if (!a) return;
+    _stampRevealing = true;
+    const bg = document.getElementById('stamp-reveal-bg');
+    const svgEl = document.getElementById('stamp-reveal-svg');
+    const nameEl = document.getElementById('stamp-reveal-name');
+    const subEl = document.getElementById('stamp-reveal-sub');
+    svgEl.innerHTML = a.def.svg(180, a.meta);
+    nameEl.textContent = a.def.name;
+    subEl.textContent = a.meta && a.meta.title ? `《${a.meta.title}》 · ${a.def.sub}` : a.def.sub;
+    bg.classList.add('active');
+  }
+
+  function dismissStampReveal() {
+    const bg = document.getElementById('stamp-reveal-bg');
+    if (!bg.classList.contains('active')) return;
+    bg.classList.remove('active');
+    setTimeout(() => {
+      // Reset animation state by clearing then next tick showing next
+      _stampRevealing = false;
+      playNextStampReveal();
+    }, 300);
+  }
+
+  function openStampBook() {
+    renderStampBook();
+    document.getElementById('stamp-book-bg').style.display = 'flex';
+  }
+  function closeStampBook() {
+    document.getElementById('stamp-book-bg').style.display = 'none';
+  }
+  window.openStampBook = openStampBook;
+  window.closeStampBook = closeStampBook;
+  window.dismissStampReveal = dismissStampReveal;
+
+  function renderStampBook() {
+    // Build the effective catalog: unlockable stamps + already-earned song-complete rows.
+    const items = [];
+    for (const st of STAMP_CATALOG) {
+      if (st.parameterized) {
+        // For each earned song-complete row, add a cell.
+        const rows = earnedStamps.filter(r => r.stamp_code.startsWith(st.code + ':'));
+        for (const r of rows) {
+          items.push({ def: st, code: r.stamp_code, meta: r.meta || {}, earned: true, awarded_at: r.awarded_at });
+        }
+        // If none earned yet, still show one placeholder so users see the shape.
+        if (!rows.length) {
+          items.push({ def: st, code: st.code, meta: {}, earned: false });
+        }
+      } else {
+        const earned = earnedStampCodes.has(st.code);
+        const row = earnedStamps.find(r => r.stamp_code === st.code);
+        items.push({ def: st, code: st.code, meta: {}, earned, awarded_at: row && row.awarded_at });
+      }
+    }
+    const earnedCount = items.filter(i => i.earned).length;
+    document.getElementById('stamp-count-num').textContent = earnedCount;
+    document.getElementById('stamp-count-total').textContent = items.length;
+
+    const byCat = {};
+    for (const it of items) {
+      (byCat[it.def.cat] = byCat[it.def.cat] || []).push(it);
+    }
+    const catOrder = ['streak', 'cumulative', 'specialty'];
+    const html = catOrder.filter(c => byCat[c]).map((c, idx) => {
+      const num = ['壹', '貳', '叁'][idx] || '';
+      const cells = byCat[c].map(it => {
+        if (it.earned) {
+          const subLine = it.meta && it.meta.title ? `《${escHtml(String(it.meta.title))}》` : escHtml(it.def.sub);
+          return `<div class="stamp-cell">
+            ${it.def.svg(76, it.meta)}
+            <div class="stamp-caption">${escHtml(it.def.name)}</div>
+            <div class="stamp-sub">${subLine}</div>
+          </div>`;
+        }
+        return `<div class="stamp-cell locked">
+          <div class="stamp-slot">待得</div>
+          <div class="stamp-caption">${escHtml(it.def.name)}</div>
+          <div class="stamp-sub">${escHtml(it.def.sub)}</div>
+        </div>`;
+      }).join('');
+      return `<div class="stamp-cat-label"><span class="cat-num">${num}</span>${STAMP_CAT_LABELS[c]}</div>
+              <div class="stamp-grid">${cells}</div>`;
+    }).join('');
+    document.getElementById('stamp-book-body').innerHTML = html;
+  }
+
+
   function todayDateStr() {
     const d = new Date();
     return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
@@ -6530,7 +7005,8 @@
     // Render synchronously from the cached snapshot first so the section
     // doesn't pop in after the network round-trip and shove the songs down.
     if (userRole === 'student') renderStudentHomeworkSection();
-    await Promise.all([loadHomeworkAll(), loadMyStudents()]);
+    await Promise.all([loadHomeworkAll(), loadMyStudents(), loadStamps()]);
+    if (userRole === 'student') { evaluateStamps(); }
     if (userRole === 'teacher') {
       renderTeacherStudentsSection();
       document.getElementById('student-homework-section').style.display = 'none';
@@ -6679,7 +7155,8 @@
       const todayObj = new Date(today + 'T00:00:00');
       const wday = ['周日','周一','周二','周三','周四','周五','周六'][todayObj.getDay()];
       const dateLabel = `${todayObj.getMonth()+1} 月 ${todayObj.getDate()} 日`;
-      sectionTitle.innerHTML = `<span>今天 · ${wday} · ${dateLabel}</span>`;
+      sectionTitle.innerHTML = `<span>今天 · ${wday} · ${dateLabel}</span>
+        <button class="stamp-book-btn" onclick="openStampBook()" title="印谱"><span class="stamp-dot"></span>印谱</button>`;
     }
 
     let activeHtml = '';
@@ -7187,6 +7664,7 @@
       const hw2 = homeworkAsStudent.find(h => h.id === hwId);
       if (hw2) renderDrawerDayList(hw2, 'student');
       renderStudentHomeworkSection();
+      if (next) { evaluateStamps(); }
     } catch(e) {
       console.error('check sync failed, reverting', e);
       if (Object.keys(prev).length) homeworkChecksByHw[hwId][date] = prev;
