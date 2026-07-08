@@ -2366,11 +2366,39 @@
     }
     .stamp-modal-head .stamp-count b { color: #B92923; font-size: 15px; }
     .stamp-modal-body {
-      padding: 24px 26px 28px; max-height: 70vh; overflow-y: auto;
+      padding: 24px 26px 28px 44px; max-height: 70vh; overflow-y: auto;
+      position: relative;
       background:
         repeating-linear-gradient(102deg, transparent 0 3px, rgba(139,105,50,0.022) 3px 4px),
         repeating-linear-gradient(15deg, transparent 0 5px, rgba(139,105,50,0.018) 5px 6px),
+        radial-gradient(ellipse at top left, rgba(139,80,30,0.05), transparent 60%),
+        radial-gradient(ellipse at bottom right, rgba(139,80,30,0.05), transparent 55%),
         #F9F1DC;
+      box-shadow: inset 12px 0 22px -12px rgba(70,45,20,0.18),
+                  inset -6px 0 12px -8px rgba(70,45,20,0.06);
+    }
+    /* Bound-book spine strip on the left */
+    .stamp-modal-body::before {
+      content: "";
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 18px;
+      background:
+        linear-gradient(90deg, rgba(70,45,20,0.32) 0%, rgba(70,45,20,0.12) 55%, transparent 100%),
+        repeating-linear-gradient(0deg, transparent 0 6px, rgba(70,45,20,0.06) 6px 7px);
+      pointer-events: none;
+    }
+    /* Optional page-turn shadow on the right */
+    .stamp-modal-body::after {
+      content: "";
+      position: absolute; right: 0; top: 0; bottom: 0;
+      width: 8px;
+      background: linear-gradient(90deg, transparent 0%, rgba(70,45,20,0.08) 100%);
+      pointer-events: none;
+    }
+    /* Bound sanpgi / saijin variants also keep the spine */
+    body.skin-sangpi .stamp-modal-body,
+    body.skin-saijin .stamp-modal-body {
+      padding-left: 44px; position: relative;
     }
     .stamp-cat-label {
       font-family: "Noto Serif SC", "Songti SC", serif;
@@ -2379,6 +2407,46 @@
     }
     .stamp-cat-label + .stamp-cat-label { margin-top: 24px; }
     .stamp-cat-label .cat-num { color: #B92923; margin-right: 10px; font-weight: 600; }
+
+    /* Chapter-style headers when printbook feels like a bound volume */
+    .book-chapter {
+      text-align: center; margin: 18px 0 20px;
+      position: relative;
+    }
+    .book-chapter:first-child { margin-top: 4px; }
+    .book-chapter + .book-chapter,
+    .book-chapter ~ .stamp-grid + .book-chapter { margin-top: 36px; }
+    .book-chapter::before, .book-chapter::after {
+      content: ""; position: absolute; top: 50%; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(139,115,85,0.4), transparent);
+      width: 26%;
+    }
+    .book-chapter::before { left: 4%; }
+    .book-chapter::after { right: 4%; }
+    .book-chapter-num {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 10.5px; letter-spacing: 0.4em; color: #B98A2D;
+      margin-bottom: 4px; font-weight: 600;
+    }
+    .book-chapter-title {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 17px; letter-spacing: 0.32em; color: #2A1F16;
+      font-weight: 500; display: inline-block;
+      padding: 0 12px;
+      position: relative; z-index: 1; background: #F9F1DC;
+    }
+    body.skin-sangpi .book-chapter-title { background: #E2C88C; }
+    body.skin-saijin .book-chapter-title { background: #F5EAC6; }
+    .book-chapter-title::before { content: "〈"; margin-right: 4px; color: #B92923; font-weight: 400; opacity: 0.7; }
+    .book-chapter-title::after  { content: "〉"; margin-left: 4px;  color: #B92923; font-weight: 400; opacity: 0.7; }
+    .book-chapter-foot {
+      text-align: center; margin: 14px 0 0;
+      font-family: "Noto Serif SC", serif;
+      font-size: 10px; letter-spacing: 0.35em; color: #B8A47F;
+    }
+    .book-chapter-foot::before, .book-chapter-foot::after {
+      content: "—"; margin: 0 6px; color: #B8A47F;
+    }
     .stamp-next-card {
       background: linear-gradient(180deg, #FDF6E0 0%, #F5E9CA 100%);
       border: 1px solid rgba(139,115,85,0.35);
@@ -7746,19 +7814,65 @@
   // ═══ Shop (印肆): items you buy with 宝 ═══
   const SHOP_ITEMS = [
     // Idle seals — decorative 闲章 unlocked purely by 宝
-    { code: 'idle_bingxin', name: '一片冰心', cat: 'idle', cost: 30, sub: '闲章 · 王昌龄',
-      svg: (s) => stampSvg.oval('冰', '心', s, { rot: -6 }) },
-    { code: 'idle_zhiyin', name: '知音', cat: 'idle', cost: 40, sub: '闲章',
-      svg: (s) => stampSvg.round2('知', '音', s, { rot: 4 }) },
-    { code: 'idle_youhuang', name: '独坐幽篁', cat: 'idle', cost: 60, sub: '闲章 · 王维',
-      svg: (s) => stampSvg.vert3('幽', '篁', '独坐', s) },
-    { code: 'idle_baiyun', name: '白云自在', cat: 'idle', cost: 100, sub: '闲章',
-      svg: (s) => stampSvg.horiz2('白', '雲', s) },
-    // Cosmetic — record only for v1
-    { code: 'skin_sangpi', name: '桑皮纸底', cat: 'skin', cost: 120, sub: '印谱换纸' },
-    { code: 'skin_saijin', name: '洒金笺', cat: 'skin', cost: 200, sub: '印谱换纸' },
-    { code: 'font_kaishu', name: '楷体印文', cat: 'font', cost: 300, sub: '所有印文改楷体' },
-    { code: 'custom_seal', name: '自选定制印', cat: 'custom', cost: 500, sub: '自选 4 字 · 联系我们' },
+    // Idle seals — hand-drawn custom SVG per phrase, distinctive from the
+    // milestone set so they read as "collector pieces" not just recolored templates.
+    { code: 'idle_bingxin', name: '一片冰心', cat: 'idle', cost: 30, sub: '王昌龄 · 玉壶 · 六字椭圆',
+      svg: (s) => `<svg viewBox="0 0 120 90" width="${s}" height="${s * 90/120}" class="seal-svg">
+        <g filter="url(#seal-bleed)" transform="rotate(-4 60 45)">
+          <ellipse cx="60" cy="45" rx="52" ry="34" fill="${STAMP_INK}"/>
+          <ellipse cx="60" cy="45" rx="45" ry="27" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.7" opacity="0.35"/>
+          <g stroke="${STAMP_PAPER}" stroke-width="1.2" fill="none" opacity="0.35">
+            <path d="M18 45 L28 45 M92 45 L102 45 M60 20 L60 26 M60 64 L60 70"/>
+            <path d="M33 30 L37 34 M83 60 L87 64 M33 60 L37 56 M83 30 L87 34"/>
+          </g>
+          <text x="60" y="45" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="Kaiti SC, STKaiti, serif" font-size="18" font-weight="700" letter-spacing="2">一片冰心</text>
+        </g></svg>` },
+    { code: 'idle_zhiyin', name: '知音', cat: 'idle', cost: 40, sub: '古琴 · 双环连印',
+      svg: (s) => `<svg viewBox="0 0 120 80" width="${s}" height="${s * 80/120}" class="seal-svg">
+        <g filter="url(#seal-bleed)" transform="rotate(3 60 40)">
+          <circle cx="42" cy="40" r="30" fill="${STAMP_INK}"/>
+          <circle cx="78" cy="40" r="30" fill="${STAMP_INK}"/>
+          <circle cx="42" cy="40" r="24" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.6" opacity="0.35"/>
+          <circle cx="78" cy="40" r="24" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.6" opacity="0.35"/>
+          <text x="42" y="40" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="24" font-weight="700">知</text>
+          <text x="78" y="40" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="${SERIF}" font-size="24" font-weight="700">音</text>
+          <path d="M56 40 Q60 34 64 40 Q60 46 56 40 Z" fill="${STAMP_PAPER}" opacity="0.75"/>
+        </g></svg>` },
+    { code: 'idle_youhuang', name: '独坐幽篁', cat: 'idle', cost: 60, sub: '王维 · 竹林独坐 · 竖式',
+      svg: (s) => `<svg viewBox="0 0 70 110" width="${s * 0.64}" height="${s}" class="seal-svg">
+        <g filter="url(#seal-bleed)" transform="rotate(-2 35 55)">
+          <rect x="10" y="10" width="50" height="90" rx="2" fill="${STAMP_INK}"/>
+          <rect x="14" y="14" width="42" height="82" rx="0.5" fill="none" stroke="${STAMP_PAPER}" stroke-width="0.6" opacity="0.35"/>
+          <g fill="${STAMP_PAPER}" opacity="0.28">
+            <rect x="18" y="20" width="3" height="72"/>
+            <rect x="49" y="24" width="3" height="68"/>
+            <rect x="33" y="18" width="2.5" height="76"/>
+          </g>
+          <g stroke="${STAMP_INK}" stroke-width="1.2" fill="none">
+            <line x1="18" y1="34" x2="21" y2="34"/>
+            <line x1="18" y1="52" x2="21" y2="52"/>
+            <line x1="18" y1="70" x2="21" y2="70"/>
+            <line x1="49" y1="40" x2="52" y2="40"/>
+            <line x1="49" y1="60" x2="52" y2="60"/>
+            <line x1="49" y1="80" x2="52" y2="80"/>
+          </g>
+          <text x="35" y="26" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="Kaiti SC, STKaiti, serif" font-size="15" font-weight="700">獨</text>
+          <text x="35" y="47" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="Kaiti SC, STKaiti, serif" font-size="15" font-weight="700">坐</text>
+          <text x="35" y="68" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="Kaiti SC, STKaiti, serif" font-size="15" font-weight="700">幽</text>
+          <text x="35" y="89" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="Kaiti SC, STKaiti, serif" font-size="15" font-weight="700">篁</text>
+        </g></svg>` },
+    { code: 'idle_baiyun', name: '白云自在', cat: 'idle', cost: 100, sub: '云头 · 楷体四字',
+      svg: (s) => `<svg viewBox="0 0 130 80" width="${s}" height="${s * 80/130}" class="seal-svg">
+        <g filter="url(#seal-bleed)" transform="rotate(-3 65 40)">
+          <path d="M12 40 Q12 26 26 24 Q30 12 44 16 Q54 4 66 12 Q80 4 88 16 Q104 12 108 26 Q126 26 124 40 L124 52 Q126 68 108 68 Q104 78 88 74 Q80 82 66 74 Q54 82 44 74 Q30 78 26 68 Q10 68 12 52 Z" fill="${STAMP_INK}"/>
+          <path d="M22 40 Q26 34 32 36 M76 62 Q80 56 86 58 M100 40 Q104 34 110 36" stroke="${STAMP_PAPER}" stroke-width="1.2" fill="none" opacity="0.45"/>
+          <text x="65" y="42" text-anchor="middle" dominant-baseline="central" fill="${STAMP_PAPER}" font-family="Kaiti SC, STKaiti, serif" font-size="20" font-weight="700" letter-spacing="3">白雲自在</text>
+        </g></svg>` },
+    // Cosmetic — purchase unlocks, actual toggle lives in 换装 tab.
+    { code: 'skin_sangpi', name: '桑皮纸底', cat: 'skin', cost: 120, sub: '暖褐纸底 · 到「换装」启用' },
+    { code: 'skin_saijin', name: '洒金笺', cat: 'skin', cost: 200, sub: '米底散金 · 到「换装」启用' },
+    { code: 'font_kaishu', name: '楷体印文', cat: 'font', cost: 300, sub: '全部印文改楷 · 到「换装」启用' },
+    { code: 'custom_seal', name: '自选定制印', cat: 'custom', cost: 500, sub: '4 字私章 · 到「换装」输入' },
   ];
 
   const SHOP_CAT_LABELS = {
@@ -8149,7 +8263,13 @@
       if (error) throw error;
       shopPurchases.push(data);
       ownedItemCodes.add(itemCode);
-      renderStampBook();
+      playChimeSound();
+      // Non-idle purchases go to 换装 tab so user can actually turn them on.
+      if (item.cat === 'skin' || item.cat === 'font' || item.cat === 'custom') {
+        switchStampTab('wardrobe');
+      } else {
+        renderStampBook();
+      }
     } catch(e) { console.error('buy failed', e); alert('购买失败'); }
   }
   window.buyShopItem = buyShopItem;
@@ -8373,9 +8493,15 @@
     const catNums = ['壹', '貳', '叁', '肆', '伍', '陸', '柒', '捌'];
     const gridsHtml = catOrder.filter(c => byCat[c]).map((c, idx) => {
       const num = catNums[idx] || '';
-      const cells = byCat[c].map(it => renderStampCell(it, role)).join('');
-      return `<div class="stamp-cat-label"><span class="cat-num">${num}</span>${catLabels[c]}</div>
-              <div class="stamp-grid">${cells}</div>`;
+      const cellsList = byCat[c];
+      const cells = cellsList.map(it => renderStampCell(it, role)).join('');
+      const earned = cellsList.filter(it => it.tierEarned > 0).length;
+      return `<div class="book-chapter">
+                <div class="book-chapter-num">卷之 ${num}</div>
+                <div class="book-chapter-title">${catLabels[c]}</div>
+              </div>
+              <div class="stamp-grid">${cells}</div>
+              <div class="book-chapter-foot">共 ${cellsList.length} 印 · 已得 ${earned}</div>`;
     }).join('');
 
     // ── Festival seals (year-bound) — earned rows only, oldest → newest.
@@ -8401,8 +8527,12 @@
           ${claimBtn}
         </div>`;
       }).join('');
-      festivalHtml = `<div class="stamp-cat-label"><span class="cat-num">節</span>节日之印</div>
-                      <div class="stamp-grid">${cells}</div>`;
+      festivalHtml = `<div class="book-chapter">
+                        <div class="book-chapter-num">卷之 節</div>
+                        <div class="book-chapter-title">节日之印</div>
+                      </div>
+                      <div class="stamp-grid">${cells}</div>
+                      <div class="book-chapter-foot">共 ${festivalRows.length} 印 · 皆得</div>`;
     }
 
     // ── Idle seals owned via shop, appended as a bonus section (self only)
@@ -8425,8 +8555,12 @@
         </div>`);
       }
       if (idleCells.length) {
-        idleHtml = `<div class="stamp-cat-label"><span class="cat-num">閒</span>闲章</div>
-                    <div class="stamp-grid">${idleCells.join('')}</div>`;
+        idleHtml = `<div class="book-chapter">
+                      <div class="book-chapter-num">卷之 閒</div>
+                      <div class="book-chapter-title">闲章</div>
+                    </div>
+                    <div class="stamp-grid">${idleCells.join('')}</div>
+                    <div class="book-chapter-foot">共 ${idleCells.length} 印</div>`;
       }
     }
 
