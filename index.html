@@ -2411,34 +2411,22 @@
     /* Chapter-style headers when printbook feels like a bound volume */
     .book-chapter {
       text-align: center; margin: 18px 0 20px;
-      position: relative;
     }
     .book-chapter:first-child { margin-top: 4px; }
     .book-chapter + .book-chapter,
     .book-chapter ~ .stamp-grid + .book-chapter { margin-top: 36px; }
-    .book-chapter::before, .book-chapter::after {
-      content: ""; position: absolute; top: 50%; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(139,115,85,0.4), transparent);
-      width: 26%;
-    }
-    .book-chapter::before { left: 4%; }
-    .book-chapter::after { right: 4%; }
     .book-chapter-num {
       font-family: "Noto Serif SC", "Songti SC", serif;
       font-size: 10.5px; letter-spacing: 0.4em; color: #B98A2D;
-      margin-bottom: 4px; font-weight: 600;
+      margin-bottom: 6px; font-weight: 600;
     }
     .book-chapter-title {
       font-family: "Noto Serif SC", "Songti SC", serif;
       font-size: 17px; letter-spacing: 0.32em; color: #2A1F16;
       font-weight: 500; display: inline-block;
-      padding: 0 12px;
-      position: relative; z-index: 1; background: #F9F1DC;
     }
-    body.skin-sangpi .book-chapter-title { background: #E2C88C; }
-    body.skin-saijin .book-chapter-title { background: #F5EAC6; }
-    .book-chapter-title::before { content: "〈"; margin-right: 4px; color: #B92923; font-weight: 400; opacity: 0.7; }
-    .book-chapter-title::after  { content: "〉"; margin-left: 4px;  color: #B92923; font-weight: 400; opacity: 0.7; }
+    .book-chapter-title::before { content: "〈"; margin-right: 6px; color: #B92923; font-weight: 400; opacity: 0.7; }
+    .book-chapter-title::after  { content: "〉"; margin-left: 6px;  color: #B92923; font-weight: 400; opacity: 0.7; }
     .book-chapter-foot {
       text-align: center; margin: 14px 0 0;
       font-family: "Noto Serif SC", serif;
