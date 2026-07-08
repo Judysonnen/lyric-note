@@ -5,9 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>标唱 · LyricNote</title>
   <meta name="theme-color" content="#B92923" />
-  <!-- Full-bleed 朱砂 seal favicon with a large 唱 glyph — reads at 16px. -->
-  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="16" fill="%23B92923"/><text x="50" y="55" text-anchor="middle" dominant-baseline="central" font-family="Songti SC,STSong,serif" font-size="72" font-weight="700" fill="%23FBF3D8">唱</text></svg>' />
-  <link rel="apple-touch-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" rx="30" fill="%23B92923"/><text x="90" y="100" text-anchor="middle" dominant-baseline="central" font-family="Songti SC,STSong,serif" font-size="130" font-weight="700" fill="%23FBF3D8">唱</text></svg>' />
+  <!-- Plum-flower 朱砂 seal favicon: five-petal outline with 唱 in the center.
+       Distinct silhouette reads even at 16 px; serif fallback keeps the glyph
+       from disappearing when Songti isn't installed on the OS. -->
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g fill="%23B92923"><circle cx="50" cy="22" r="20"/><circle cx="78" cy="42" r="20"/><circle cx="67" cy="74" r="20"/><circle cx="33" cy="74" r="20"/><circle cx="22" cy="42" r="20"/><circle cx="50" cy="50" r="23"/></g><text x="50" y="50" text-anchor="middle" dominant-baseline="central" font-family="serif" font-size="30" font-weight="700" fill="%23FBF3D8">唱</text></svg>' />
+  <link rel="apple-touch-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180"><rect width="180" height="180" fill="%23FAF5EC"/><g transform="translate(90 90) scale(1.5) translate(-50 -50)" fill="%23B92923"><circle cx="50" cy="22" r="20"/><circle cx="78" cy="42" r="20"/><circle cx="67" cy="74" r="20"/><circle cx="33" cy="74" r="20"/><circle cx="22" cy="42" r="20"/><circle cx="50" cy="50" r="23"/></g><text x="90" y="90" text-anchor="middle" dominant-baseline="central" font-family="serif" font-size="45" font-weight="700" fill="%23FBF3D8">唱</text></svg>' />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <!-- Supabase SDK for cloud sync -->
