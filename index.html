@@ -2028,14 +2028,15 @@
     .sv-hw-card-status.future { background: #F3F4F6; color: var(--muted); }
     .sv-hw-card-prog { margin-top: 10px; height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; }
     .sv-hw-card-prog > div { height: 100%; background: var(--primary); transition: width .3s; }
-    .sv-hw-card { position: relative; }
-    .sv-hw-card::before {
-      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
-      width: 3px; border-radius: 12px 0 0 12px; background: transparent;
-      transition: background .15s;
+    .sv-hw-card { position: relative; transition: background .18s, border-color .18s; }
+    .sv-hw-card.mastery-mastered {
+      background: linear-gradient(180deg, #F0FDF4 0%, var(--card) 85%);
+      border-color: #C6F0D5;
     }
-    .sv-hw-card.mastery-mastered::before { background: #10B981; }
-    .sv-hw-card.mastery-keep_practicing::before { background: #F59E0B; }
+    .sv-hw-card.mastery-keep_practicing {
+      background: linear-gradient(180deg, #FFFBEB 0%, var(--card) 85%);
+      border-color: #FBE7B8;
+    }
     .sv-hw-card-badges {
       display: flex; align-items: center; gap: 6px; flex-shrink: 0;
     }
@@ -2083,6 +2084,25 @@
       cursor: pointer; font-family: inherit; transition: all .15s;
     }
     .sv-ach-open:hover { background: var(--primary); color: white; }
+
+    .sv-mastered-wall { display: flex; flex-direction: column; gap: 10px; }
+    .sv-mastered-row {
+      background: linear-gradient(180deg, #F0FDF4 0%, #FDFDFB 90%);
+      border: 1px solid #C6F0D5; border-radius: 10px;
+      padding: 12px 14px; cursor: pointer; transition: all .15s;
+    }
+    .sv-mastered-row:hover {
+      border-color: #10B981; transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(16,185,129,0.08);
+    }
+    .sv-mastered-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+    .sv-mastered-row-title { font-size: 14px; font-weight: 600; color: #065F46; }
+    .sv-mastered-row-date { font-size: 11px; color: #047857; opacity: .75; letter-spacing: .05em; flex-shrink: 0; }
+    .sv-mastered-row-meta { font-size: 12px; color: #047857; margin-top: 4px; opacity: .8; }
+    .sv-mastered-row-note {
+      font-size: 12px; color: #065F46; margin-top: 6px; font-style: italic;
+      padding-top: 6px; border-top: 1px dashed #C6F0D5;
+    }
 
     .sv-song-list { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .sv-song-row {
@@ -10975,6 +10995,7 @@
     const archivedGroupCount = computeHwGroups(archivedStudentHw).length;
     // Auto-fallback if user landed on archive tab but has none archived
     if (currentStudentViewTab === 'archive' && !archivedGroupCount) currentStudentViewTab = 'homework';
+    if (currentStudentViewTab === 'mastered' && !studentHw.some(h => h.mastery_state === 'mastered')) currentStudentViewTab = 'homework';
 
     const nameJs = escHtml(s.displayName).replace(/'/g, "\\'");
     const linked = !!s.id;
@@ -11026,11 +11047,18 @@
     const achTabHtml = linked
       ? `<div class="sv-tab ${currentStudentViewTab==='achievements'?'active':''}" onclick="setStudentViewTab('achievements')">成就 <span class="num">${achEarnedCount}</span></div>`
       : '';
+    // 练成 tab: everything this student has ever mastered, pulled from live
+    // and archived batches alike so the wall of wins keeps growing.
+    const masteredStudentHw = studentHw.filter(h => h.mastery_state === 'mastered');
+    const masteredTabHtml = (linked && masteredStudentHw.length)
+      ? `<div class="sv-tab ${currentStudentViewTab==='mastered'?'active':''}" onclick="setStudentViewTab('mastered')">练成 <span class="num">${masteredStudentHw.length}</span></div>`
+      : '';
     const tabsHtml = `
       <div class="sv-tabbar">
         <div class="sv-tabs">
           <div class="sv-tab ${currentStudentViewTab==='homework'?'active':''}" onclick="setStudentViewTab('homework')">作业 <span class="num">${linked ? activeStudentHw.length : 0}</span></div>
           <div class="sv-tab ${currentStudentViewTab==='songs'?'active':''}" onclick="setStudentViewTab('songs')">歌词 <span class="num">${songs.length}</span></div>
+          ${masteredTabHtml}
           ${achTabHtml}
           ${archiveTabHtml}
         </div>
@@ -11089,6 +11117,33 @@
             </div>`;
         }).join('') + '</div>';
       }
+    } else if (currentStudentViewTab === 'mastered') {
+      if (!masteredStudentHw.length) {
+        bodyHtml = `<div class="sv-empty">
+          <div class="sv-empty-icon">🌾</div>
+          <div>还没有练成的任务 —— 在作业条目上点 <b>✓ 掌握</b> 就会收进这里</div>
+        </div>`;
+      } else {
+        const sorted = [...masteredStudentHw].sort((a, b) =>
+          (b.mastery_marked_at || '').localeCompare(a.mastery_marked_at || ''));
+        bodyHtml = `<div class="sv-mastered-wall">` + sorted.map(h => {
+          const batch = h.batch_id ? homeworkBatchesById[h.batch_id] : null;
+          const groupLabel = (batch && (batch.label || formatHwLabelAuto(batch.start_date, batch.end_date))) || `${h.start_date} → ${h.end_date}`;
+          const markedDate = (h.mastery_marked_at || '').slice(0, 10);
+          const note = h.mastery_note ? `<div class="sv-mastered-row-note">留言：${escHtml(h.mastery_note)}</div>` : '';
+          const minutes = h.daily_minutes ? ` · 曾练每天 ${h.daily_minutes} 分钟` : '';
+          const version = (h.version && h.version > 1) ? `<span class="sv-hw-version-badge">v${h.version}</span>` : '';
+          return `
+            <div class="sv-mastered-row" onclick="openHomeworkDrawerForTeacher('${h.id}')">
+              <div class="sv-mastered-row-head">
+                <div class="sv-mastered-row-title">✓ ${escHtml(h.title)}${version}</div>
+                <div class="sv-mastered-row-date">${escHtml(markedDate || '已掌握')}</div>
+              </div>
+              <div class="sv-mastered-row-meta">来自「${escHtml(groupLabel)}」${minutes}</div>
+              ${note}
+            </div>`;
+        }).join('') + `</div>`;
+      }
     } else if (currentStudentViewTab === 'achievements') {
       const stampRows = cachedStamps;
       if (stampRows == null) {
@@ -11140,7 +11195,7 @@
       if (!byBatch.has(key)) byBatch.set(key, []);
       byBatch.get(key).push(h);
     }
-    const groups = Array.from(byBatch.entries()).map(([key, rows]) => {
+    const raw = Array.from(byBatch.entries()).map(([key, rows]) => {
       rows.sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
       const first = rows[0];
       const batch = first.batch_id ? homeworkBatchesById[first.batch_id] : null;
@@ -11157,10 +11212,32 @@
         batchLabel: batch ? (batch.label || null) : null,
         startDate, endDate,
         createdAt: (batch && batch.created_at) || first.created_at || '',
-        archivedAt
+        archivedAt,
+        studentId: first.student_id,
       };
     });
-    return groups;
+    // Second pass: merge batches that share (student, start, end, archived).
+    // This can happen when a legacy per-row batch coexists with a new one, or
+    // when a teacher auto-archived a group and then unarchived it while a new
+    // group for the same date range was already open. To the teacher these
+    // read as "the same lesson block," so we show them as one.
+    const mergedByKey = new Map();
+    for (const g of raw) {
+      if (!g.batchId) { mergedByKey.set(g.key, { ...g, batchIds: [] }); continue; }
+      const mkey = [g.studentId, g.startDate, g.endDate, g.archived ? 'a' : 'u'].join('|');
+      const existing = mergedByKey.get(mkey);
+      if (!existing) {
+        mergedByKey.set(mkey, { ...g, batchIds: [g.batchId] });
+      } else {
+        existing.rows = existing.rows.concat(g.rows);
+        existing.batchIds.push(g.batchId);
+        if (g.createdAt && (!existing.createdAt || g.createdAt < existing.createdAt)) {
+          existing.createdAt = g.createdAt;
+        }
+        if (!existing.batchLabel && g.batchLabel) existing.batchLabel = g.batchLabel;
+      }
+    }
+    return Array.from(mergedByKey.values());
   }
 
   function renderHwGroupsForStudent(studentHw, today, mode) {
@@ -11214,10 +11291,13 @@
       }).join('');
       const autoTitle = formatHwLabelAuto(g.startDate, g.endDate);
       const groupTitle = g.batchLabel || autoTitle || (g.rows.slice(0, 3).map(r => r.title).join(' + ') + (g.rows.length > 3 ? ' 等' : ''));
-      const btn = g.batchId
+      // A merged group may span several DB batch_ids. Archive/unarchive them
+      // all together so the button matches what the teacher sees on screen.
+      const batchIdsJson = escHtml(JSON.stringify(g.batchIds || (g.batchId ? [g.batchId] : []))).replace(/"/g, '&quot;');
+      const btn = (g.batchIds && g.batchIds.length)
         ? (g.archived
-            ? `<button class="sv-group-action" onclick="unarchiveHwBatch('${g.batchId}')">取消归档</button>`
-            : `<button class="sv-group-action" onclick="archiveHwBatch('${g.batchId}','${escHtml(groupTitle).replace(/'/g,"\\'")}')">归档本组</button>`)
+            ? `<button class="sv-group-action" onclick='unarchiveHwGroup(${JSON.stringify(g.batchIds)})'>取消归档</button>`
+            : `<button class="sv-group-action" onclick='archiveHwGroup(${JSON.stringify(g.batchIds)}, ${JSON.stringify(groupTitle)})'>归档本组</button>`)
         : '';
       const summary = `${totalTasks} 个任务 · ${g.startDate} → ${g.endDate}${groupTotalDays ? ` · 打卡 ${groupDoneDays}/${groupTotalDays}` : ''}`;
       return `
@@ -11257,8 +11337,38 @@
       alert('取消归档失败：' + (e.message || '未知'));
     }
   }
+  // Merged groups: archive / unarchive every underlying batch at once.
+  async function archiveHwGroup(batchIds, groupTitle) {
+    if (!Array.isArray(batchIds) || !batchIds.length) return;
+    if (!confirm(`归档「${groupTitle}」这一组？\n\n· 这组所有任务会从主页和进行中列表消失\n· 学生也不会再看到\n· 打卡、感想、批注都保留，可以随时取消归档`)) return;
+    try {
+      for (const id of batchIds) {
+        const { error } = await supabaseClient.rpc('archive_homework_batch', { batch: id });
+        if (error) throw error;
+      }
+      await refreshHomeworkUI();
+      if (currentStudentViewLabel) renderStudentMainView();
+    } catch(e) {
+      alert('归档失败：' + (e.message || '未知'));
+    }
+  }
+  async function unarchiveHwGroup(batchIds) {
+    if (!Array.isArray(batchIds) || !batchIds.length) return;
+    try {
+      for (const id of batchIds) {
+        const { error } = await supabaseClient.rpc('unarchive_homework_batch', { batch: id });
+        if (error) throw error;
+      }
+      await refreshHomeworkUI();
+      if (currentStudentViewLabel) renderStudentMainView();
+    } catch(e) {
+      alert('取消归档失败：' + (e.message || '未知'));
+    }
+  }
   window.archiveHwBatch = archiveHwBatch;
   window.unarchiveHwBatch = unarchiveHwBatch;
+  window.archiveHwGroup = archiveHwGroup;
+  window.unarchiveHwGroup = unarchiveHwGroup;
 
   // ── Mastery menu (teacher marks a homework item as mastered / keep-practicing / active) ──
   let masteryTargetHomeworkId = null;
