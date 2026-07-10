@@ -10511,32 +10511,65 @@
     const labelValue = (document.getElementById('hw-label-input')?.value || '').trim();
     btn.disabled = true; btn.innerHTML = '提交中…';
     try {
-      const genUuid = () => (crypto && crypto.randomUUID) ? crypto.randomUUID() :
-        ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
-          const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16);
+      // If this teacher already has an unarchived batch for the same student
+      // covering the exact same date range, this is a "same-period follow-up"
+      // — just append the new tasks into that existing group instead of
+      // closing it and starting fresh.
+      const sameSpanBatch = Object.values(homeworkBatchesById).find(b =>
+        b.teacher_id === cloudUser.id
+        && b.student_id === pendingStudentForHomework
+        && !b.archived_at
+        && b.start_date === start
+        && b.end_date === end
+      );
+      if (sameSpanBatch) {
+        const rows = tasks.map(t => ({
+          teacher_id: cloudUser.id,
+          student_id: pendingStudentForHomework,
+          title: t.title,
+          description: t.desc || null,
+          start_date: start,
+          end_date: end,
+          daily_minutes: t.minutes,
+          batch_id: sameSpanBatch.id,
+          parent_homework_id: t.parent_homework_id,
+          version: t.version
         }));
-      const batchPayload = {
-        id: genUuid(),
-        student_id: pendingStudentForHomework,
-        label: labelValue || null,
-        start_date: start,
-        end_date: end,
-        copied_from_batch_id: window.hwCopiedFromBatchId || null
-      };
-      const rowsPayload = tasks.map(t => ({
-        title: t.title,
-        description: t.desc || null,
-        daily_minutes: t.minutes,
-        parent_homework_id: t.parent_homework_id,
-        version: t.version
-      }));
-      // Atomic: auto-archive this student's previous unarchived batches, then
-      // create the new batch and its homework rows.
-      const { error } = await supabaseClient.rpc('create_batch_and_archive_prev', {
-        p_batch: batchPayload,
-        p_rows: rowsPayload
-      });
-      if (error) throw error;
+        const { error: insErr } = await supabaseClient.from('homework').insert(rows);
+        if (insErr) throw insErr;
+        // If the teacher tweaked the label field, apply it now.
+        if (labelValue && labelValue !== (sameSpanBatch.label || '')) {
+          await supabaseClient.from('homework_batches')
+            .update({ label: labelValue }).eq('id', sameSpanBatch.id);
+        }
+      } else {
+        const genUuid = () => (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+          ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+            const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16);
+          }));
+        const batchPayload = {
+          id: genUuid(),
+          student_id: pendingStudentForHomework,
+          label: labelValue || null,
+          start_date: start,
+          end_date: end,
+          copied_from_batch_id: window.hwCopiedFromBatchId || null
+        };
+        const rowsPayload = tasks.map(t => ({
+          title: t.title,
+          description: t.desc || null,
+          daily_minutes: t.minutes,
+          parent_homework_id: t.parent_homework_id,
+          version: t.version
+        }));
+        // Atomic: auto-archive this student's previous unarchived batches, then
+        // create the new batch and its homework rows.
+        const { error } = await supabaseClient.rpc('create_batch_and_archive_prev', {
+          p_batch: batchPayload,
+          p_rows: rowsPayload
+        });
+        if (error) throw error;
+      }
       window.hwCopiedFromBatchId = null;
       closeCreateHomework();
       await refreshHomeworkUI();
