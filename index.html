@@ -2419,6 +2419,119 @@
       transform: translateX(3px); opacity: 1; color: var(--primary);
     }
 
+    /* Streak card (student home hero) */
+    .streak-card {
+      background: linear-gradient(180deg, #FEF7E6 0%, var(--card) 100%);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px 22px 16px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .streak-hero {
+      display: grid;
+      grid-template-columns: auto auto auto 1fr;
+      gap: 6px 12px;
+      align-items: baseline;
+      margin-bottom: 18px;
+    }
+    .streak-hero-flame {
+      font-size: 32px; line-height: 1; align-self: center; grid-row: 1 / 3;
+    }
+    .streak-hero.cold .streak-hero-flame { opacity: 0.35; }
+    .streak-hero-num {
+      font-family: var(--font-display, "Noto Serif SC", "Songti SC", serif);
+      font-size: 56px; font-weight: 700; line-height: 1;
+      color: var(--primary); font-variant-numeric: tabular-nums;
+      transition: transform .28s cubic-bezier(.34,1.56,.64,1);
+      display: inline-block;
+    }
+    .streak-hero.hot .streak-hero-num { color: #C55A2A; }
+    .streak-hero.cold .streak-hero-num { color: var(--muted); }
+    .streak-hero-num.bump { transform: scale(1.4); }
+    .streak-hero-unit {
+      font-size: 16px; font-weight: 500; color: var(--text-soft);
+      align-self: flex-end; margin-bottom: 6px;
+    }
+    .streak-hero-lead {
+      grid-column: 2 / -1; font-size: 12.5px; color: var(--muted);
+      line-height: 1.4; margin-top: 4px;
+    }
+    .streak-goal {
+      display: flex; align-items: center; gap: 14px;
+      padding: 12px 14px; background: rgba(255,255,255,0.55);
+      border: 1px solid rgba(184,132,49,0.18); border-radius: 10px;
+    }
+    .streak-goal.all-done {
+      justify-content: center; padding: 14px; font-size: 13px;
+      color: #7A5A2A; font-style: italic; background: rgba(255,255,255,0.55);
+    }
+    .streak-goal-svg {
+      flex-shrink: 0; opacity: 0.65; filter: grayscale(0.3);
+      transition: opacity .25s;
+    }
+    .streak-goal:hover .streak-goal-svg { opacity: 0.95; filter: none; }
+    .streak-goal-body { flex: 1; min-width: 0; }
+    .streak-goal-name {
+      font-size: 13px; color: var(--text); font-weight: 500;
+    }
+    .streak-goal-name b {
+      color: var(--primary); font-size: 15px; font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .streak-goal-bar {
+      margin-top: 8px; height: 8px; background: rgba(139,115,85,0.15);
+      border-radius: 999px; overflow: hidden; position: relative;
+    }
+    .streak-goal-bar-fill {
+      height: 100%; background: linear-gradient(90deg, #E29742 0%, var(--primary) 100%);
+      border-radius: 999px; transition: width .8s cubic-bezier(.4,0,.2,1);
+      position: relative;
+    }
+    .streak-goal-bar-fill::after {
+      content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 12px;
+      background: rgba(255,255,255,0.5); border-radius: 999px;
+      filter: blur(4px);
+    }
+    .streak-goal-hint {
+      font-size: 10.5px; color: var(--muted); margin-top: 4px;
+      letter-spacing: .05em; font-variant-numeric: tabular-nums;
+    }
+    .streak-shelf {
+      display: flex; align-items: center; gap: 10px;
+      margin-top: 14px; padding: 10px 12px 8px;
+      border-top: 1px dashed rgba(139,115,85,0.2);
+      cursor: pointer; transition: all .15s;
+    }
+    .streak-shelf:hover { background: rgba(255,255,255,0.4); }
+    .streak-shelf-label {
+      font-size: 11px; color: var(--muted); letter-spacing: .1em;
+      flex-shrink: 0; text-transform: uppercase; font-weight: 500;
+    }
+    .streak-shelf-seals { flex: 1; display: flex; gap: 8px; overflow: hidden; }
+    .streak-shelf-seals .stamp-shelf-seal { flex-shrink: 0; }
+    .streak-shelf-arrow {
+      color: var(--muted); font-size: 18px; flex-shrink: 0;
+      opacity: 0.6; transition: all .15s;
+    }
+    .streak-shelf:hover .streak-shelf-arrow {
+      transform: translateX(2px); opacity: 1; color: var(--primary);
+    }
+    /* Check-in ripple: applied briefly by JS on toggleTodayCheck */
+    @keyframes hw-check-ripple {
+      0% { box-shadow: 0 0 0 0 rgba(168,77,53,0.35); }
+      70% { box-shadow: 0 0 0 22px rgba(168,77,53,0); }
+      100% { box-shadow: 0 0 0 0 rgba(168,77,53,0); }
+    }
+    .hw-check-ripple { animation: hw-check-ripple .7s ease-out; }
+    @keyframes streak-num-bump {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.5); color: #C55A2A; }
+      100% { transform: scale(1); }
+    }
+    .streak-hero-num.animate-bump { animation: streak-num-bump .5s cubic-bezier(.34,1.56,.64,1); }
+
     .stamp-book-btn {
       background: none; border: 1px solid var(--border);
       color: var(--primary); font-size: 11.5px; letter-spacing: 0.15em;
@@ -3377,7 +3490,7 @@
               布置作业
             </button>
           </div>
-          <div id="teacher-stamp-shelf" class="hw-section" style="display:none;margin-top:0;width:100%;max-width:460px;"></div>
+          <!-- teacher-stamp-shelf removed: teachers no longer earn seals. -->
           <div id="student-homework-section" class="hw-section" style="display:none;margin-top:0;">
             <div class="hw-section-title"><span>我的练习 · 今日打卡</span></div>
             <div id="student-homework-list" class="hw-today-list"></div>
@@ -7962,181 +8075,37 @@
   //   Parameterized (song_complete): { parameterized: true, ruleParam(ctx) }
   //     Each returned entry is its own stamp_code.
   // Everything else about a catalog entry: code, name, sub, cat, svg(size, tier, meta).
+  // Six seals only. Every one hooks the same behavior: daily practice.
+  // Streak drives four (first day, 3-day, 7-day, 30-day), cumulative anchors
+  // the long tail (100 total practice days), and comeback catches the tail
+  // of a broken streak so a slip doesn't feel like a failure.
   const STAMP_CATALOG = [
-    // ═══ 连续之印 · streak (each threshold = own stamp, distinct visual)
-    { code: 'first_day', name: '首日印', sub: '首次打卡', cat: 'streak',
+    { code: 'first_day', name: '首日印', sub: '第一次打卡', cat: 'streak',
       svg: (s) => stampSvg.box('始', s), metric: 'cumulative', tiers: [{at: 1, xp: 5}] },
-    { code: 'streak_3', name: '初心', sub: '连续 3 日', cat: 'streak',
-      svg: (s) => stampSvg.box('初', s), metric: 'streak', tiers: [{at: 3, xp: 10}] },
-    { code: 'streak_5', name: '五日印', sub: '连续 5 日', cat: 'streak',
-      svg: (s) => stampSvg.pill('五', '日', s), metric: 'streak', tiers: [{at: 5, xp: 15}] },
-    { code: 'streak_7', name: '一周', sub: '连续 7 日', cat: 'streak',
-      svg: (s) => stampSvg.round2('七', '日', s), metric: 'streak', tiers: [{at: 7, xp: 25}] },
-    { code: 'streak_10', name: '旬印', sub: '连续 10 日', cat: 'streak',
-      svg: (s) => stampSvg.box('旬', s), metric: 'streak', tiers: [{at: 10, xp: 40}] },
-    { code: 'streak_14', name: '两周不断', sub: '连续 14 日', cat: 'streak',
-      svg: (s) => stampSvg.vert3('兩', '周', '不斷', s), metric: 'streak', tiers: [{at: 14, xp: 60}] },
-    { code: 'streak_21', name: '三周', sub: '连续 21 日', cat: 'streak',
-      svg: (s) => stampSvg.hex('三', '周', s), metric: 'streak', tiers: [{at: 21, xp: 100}] },
+    { code: 'streak_3', name: '三日印', sub: '连续 3 日', cat: 'streak',
+      svg: (s) => stampSvg.box('初', s), metric: 'streak', tiers: [{at: 3, xp: 15}] },
+    { code: 'streak_7', name: '七日印', sub: '连续 7 日', cat: 'streak',
+      svg: (s) => stampSvg.round2('七', '日', s), metric: 'streak', tiers: [{at: 7, xp: 40}] },
     { code: 'streak_30', name: '满月印', sub: '连续 30 日', cat: 'streak',
-      svg: (s) => stampSvg.doublering('滿', '月', s), metric: 'streak', tiers: [{at: 30, xp: 150}] },
-    { code: 'streak_50', name: '半百印', sub: '连续 50 日', cat: 'streak',
-      svg: (s) => stampSvg.horiz2('五', '十', s), metric: 'streak', tiers: [{at: 50, xp: 300}] },
-    { code: 'streak_100', name: '百日不断', sub: '连续 100 日', cat: 'streak',
-      svg: (s) => stampSvg.grid4(['百', '日', '不', '斷'], s), metric: 'streak', tiers: [{at: 100, xp: 800}] },
-
-    // ═══ 累积之印 · cumulative (each threshold own stamp)
-    { code: 'cum_10', name: '十次印', sub: '累积 10 次', cat: 'cumulative',
-      svg: (s) => stampSvg.pill('十', '次', s), metric: 'cumulative', tiers: [{at: 10, xp: 10}] },
-    { code: 'cum_30', name: '三十次', sub: '累积 30 次', cat: 'cumulative',
-      svg: (s) => stampSvg.horiz2('卅', '次', s), metric: 'cumulative', tiers: [{at: 30, xp: 25}] },
-    { code: 'cum_50', name: '五十次', sub: '累积 50 次', cat: 'cumulative',
-      svg: (s) => stampSvg.oval('五', '十', s), metric: 'cumulative', tiers: [{at: 50, xp: 50}] },
-    { code: 'cum_100', name: '百日歌心', sub: '累积 100 次', cat: 'cumulative',
-      svg: (s) => stampSvg.grid4(['百', '日', '歌', '心'], s), metric: 'cumulative', tiers: [{at: 100, xp: 150}] },
-    { code: 'cum_365', name: '一年不辍', sub: '累积 365 次', cat: 'cumulative',
-      svg: (s) => stampSvg.doublering('一年', '不輟', s), metric: 'cumulative', tiers: [{at: 365, xp: 500}] },
-    { code: 'cum_500', name: '五百余音', sub: '累积 500 次', cat: 'cumulative',
-      svg: (s) => stampSvg.gourd('五百', '餘音', s), metric: 'cumulative', tiers: [{at: 500, xp: 800}] },
-
-    // ═══ 周月之印 · weekly (multi-tier)
-    { code: 'week_full', name: '一周不歇', sub: '本周 / 4 周 / 12 周 / 52 周', cat: 'weekly',
-      svg: (s) => stampSvg.round2('周', '全', s), metric: 'weekStreak',
-      tiers: [{at: 1, xp: 10}, {at: 4, xp: 40}, {at: 12, xp: 100}, {at: 52, xp: 300}] },
-    { code: 'month_full', name: '满勤月', sub: '整月每日皆有印', cat: 'weekly',
-      svg: (s) => stampSvg.doublering('滿', '勤', s), metric: 'monthFullCount',
-      tiers: [{at: 1, xp: 30}, {at: 3, xp: 100}, {at: 12, xp: 400}] },
-    { code: 'weekend', name: '周末不歇', sub: '周六日皆打卡', cat: 'weekly',
-      svg: (s) => stampSvg.pill('周', '末', s), metric: 'weekendCount',
-      tiers: [{at: 1, xp: 5}, {at: 5, xp: 15}, {at: 20, xp: 60}] },
-
-    // ═══ 时辰之印 · time-of-day (multi-tier)
-    { code: 'early_bird', name: '早鸟印', sub: '晨间打卡（8 点前）', cat: 'time',
-      svg: (s) => stampSvg.sunrise('晨', s), metric: 'earlyCount',
-      tiers: [{at: 5, xp: 10}, {at: 20, xp: 30}, {at: 50, xp: 80}, {at: 100, xp: 200}] },
-    { code: 'night_owl', name: '夜歌印', sub: '夜间打卡（22 点后）', cat: 'time',
-      svg: (s) => stampSvg.crescent('夜', s), metric: 'nightCount',
-      tiers: [{at: 5, xp: 10}, {at: 20, xp: 30}, {at: 50, xp: 80}] },
-    { code: 'both_time', name: '昼夜俱到', sub: '同日晨与夜', cat: 'time',
-      svg: (s) => stampSvg.sunmoon(s), metric: 'bothTimeCount',
-      tiers: [{at: 3, xp: 10}, {at: 10, xp: 30}, {at: 30, xp: 80}] },
-
-    // ═══ 专项之印 · specialty (multi-tier)
-    { code: 'full_house', name: '满堂印', sub: '一日所有任务皆打', cat: 'specialty',
-      svg: (s) => stampSvg.star(s), metric: 'fullHouseCount',
-      tiers: [{at: 1, xp: 5}, {at: 5, xp: 15}, {at: 20, xp: 40}, {at: 50, xp: 100}, {at: 100, xp: 250}] },
-    { code: 'new_song', name: '新歌初染', sub: '打新任务的第一次', cat: 'specialty',
-      svg: (s) => stampSvg.boxSolid('新', s), metric: 'newSongCount',
-      tiers: [{at: 1, xp: 5}, {at: 3, xp: 15}, {at: 10, xp: 40}] },
-    { code: 'comeback', name: '复归印', sub: '断而复起', cat: 'specialty',
-      svg: (s) => stampSvg.return2('復', '歸', s), metric: 'comebackCount',
-      tiers: [{at: 1, xp: 10}, {at: 3, xp: 30}, {at: 10, xp: 80}] },
-    { code: 'song_complete', parameterized: true, name: '结课印', sub: '一首歌完成', cat: 'specialty',
-      svg: (s, tier, meta) => stampSvg.scroll('結課', (meta && meta.title) ? escHtml(String(meta.title).slice(0, 6)) : '', s),
-      ruleParam: (ctx) => ctx.songsCompleted.map(sc => ({
-        code: 'song_complete:' + sc.id, tier: 1, xp: 20,
-        meta: { homework_id: sc.id, title: sc.title }
-      })) },
-
-    // ═══ 藏印 · hidden (each own single-tier)
-    { code: 'mystery_1', name: '藏印壹 · 缘', sub: '暗藏于某一次', cat: 'hidden',
-      svg: (s) => stampSvg.mystery('緣', s), metric: 'cumulative', tiers: [{at: 12, xp: 30}] },
-    { code: 'mystery_2', name: '藏印贰 · 遇', sub: '暗藏于某一次', cat: 'hidden',
-      svg: (s) => stampSvg.mystery('遇', s), metric: 'cumulative', tiers: [{at: 42, xp: 60}] },
-    { code: 'mystery_3', name: '藏印叁 · 恒', sub: '暗藏于某一次', cat: 'hidden',
-      svg: (s) => stampSvg.mystery('恆', s), metric: 'cumulative', tiers: [{at: 88, xp: 100}] },
-
-    // ═══ 形制拓展 · shape-diverse bonus seals (fired parallel to main tiers)
-    { code: 'form_chunxin', name: '春信印', sub: '梅花五瓣 · 周末不歇 5 次', cat: 'form',
-      svg: (s) => stampSvg.plumFlower('春', '信', s), metric: 'weekendCount', tiers: [{at: 5, xp: 30}] },
-    { code: 'form_qingfeng', name: '清风徐来', sub: '折扇形 · 夜歌 10 次', cat: 'form',
-      svg: (s) => stampSvg.fan('清風', '徐來', s), metric: 'nightCount', tiers: [{at: 10, xp: 40}] },
-    { code: 'form_xiangyun', name: '祥云歌起', sub: '云头形 · 首次结课', cat: 'form',
-      svg: (s) => stampSvg.cloudHead('祥雲', '歌起', s), metric: 'songsCompletedCount', tiers: [{at: 1, xp: 50}] },
-    { code: 'form_ruyi', name: '如意印', sub: '如意云形 · 昼夜俱到 5 次', cat: 'form',
-      svg: (s) => stampSvg.ruyi('如', '意', s), metric: 'bothTimeCount', tiers: [{at: 5, xp: 40}] },
-    { code: 'form_xinya', name: '新芽印', sub: '柳叶形 · 打过 3 个新任务', cat: 'form',
-      svg: (s) => stampSvg.willowLeaf('新', s), metric: 'newSongCount', tiers: [{at: 3, xp: 30}] },
-    { code: 'form_zhongming', name: '钟鸣歌成', sub: '铜钟形 · 满勤月 1 次', cat: 'form',
-      svg: (s) => stampSvg.bell('鐘鳴', '歌成', s), metric: 'monthFullCount', tiers: [{at: 1, xp: 60}] },
-    { code: 'form_changle', name: '长乐未央', sub: '汉瓦当形 · 累积 200 次', cat: 'form',
-      svg: (s) => stampSvg.tile(['長','樂','未','央'], s), metric: 'cumulative', tiers: [{at: 200, xp: 120}] },
-    { code: 'form_fulu', name: '福禄印', sub: '葫芦形 · 完成 3 首歌', cat: 'form',
-      svg: (s) => stampSvg.gourd('福', '祿', s), metric: 'songsCompletedCount', tiers: [{at: 3, xp: 80}] },
-
-    // ═══ 四君子印 · seasonal (unlocked on full-attendance in specific month)
-    { code: 'junzi_mei', name: '梅印 · 冬', sub: '腊月满勤 · 十二月全打卡', cat: 'junzi',
-      svg: (s) => stampSvg.junziMei(s), metric: 'hadFullDec', tiers: [{at: 1, xp: 100}] },
-    { code: 'junzi_lan', name: '兰印 · 春', sub: '仲春满勤 · 三月全打卡', cat: 'junzi',
-      svg: (s) => stampSvg.junziLan(s), metric: 'hadFullMar', tiers: [{at: 1, xp: 100}] },
-    { code: 'junzi_zhu', name: '竹印 · 夏', sub: '仲夏满勤 · 六月全打卡', cat: 'junzi',
-      svg: (s) => stampSvg.junziZhu(s), metric: 'hadFullJun', tiers: [{at: 1, xp: 100}] },
-    { code: 'junzi_ju', name: '菊印 · 秋', sub: '仲秋满勤 · 九月全打卡', cat: 'junzi',
-      svg: (s) => stampSvg.junziJu(s), metric: 'hadFullSep', tiers: [{at: 1, xp: 100}] },
+      svg: (s) => stampSvg.doublering('滿', '月', s), metric: 'streak', tiers: [{at: 30, xp: 200}] },
+    { code: 'cum_100', name: '百日歌心', sub: '累积打卡 100 次', cat: 'cumulative',
+      svg: (s) => stampSvg.grid4(['百', '日', '歌', '心'], s), metric: 'cumulative', tiers: [{at: 100, xp: 300}] },
+    { code: 'comeback', name: '复归印', sub: '断链后重新回来', cat: 'specialty',
+      svg: (s) => stampSvg.return2('復', '歸', s), metric: 'comebackCount', tiers: [{at: 1, xp: 20}] },
   ];
 
   const STAMP_CAT_LABELS = {
-    streak: '连续之印',
-    cumulative: '累积之印',
-    weekly: '周月之印',
-    time: '时辰之印',
-    specialty: '专项之印',
-    hidden: '藏之印',
-    form: '形制之印',
-    junzi: '四君子印',
+    streak: '连续',
+    cumulative: '累积',
+    specialty: '归来',
   };
 
-  // ═══ Teacher catalog · 老师端 ═══
-  // Teachers earn seals for teaching activity and their students' milestones.
-  // Visually distinguished by a gold glow (via CSS class) + a 「師」 badge.
-  const TEACHER_STAMP_CATALOG = [
-    // ── 授业之印: what she does
-    { code: 't_first_hw', name: '授业开门', sub: '首次布置作业', cat: 't_teach',
-      svg: (s) => stampSvg.box('授', s), metric: 'hwAssignCount', tiers: [{at: 1, xp: 10}] },
-    { code: 't_hw_batch', name: '连布作业', sub: '3 / 10 / 30 / 100 份', cat: 't_teach',
-      svg: (s) => stampSvg.horiz2('授', '业', s), metric: 'hwAssignCount',
-      tiers: [{at: 3, xp: 15}, {at: 10, xp: 40}, {at: 30, xp: 120}, {at: 100, xp: 400}] },
-    { code: 't_songs', name: '一曲成课', sub: '完成 1 / 3 / 10 首歌批注', cat: 't_teach',
-      svg: (s) => stampSvg.scroll('成', '曲', s), metric: 'songsOwned',
-      tiers: [{at: 1, xp: 10}, {at: 3, xp: 40}, {at: 10, xp: 120}] },
-    { code: 't_disciples', name: '弟子门', sub: '关联 1 / 3 / 5 / 10 名学生', cat: 't_teach',
-      svg: (s) => stampSvg.hex('弟', '子', s), metric: 'studentCount',
-      tiers: [{at: 1, xp: 20}, {at: 3, xp: 60}, {at: 5, xp: 150}, {at: 10, xp: 400}] },
-
-    // ── 育徒之印: reflected from students' achievements
-    { code: 't_mirror_streak3', name: '徒得初心', sub: '有 N 位学生打通 3 日', cat: 't_raise',
-      svg: (s) => stampSvg.box('育', s), metric: 'studentTotalStreak3',
-      tiers: [{at: 1, xp: 5}, {at: 3, xp: 20}, {at: 5, xp: 40}] },
-    { code: 't_mirror_streak7', name: '徒过一周', sub: '有 N 位学生连续 7 日', cat: 't_raise',
-      svg: (s) => stampSvg.round2('徒', '週', s), metric: 'studentTotalStreak7',
-      tiers: [{at: 1, xp: 10}, {at: 3, xp: 40}, {at: 5, xp: 80}] },
-    { code: 't_mirror_streak30', name: '育徒满月', sub: '有 N 位学生连续 30 日', cat: 't_raise',
-      svg: (s) => stampSvg.doublering('育', '月', s), metric: 'studentTotalStreak30',
-      tiers: [{at: 1, xp: 50}, {at: 3, xp: 200}, {at: 5, xp: 500}] },
-    { code: 't_mirror_streak100', name: '育徒百日', sub: '有 N 位学生连续 100 日', cat: 't_raise',
-      svg: (s) => stampSvg.grid4(['育', '徒', '百', '日'], s), metric: 'studentTotalStreak100',
-      tiers: [{at: 1, xp: 200}, {at: 3, xp: 800}] },
-    { code: 't_mirror_cum100', name: '徒歌百次', sub: '有 N 位学生累积 100 次', cat: 't_raise',
-      svg: (s) => stampSvg.horiz2('徒', '勤', s), metric: 'studentTotalCum100',
-      tiers: [{at: 1, xp: 30}, {at: 3, xp: 120}, {at: 5, xp: 300}] },
-    { code: 't_mirror_song_complete', name: '徒有所成', sub: '学生完成 1 / 5 / 20 首歌', cat: 't_raise',
-      svg: (s) => stampSvg.scroll('成', '徒', s), metric: 'studentTotalSongComplete',
-      tiers: [{at: 1, xp: 30}, {at: 5, xp: 120}, {at: 20, xp: 400}] },
-    { code: 't_taoli', name: '桃李成蹊', sub: '3 / 5 / 10 名活跃学生', cat: 't_raise',
-      svg: (s) => stampSvg.oval('桃', '李', s), metric: 'studentActiveCount',
-      tiers: [{at: 3, xp: 100}, {at: 5, xp: 300}, {at: 10, xp: 800}] },
-
-    // ── 关怀之印: teacher's daily-care behavior
-    { code: 't_care_visit', name: '巡徒印', sub: '登录看学生 5 / 20 / 50 次', cat: 't_care',
-      svg: (s) => stampSvg.crescent('巡', s), metric: 'studentActiveCount',
-      tiers: [{at: 1, xp: 5}, {at: 3, xp: 15}, {at: 5, xp: 40}] },
-  ];
-
-  const TEACHER_CAT_LABELS = {
-    t_teach: '授业之印',
-    t_raise: '育徒之印',
-    t_care: '关怀之印',
-  };
+  // Teachers no longer earn their own seals — the achievement system is a
+  // student-motivation tool, and giving teachers a parallel game just added
+  // noise. Kept as empty exports so any callsite that iterates them is a
+  // no-op instead of a crash.
+  const TEACHER_STAMP_CATALOG = [];
+  const TEACHER_CAT_LABELS = {};
 
   // ═══ Shop (印肆): items you buy with 宝 ═══
   const SHOP_ITEMS = [
@@ -10142,56 +10111,111 @@
     centerTodayInStrips(list);
   }
 
-  // A small "印谱 · 8 / 30" shelf card at the top of the student home,
-  // with up to 4 recent seal previews and a big tap area. Replaces the
-  // former tiny button hidden in the section title.
+  // Streak hero for the student home. Six seals only; the hero foregrounds
+  // "current streak" as the single high-signal number, the next-goal progress
+  // bar creates the "so close" push, and the mini shelf keeps earned stamps
+  // as a soft trophy row without demanding attention.
+  function nextStampGoal(role) {
+    if (role === 'teacher') return null;
+    const ctx = stampContext();
+    const streak = ctx.streak || 0;
+    const cumulative = ctx.cumulative || 0;
+    const catalog = catalogForRole('student');
+    const earnedCodes = new Set(earnedStamps.map(r => r.stamp_code));
+    // Priority order: first day → 3 → 7 → 30 → cum 100.
+    const path = ['first_day', 'streak_3', 'streak_7', 'streak_30', 'cum_100'];
+    for (const code of path) {
+      if (earnedCodes.has(code)) continue;
+      const def = catalog.find(x => x.code === code);
+      if (!def) continue;
+      const target = def.tiers[0].at;
+      const cur = def.metric === 'streak' ? streak : cumulative;
+      if (cur >= target) continue; // fallthrough (should be caught by earnedCodes but stay safe)
+      return {
+        code, def, name: def.name, cur, target,
+        pct: Math.max(0, Math.min(1, cur / target)),
+        remaining: Math.max(0, target - cur),
+        metric: def.metric,
+      };
+    }
+    return null; // all path stamps earned — user is a legend
+  }
+
   function renderStampShelfCard(opts) {
     opts = opts || {};
     const role = opts.role || userRole || 'student';
     const catalog = catalogForRole(role);
-    const totalStamps = catalog.reduce((n, s) => n + (s.parameterized ? 0 : 1), 0);
+    // Teacher: no game, minimal card (unused now — kept for preview mode).
+    if (role === 'teacher') {
+      return `<div class="stamp-shelf teacher-view" onclick="openStampBook()">
+        <div class="stamp-shelf-left">
+          <div class="stamp-shelf-title">学生的印谱</div>
+          <div class="stamp-shelf-count" style="font-size:12px;">点学生名字可以看 ta 的成就</div>
+        </div>
+        <div class="stamp-shelf-arrow">›</div>
+      </div>`;
+    }
+    const ctx = stampContext();
+    const streak = ctx.streak || 0;
+    const cumulative = ctx.cumulative || 0;
     const distinctEarned = new Set(earnedStamps.map(r => r.stamp_code)).size;
-    const balance = computeBalance(earnedStamps, shopPurchases);
-    const totalEarned = computeTotalEarned(earnedStamps);
-    const unclaimedCount = computeUnclaimedCount(earnedStamps);
-    const title = titleFor(totalEarned, role);
-    const recent = [...earnedStamps]
-      .sort((a, b) => (b.awarded_at || '').localeCompare(a.awarded_at || ''))
-      .slice(0, 4);
-    const seals = recent.map(row => {
-      const def = catalog.find(s => s.code === row.stamp_code
-        || (s.parameterized && row.stamp_code.startsWith(s.code + ':')));
-      if (!def) return '';
-      return `<div class="stamp-shelf-seal">${def.svg(44, row.tier || 1, row.meta || {})}</div>`;
+    const totalStamps = catalog.length;
+    const goal = nextStampGoal(role);
+    const goalSvg = goal ? goal.def.svg(48, 1, {}) : '';
+    // Streak semantics: 0 = "start today" gentle push; 1-2 = "get to 3-day"; ≥3 = "keep it alive".
+    const heroLead = streak === 0
+      ? (cumulative === 0 ? '开始今天的第一次打卡' : '今天没打过 · 一次就够 · 重新开始')
+      : streak < 3
+      ? '继续 · 三日印很近了'
+      : streak < 30
+      ? '连续 · 保持这个节奏'
+      : '满月了 · 每天都在长';
+    const flame = streak >= 7 ? '🔥' : streak >= 3 ? '🔆' : streak >= 1 ? '·' : '';
+    const streakHtml = `
+      <div class="streak-hero ${streak === 0 ? 'cold' : streak >= 7 ? 'hot' : 'warm'}">
+        <div class="streak-hero-flame">${flame}</div>
+        <div class="streak-hero-num" id="streak-hero-num">${streak}</div>
+        <div class="streak-hero-unit">天</div>
+        <div class="streak-hero-lead">${heroLead}</div>
+      </div>`;
+    let goalHtml = '';
+    if (goal) {
+      goalHtml = `
+        <div class="streak-goal">
+          <div class="streak-goal-svg">${goalSvg}</div>
+          <div class="streak-goal-body">
+            <div class="streak-goal-name">${escHtml(goal.name)} · 还差 <b>${goal.remaining}</b> ${goal.metric === 'streak' ? '天' : '次'}</div>
+            <div class="streak-goal-bar"><div class="streak-goal-bar-fill" style="width:${Math.round(goal.pct * 100)}%"></div></div>
+            <div class="streak-goal-hint">${goal.cur} / ${goal.target}</div>
+          </div>
+        </div>`;
+    } else {
+      goalHtml = `<div class="streak-goal all-done">这条路上的印章全拿了 · 你是了不起的</div>`;
+    }
+    // Mini shelf: up to 5 earned seals (each in the simplified catalog), muted
+    // trophy row, no numbers to compete with the hero.
+    const earnedInCatalog = catalog.filter(def => earnedStamps.some(r => r.stamp_code === def.code));
+    const seals = earnedInCatalog.slice(0, 6).map(def => {
+      const r = earnedStamps.find(x => x.stamp_code === def.code) || {};
+      return `<div class="stamp-shelf-seal">${def.svg(40, r.tier || 1, r.meta || {})}</div>`;
     }).join('');
-    const empty = !distinctEarned;
-    const teaserSeal = empty
-      ? `<div class="stamp-shelf-seal empty">${stampSvg.box('印', 44)}</div>`
+    const shelfHtml = distinctEarned
+      ? `<div class="streak-shelf" onclick="event.stopPropagation();openStampBook()">
+          <div class="streak-shelf-label">已得 · ${distinctEarned}/${totalStamps}</div>
+          <div class="streak-shelf-seals">${seals}</div>
+          <div class="streak-shelf-arrow">›</div>
+        </div>`
       : '';
-    const unclaimedPill = unclaimedCount > 0
-      ? `<span class="unclaimed-pill">· ⚡ ${unclaimedCount} 待收</span>`
-      : '';
-    const line = empty
-      ? '尚未启印 · 首次打卡即得'
-      : `<b>${distinctEarned}</b> / ${totalStamps} · <b>${balance}</b> 宝${unclaimedPill}`;
-    return `<div class="stamp-shelf" onclick="openStampBook()">
-      <div class="stamp-shelf-left">
-        <div class="stamp-shelf-title">印 谱 · <span class="stamp-shelf-title-badge">${title}</span></div>
-        <div class="stamp-shelf-count">${line}</div>
-      </div>
-      <div class="stamp-shelf-strip">${empty ? teaserSeal : seals}</div>
-      <div class="stamp-shelf-arrow">›</div>
+    return `<div class="streak-card">
+      ${streakHtml}
+      ${goalHtml}
+      ${shelfHtml}
     </div>`;
   }
 
-  // Teacher home doesn't use the homework shelf, so provide a stand-alone
-  // container that renderTeacherStudentsSection can call.
-  function updateTeacherStampShelf() {
-    const el = document.getElementById('teacher-stamp-shelf');
-    if (!el) return;
-    if (userRole !== 'teacher') { el.innerHTML = ''; return; }
-    el.innerHTML = renderStampShelfCard({ role: 'teacher' });
-  }
+  // Teachers no longer earn seals. Keep this as a no-op so any lingering
+  // caller (e.g. role-swap on login) doesn't crash.
+  function updateTeacherStampShelf() { /* removed */ }
 
   function centerTodayInStrips(root) {
     const strips = (root || document).querySelectorAll('.hw-strip');
@@ -10257,13 +10281,37 @@
       </div>`;
   }
 
-  async function toggleTodayCheck(homeworkId) {
+  async function toggleTodayCheck(homeworkId, evt) {
     const today = todayDateStr();
     const existing = (homeworkChecksByHw[homeworkId] || {})[today];
     const nextDone = !(existing && existing.completed);
+    // Immediate visual feedback: ripple on the tapped button so the click
+    // feels alive before the network round-trip. Grab the streak-num pre-check
+    // so we know when it changed.
+    if (nextDone && evt && evt.currentTarget) {
+      evt.currentTarget.classList.add('hw-check-ripple');
+      setTimeout(() => evt.currentTarget && evt.currentTarget.classList.remove('hw-check-ripple'), 700);
+      try { playChopSound && playChopSound(); } catch(_) {}
+    }
+    const preStreak = (stampContext().streak) || 0;
     await upsertCheck(homeworkId, today, { completed: nextDone, completed_at: nextDone ? new Date().toISOString() : null });
     await loadHomeworkAll();
     renderStudentHomeworkSection();
+    if (nextDone) {
+      // Bump the freshly-rendered streak number if it grew.
+      const postStreak = (stampContext().streak) || 0;
+      if (postStreak > preStreak) {
+        requestAnimationFrame(() => {
+          const el = document.getElementById('streak-hero-num');
+          if (el) {
+            el.classList.add('animate-bump');
+            setTimeout(() => el.classList.remove('animate-bump'), 500);
+          }
+        });
+      }
+      // Any new stamps that fall out of this check show up as reveals.
+      evaluateStamps();
+    }
   }
 
   async function upsertCheck(homeworkId, date, fields) {
@@ -10680,6 +10728,9 @@
   async function toggleDayCheck(hwId, date) {
     const prev = (homeworkChecksByHw[hwId] || {})[date] || {};
     const next = !prev.completed;
+    // Compute streak BEFORE we mutate homeworkChecksByHw so we can detect
+    // whether this check bumped it.
+    const preStreak = (stampContext().streak) || 0;
     // ── Optimistic update: apply locally + re-render before the network call
     if (!homeworkChecksByHw[hwId]) homeworkChecksByHw[hwId] = {};
     homeworkChecksByHw[hwId][date] = Object.assign({}, prev, {
@@ -10696,6 +10747,15 @@
         if (cell) { cell.classList.add('bloom'); setTimeout(() => cell.classList.remove('bloom'), 500); }
         playBloomSound();
         celebrateAt(cell || document.querySelector(`#hw-day-${hwId}-${date}`));
+        // Streak bump: if today's check pushed the streak, pop the hero number.
+        const postStreak = (stampContext().streak) || 0;
+        if (postStreak > preStreak) {
+          const el = document.getElementById('streak-hero-num');
+          if (el) {
+            el.classList.add('animate-bump');
+            setTimeout(() => el.classList.remove('animate-bump'), 500);
+          }
+        }
       });
     }
     // Sync in background; revert on error
@@ -11641,14 +11701,12 @@
     // Tweak the song-search placeholder for students (no other students concept)
     const searchEl = document.getElementById('project-search');
     if (searchEl) searchEl.placeholder = userRole === 'student' ? '搜索歌曲…' : '搜索歌曲、学生…';
-    const teacherStampShelf = document.getElementById('teacher-stamp-shelf');
     if (userRole === 'teacher') {
       badge.textContent = '老师'; badge.style.display = '';
       if (subtitle) subtitle.textContent = '给学生标注、留作业';
       if (assignBtn) assignBtn.style.display = '';
       if (studentTeachersSec) studentTeachersSec.style.display = 'none';
       if (studentHwSec) studentHwSec.style.display = 'none';
-      if (teacherStampShelf) { teacherStampShelf.style.display = ''; updateTeacherStampShelf(); }
     } else if (userRole === 'student') {
       badge.textContent = '学生'; badge.style.display = '';
       if (subtitle) subtitle.textContent = '练习、打卡、复习老师的批注';
