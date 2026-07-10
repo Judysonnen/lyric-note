@@ -2040,8 +2040,10 @@
     .sv-hw-card-status.mastered {
       background: rgba(185,41,35,0.10); color: #B92923;
       font-family: "Kaiti SC", "STKaiti", serif; font-weight: 700;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.15em; cursor: pointer;
+      transition: background .15s;
     }
+    .sv-hw-card-status.mastered:hover { background: rgba(185,41,35,0.18); }
     .sv-hw-stamped {
       display: inline-block;
       font-family: "Kaiti SC", "STKaiti", serif;
@@ -11360,15 +11362,18 @@
         groupDoneDays += doneDays; groupTotalDays += days.length;
         const pct = days.length ? Math.round((doneDays / days.length) * 100) : 0;
         const mastery = h.mastery_state || 'active';
-        let statusLabel, statusCls;
-        if (mastery === 'mastered') { statusLabel = '已成'; statusCls = 'mastered'; }
+        let statusLabel, statusCls, statusIsMastery = false;
+        if (mastery === 'mastered') { statusLabel = '已成'; statusCls = 'mastered'; statusIsMastery = true; }
         else if (g.archived) { statusLabel = '已归档'; statusCls = 'done'; }
         else if (h.end_date < today) { statusLabel = '已结束'; statusCls = 'done'; }
         else if (h.start_date > today) { statusLabel = '未开始'; statusCls = 'future'; }
         else { statusLabel = '进行中'; statusCls = 'active'; }
         const minutesLabel = h.daily_minutes ? ` · 每天 ${h.daily_minutes} 分钟` : '';
+        // When the card is 已成 the status label is the mastery state itself —
+        // no separate ✓ 掌握 chip. For other states we still show the little
+        // mastery-mark chip so the teacher has a place to tag them.
         const masteryBadge = mastery === 'mastered'
-          ? `<span class="sv-hw-mastery-badge mastered" onclick="event.stopPropagation();openMasteryMenu('${h.id}')" title="老师已标：掌握了${h.mastery_note ? ' — ' + escHtml(h.mastery_note) : ''}">✓ 掌握</span>`
+          ? ''
           : mastery === 'keep_practicing'
           ? `<span class="sv-hw-mastery-badge keep" onclick="event.stopPropagation();openMasteryMenu('${h.id}')" title="老师已标：继续练">↻ 继续</span>`
           : `<span class="sv-hw-mastery-badge unset" onclick="event.stopPropagation();openMasteryMenu('${h.id}')" title="标记完成情况">· 标</span>`;
@@ -11392,7 +11397,7 @@
               </div>
               <div class="sv-hw-card-badges">
                 ${masteryBadge}
-                <span class="sv-hw-card-status ${statusCls}">${statusLabel}</span>
+                <span class="sv-hw-card-status ${statusCls}"${statusIsMastery ? ` onclick="event.stopPropagation();openMasteryMenu('${h.id}')" title="点开可以改状态"` : ''}>${statusLabel}</span>
               </div>
             </div>
             ${mastery === 'mastered' ? '' : `<div class="sv-hw-card-prog"><div style="width:${pct}%"></div></div>`}
