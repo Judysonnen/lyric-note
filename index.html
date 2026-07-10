@@ -10571,8 +10571,12 @@
         if (error) throw error;
       }
       window.hwCopiedFromBatchId = null;
-      closeCreateHomework();
+      // Reload + re-render BEFORE closing the modal so the new tasks are
+      // already painted in the group by the time the modal fades out. If we
+      // close first, there's a beat where old-state renders under the modal
+      // and the fresh row flashes in below — that's the "一闪而过" she saw.
       await refreshHomeworkUI();
+      closeCreateHomework();
     } catch(e) {
       err.textContent = '失败：' + (e.message || '未知');
     } finally {
