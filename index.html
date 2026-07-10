@@ -2046,9 +2046,8 @@
     .sv-hw-card-status.mastered:hover { background: rgba(185,41,35,0.18); }
     .sv-hw-stamped {
       display: inline-block;
-      font-family: "Kaiti SC", "STKaiti", serif;
-      color: #B92923; letter-spacing: 0.08em;
-      font-weight: 600; font-size: 12px;
+      color: #B92923; font-size: 12px; font-weight: 500;
+      font-variant-numeric: tabular-nums;
     }
     .sv-hw-card-prog { margin-top: 10px; height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; }
     .sv-hw-card-prog > div { height: 100%; background: var(--primary); transition: width .3s; }
@@ -10225,7 +10224,7 @@
         return `
           <div class="hw-mastered-row" onclick="openHomeworkDrawerForStudent('${h.id}','${todayDateStr()}')">
             <div class="hw-mastered-row-title">✓ ${escHtml(h.title)}</div>
-            <div class="hw-mastered-row-meta">${stampedDate ? stampedDate + ' 老师亲手盖章 · ' : ''}${h.start_date} → ${h.end_date}${minutes}</div>
+            <div class="hw-mastered-row-meta">${stampedDate ? stampedDate + ' · ' : ''}${h.start_date} → ${h.end_date}${minutes}</div>
             ${note}
           </div>`;
       }).join('');
@@ -11387,7 +11386,7 @@
         // Mastered rows swap the running-day meta for the moment they were
         // marked, which is the actual milestone to celebrate.
         const stampedLine = (mastery === 'mastered' && h.mastery_marked_at)
-          ? `<span class="sv-hw-stamped">${escHtml(h.mastery_marked_at.slice(0, 10))} 老师亲手盖章</span>`
+          ? `<span class="sv-hw-stamped">${escHtml(h.mastery_marked_at.slice(0, 10))}</span>`
           : '';
         const metaBottom = (mastery === 'mastered')
           ? stampedLine
