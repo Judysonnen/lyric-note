@@ -9752,10 +9752,14 @@
           .from('homework_batches')
           .select('*');
         for (const b of (batches || [])) homeworkBatchesById[b.id] = b;
-        // Reconcile: mark homework rows as archived if their batch is archived.
+        // Reconcile: batches.archived_at is the source of truth. When a batch
+        // exists we sync homework.archived_at to match (including clearing it
+        // on unarchive, which the legacy per-row column would otherwise pin).
         for (const h of (hw || [])) {
-          const b = h.batch_id ? homeworkBatchesById[h.batch_id] : null;
-          if (b && b.archived_at && !h.archived_at) h.archived_at = b.archived_at;
+          if (h.batch_id) {
+            const b = homeworkBatchesById[h.batch_id];
+            if (b) h.archived_at = b.archived_at || null;
+          }
         }
       } catch (_) { /* batches table not migrated yet */ }
 
@@ -10005,7 +10009,7 @@
     for (const h of homeworkAsStudent) {
       if (h.batch_id) {
         const b = homeworkBatchesById[h.batch_id];
-        if (b && b.archived_at && !h.archived_at) h.archived_at = b.archived_at;
+        if (b) h.archived_at = b.archived_at || null;
       }
     }
     const liveHomework = homeworkAsStudent.filter(h => !h.archived_at);
@@ -11103,9 +11107,10 @@
       rows.sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
       const first = rows[0];
       const batch = first.batch_id ? homeworkBatchesById[first.batch_id] : null;
-      // batches.archived_at is the source of truth once migration 018+ is in.
-      // Fall back to the legacy per-row field so pre-migration snapshots still work.
-      const archivedAt = (batch && batch.archived_at) || first.archived_at || '';
+      // batches.archived_at is the source of truth. When a batch row exists,
+      // its archived_at (or null) fully determines archived state — legacy
+      // homework.archived_at is only consulted for orphan rows without a batch.
+      const archivedAt = batch ? (batch.archived_at || '') : (first.archived_at || '');
       const startDate = batch ? batch.start_date : rows.reduce((m, r) => r.start_date < m ? r.start_date : m, first.start_date);
       const endDate   = batch ? batch.end_date   : rows.reduce((m, r) => r.end_date > m ? r.end_date : m, first.end_date);
       return {
@@ -11357,8 +11362,9 @@
   function confirmCopyPreviousForHw() {
     const picked = copyPrevRows.filter(r => copyPrevSelection[r.id]);
     if (!picked.length) return;
-    // Drop the empty placeholder task if the create-homework modal is fresh.
-    if (window.hwTasks.length === 1 && !window.hwTasks[0].title.trim()) window.hwTasks.length = 0;
+    // Drop every blank-title placeholder so the copied tasks replace them
+    // instead of appearing below rows the teacher hasn't filled in.
+    window.hwTasks = window.hwTasks.filter(t => (t.title || '').trim());
     for (const r of picked) {
       window.hwTasks.push({
         title: r.title,
@@ -11427,7 +11433,8 @@
   function confirmTemplatesPickerForHw() {
     const picked = homeworkTemplates.filter(t => templatesPickerSelection[t.id]);
     if (!picked.length) return;
-    if (window.hwTasks.length === 1 && !window.hwTasks[0].title.trim()) window.hwTasks.length = 0;
+    // Same replace-blanks behavior as copy-previous.
+    window.hwTasks = window.hwTasks.filter(t => (t.title || '').trim());
     for (const t of picked) {
       window.hwTasks.push({
         title: t.title,
