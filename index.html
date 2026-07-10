@@ -2125,67 +2125,6 @@
     }
     .sv-ach-open:hover { background: var(--primary); color: white; }
 
-    /* Mastery-hero: shared shape for teacher's 练成 tab and student's 练到位了 pane */
-    .mastery-hero {
-      position: relative; overflow: hidden;
-      background: #FEFBF3; border: 1px solid rgba(185,41,35,0.22);
-      border-radius: 14px; padding: 22px 22px 18px;
-      margin-bottom: 16px;
-    }
-    .mastery-hero::before {
-      content: "已成"; position: absolute; right: -14px; bottom: -32px;
-      transform: rotate(-14deg);
-      font-family: "Kaiti SC", "STKaiti", "Songti SC", serif;
-      font-size: 128px; font-weight: 700; color: #B92923;
-      opacity: 0.06; letter-spacing: 0.02em;
-      pointer-events: none; line-height: 0.9;
-    }
-    .mastery-hero-lead {
-      font-family: "Kaiti SC", "STKaiti", serif;
-      font-size: 12.5px; color: #7A5A2A; letter-spacing: 0.14em;
-      margin-bottom: 4px;
-    }
-    .mastery-hero-count {
-      display: flex; align-items: baseline; gap: 8px;
-    }
-    .mastery-hero-num {
-      font-family: "Noto Serif SC", "Songti SC", serif;
-      font-size: 52px; font-weight: 700; line-height: 1;
-      color: #B92923; font-variant-numeric: tabular-nums;
-      transition: transform .28s cubic-bezier(.34,1.56,.64,1);
-    }
-    .mastery-hero-unit {
-      font-size: 15px; color: var(--text-soft); font-weight: 500;
-      align-self: flex-end; margin-bottom: 4px;
-    }
-    .mastery-hero-title {
-      font-family: "Kaiti SC", "STKaiti", serif;
-      font-size: 15px; color: #7A2019; letter-spacing: 0.08em;
-      font-weight: 600; margin-top: 10px;
-    }
-    .mastery-hero-title-sub {
-      font-family: -apple-system, "PingFang SC", sans-serif;
-      font-size: 12px; color: var(--muted); letter-spacing: 0.05em;
-      margin-top: 3px; font-weight: 400;
-    }
-    .mastery-hero-next {
-      margin-top: 12px; padding-top: 10px;
-      border-top: 1px dashed rgba(185,41,35,0.18);
-      font-size: 12px; color: var(--muted); letter-spacing: 0.03em;
-    }
-    .mastery-hero-next b {
-      color: #B92923; font-weight: 600;
-      font-family: "Kaiti SC", "STKaiti", serif;
-      letter-spacing: 0.08em;
-    }
-    .mastery-hero-bar {
-      margin-top: 8px; height: 6px; background: rgba(139,115,85,0.15);
-      border-radius: 999px; overflow: hidden;
-    }
-    .mastery-hero-bar > div {
-      height: 100%; background: linear-gradient(90deg, #E29742, #B92923);
-      border-radius: 999px; transition: width .8s cubic-bezier(.4,0,.2,1);
-    }
     .sv-mastered-wall { display: flex; flex-direction: column; gap: 10px; }
     .sv-mastered-row {
       background: #FEFBF3; border: 1px solid rgba(185,41,35,0.22);
@@ -10287,7 +10226,6 @@
       masteredHtml = `
         <details class="hw-mastered-details">
           <summary>✓ 练到位了 · <b>${masteredItems.length}</b> 条</summary>
-          ${renderMasteryHero(masteredItems.length, 'student')}
           <div class="hw-mastered-list">${rows}</div>
         </details>`;
     }
@@ -11288,7 +11226,7 @@
       } else {
         const sorted = [...masteredStudentHw].sort((a, b) =>
           (b.mastery_marked_at || '').localeCompare(a.mastery_marked_at || ''));
-        bodyHtml = renderMasteryHero(masteredStudentHw.length, 'teacher') + `<div class="sv-mastered-wall">` + sorted.map(h => {
+        bodyHtml = `<div class="sv-mastered-wall">` + sorted.map(h => {
           const batch = h.batch_id ? homeworkBatchesById[h.batch_id] : null;
           const groupLabel = (batch && (batch.label || formatHwLabelAuto(batch.start_date, batch.end_date))) || `${h.start_date} → ${h.end_date}`;
           const markedDate = (h.mastery_marked_at || '').slice(0, 10);
@@ -11347,44 +11285,6 @@
     }
 
     view.innerHTML = headerHtml + tabsHtml + bodyHtml;
-  }
-
-  // Mastery milestone ladder. Same rungs for teacher and student; the
-  // difference is the framing copy (are you the one accumulating wins, or
-  // the one accumulating polished students). Keeps the reward cadence
-  // dense at the start (1, 3, 5, 10) so the first weeks always have a
-  // near-term goal, then widens.
-  const MASTERY_MILESTONES = [
-    { at: 1,   name: '头一件', sub: '从零到一' },
-    { at: 3,   name: '三件',   sub: '有形了' },
-    { at: 5,   name: '五件',   sub: '走进门' },
-    { at: 10,  name: '十件',   sub: '见了成色' },
-    { at: 25,  name: '廿五件', sub: '有底子' },
-    { at: 50,  name: '五十件', sub: '得心应手' },
-    { at: 100, name: '百件',   sub: '一家之言' },
-  ];
-  function renderMasteryHero(count, role) {
-    let cur = null, next = null;
-    for (const m of MASTERY_MILESTONES) {
-      if (count >= m.at) cur = m;
-      else { next = m; break; }
-    }
-    const lead = role === 'teacher' ? '你亲手盖章的作业' : '你练到位了的练习';
-    const curBlock = cur
-      ? `<div class="mastery-hero-title">「${cur.name}」<span class="mastery-hero-title-sub">${cur.sub}</span></div>`
-      : '';
-    const nextBlock = next
-      ? `<div class="mastery-hero-next">再练稳 <b>${next.at - count}</b> 件 → 「${next.name}」<div class="mastery-hero-bar"><div style="width:${Math.round((count / next.at) * 100)}%"></div></div></div>`
-      : `<div class="mastery-hero-next">全部登顶 · 一家之言</div>`;
-    return `<div class="mastery-hero">
-      <div class="mastery-hero-lead">${escHtml(lead)}</div>
-      <div class="mastery-hero-count">
-        <span class="mastery-hero-num">${count}</span>
-        <span class="mastery-hero-unit">件</span>
-      </div>
-      ${curBlock}
-      ${nextBlock}
-    </div>`;
   }
 
   function computeHwGroups(studentHw) {
