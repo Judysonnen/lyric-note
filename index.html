@@ -1884,6 +1884,17 @@
     }
     .hw-rail-search:focus { border-color: var(--primary); }
     .hw-rail-search::placeholder { color: var(--muted); }
+    .hw-rail-skeleton { padding: 4px 6px; display: flex; flex-direction: column; gap: 8px; }
+    .hw-rail-skeleton-row {
+      height: 32px; border-radius: 8px;
+      background: linear-gradient(90deg, rgba(139,115,85,0.06) 0%, rgba(139,115,85,0.12) 50%, rgba(139,115,85,0.06) 100%);
+      background-size: 200% 100%;
+      animation: hw-rail-skeleton-shimmer 1.4s ease-in-out infinite;
+    }
+    @keyframes hw-rail-skeleton-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
     .hw-rail-group { margin-bottom: 14px; }
     .hw-rail-group-label { font-size: 10px; color: var(--muted); letter-spacing: 0.1em; padding: 0 6px 6px; display: flex; align-items: center; gap: 6px; }
     .hw-rail-group-label .hw-rail-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--primary); }
@@ -9830,6 +9841,10 @@
       if (payload.v === 2) {
         homeworkBatchesById = payload.homeworkBatchesById || {};
         myStudents = payload.myStudents || [];
+        // If the cache actually has students we can trust that shape for the
+        // first paint; treat it as "loaded" so the empty-state hint doesn't
+        // flash before the network confirms.
+        if (myStudents.length) myStudentsLoaded = true;
       }
       return true;
     } catch(_) { return false; }
@@ -9882,7 +9897,13 @@
       });
     }
     myStudents.sort((a, b) => b.songCount - a.songCount);
+    myStudentsLoaded = true;
   }
+  // False until the first network confirmation of myStudents has landed.
+  // Used by renderTeacherStudentsSection to distinguish "we genuinely have
+  // zero students → show the onboarding hint" from "we're still loading →
+  // show a soft placeholder".
+  let myStudentsLoaded = false;
 
   async function refreshHomeworkUI() {
     if (!cloudUser) {
@@ -9932,6 +9953,19 @@
     if (cntEl) cntEl.textContent = myStudents.length || '';
     if (searchEl) searchEl.style.display = myStudents.length >= 5 ? '' : 'none';
     if (!myStudents.length) {
+      // Don't show the "怎么开始" guide until the network confirms there
+      // really are no students — otherwise it flashes for a beat every time
+      // a returning teacher opens the page before myStudents has been
+      // hydrated.
+      if (!myStudentsLoaded) {
+        list.innerHTML = `
+          <div class="hw-rail-skeleton">
+            <div class="hw-rail-skeleton-row"></div>
+            <div class="hw-rail-skeleton-row"></div>
+            <div class="hw-rail-skeleton-row"></div>
+          </div>`;
+        return;
+      }
       list.innerHTML = `
         <div style="padding:14px 8px;font-size:12px;color:var(--muted);line-height:1.7;">
           <div style="color:var(--text-soft);font-weight:600;margin-bottom:8px;font-size:12px;">怎么开始</div>
