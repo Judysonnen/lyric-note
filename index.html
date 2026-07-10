@@ -2028,6 +2028,61 @@
     .sv-hw-card-status.future { background: #F3F4F6; color: var(--muted); }
     .sv-hw-card-prog { margin-top: 10px; height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; }
     .sv-hw-card-prog > div { height: 100%; background: var(--primary); transition: width .3s; }
+    .sv-hw-card { position: relative; }
+    .sv-hw-card::before {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px; border-radius: 12px 0 0 12px; background: transparent;
+      transition: background .15s;
+    }
+    .sv-hw-card.mastery-mastered::before { background: #10B981; }
+    .sv-hw-card.mastery-keep_practicing::before { background: #F59E0B; }
+    .sv-hw-card-badges {
+      display: flex; align-items: center; gap: 6px; flex-shrink: 0;
+    }
+    .sv-hw-mastery-badge {
+      font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 999px;
+      cursor: pointer; letter-spacing: .05em; user-select: none;
+      transition: all .12s; border: 1px solid transparent;
+    }
+    .sv-hw-mastery-badge.unset {
+      background: transparent; color: var(--muted); border-color: var(--border);
+    }
+    .sv-hw-mastery-badge.unset:hover { border-color: var(--primary); color: var(--primary); }
+    .sv-hw-mastery-badge.mastered { background: #ECFDF5; color: #047857; }
+    .sv-hw-mastery-badge.keep { background: #FFFBEB; color: #B45309; }
+    .sv-hw-version-badge {
+      display: inline-block; font-size: 10.5px; font-weight: 600;
+      padding: 1px 6px; border-radius: 4px; margin-left: 6px;
+      background: rgba(168,77,53,0.08); color: var(--primary);
+      letter-spacing: .04em; vertical-align: middle;
+    }
+
+    .sv-ach-summary {
+      display: flex; align-items: baseline; justify-content: space-between;
+      padding: 4px 4px 14px; border-bottom: 1px dashed var(--border); margin-bottom: 18px;
+    }
+    .sv-ach-count { font-size: 15px; color: var(--text); }
+    .sv-ach-count b { font-size: 22px; font-weight: 700; color: var(--primary); margin-right: 2px; }
+    .sv-ach-hint { font-size: 12px; color: var(--muted); letter-spacing: .1em; }
+    .sv-ach-recent {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+      gap: 14px; margin-bottom: 22px;
+    }
+    .sv-ach-chip { text-align: center; }
+    .sv-ach-chip-svg {
+      display: flex; justify-content: center; align-items: center;
+      aspect-ratio: 1; margin-bottom: 6px;
+    }
+    .sv-ach-chip-svg svg { width: 64px; height: 64px; }
+    .sv-ach-chip-name { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .sv-ach-chip-date { font-size: 10.5px; color: var(--muted); margin-top: 2px; letter-spacing: .05em; }
+    .sv-ach-cta { text-align: center; padding: 12px 0 4px; }
+    .sv-ach-open {
+      padding: 10px 24px; background: var(--card); border: 1px solid var(--primary);
+      color: var(--primary); border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit; transition: all .15s;
+    }
+    .sv-ach-open:hover { background: var(--primary); color: white; }
 
     .sv-song-list { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
     .sv-song-row {
@@ -2112,6 +2167,28 @@
     .hw-archive-row:hover { border-color: var(--primary); }
     .hw-archive-row-title { font-size: 13px; color: var(--text); font-weight: 500; }
     .hw-archive-row-meta { font-size: 11px; color: var(--muted); margin-top: 2px; }
+    .hw-mastered-details {
+      margin-top: 18px; padding-top: 12px; border-top: 1px dashed var(--border);
+    }
+    .hw-mastered-details > summary {
+      cursor: pointer; font-size: 13px; color: #047857; padding: 6px 0;
+      user-select: none; list-style: none; font-weight: 600;
+    }
+    .hw-mastered-details > summary::-webkit-details-marker { display: none; }
+    .hw-mastered-details > summary:hover { color: #065F46; }
+    .hw-mastered-details[open] > summary { margin-bottom: 10px; }
+    .hw-mastered-list { display: flex; flex-direction: column; gap: 8px; }
+    .hw-mastered-row {
+      background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px;
+      padding: 10px 12px; cursor: pointer; transition: all .12s;
+    }
+    .hw-mastered-row:hover { border-color: #10B981; transform: translateY(-1px); }
+    .hw-mastered-row-title { font-size: 13.5px; color: #065F46; font-weight: 600; }
+    .hw-mastered-row-meta { font-size: 11px; color: #047857; margin-top: 3px; opacity: .8; }
+    .hw-mastered-row-note {
+      font-size: 12px; color: #047857; margin-top: 6px; font-style: italic;
+      padding-top: 6px; border-top: 1px dashed #A7F3D0;
+    }
     .hw-today-card-head {
       display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
       margin-bottom: 10px;
@@ -3139,6 +3216,84 @@
       cursor: pointer; font-family: inherit; transition: all .12s;
     }
     .hw-date-preset:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .hw-label-in {
+      width: 100%; padding: 9px 12px; background: white;
+      border: 1px solid var(--border); border-radius: 6px;
+      font-family: inherit; font-size: 13px; color: var(--text);
+      box-sizing: border-box;
+    }
+    .hw-label-in:focus { border-color: var(--primary); outline: none; }
+    .hw-label-hint { font-size: 11px; color: var(--muted); margin-top: 5px; }
+    .hw-toolbar {
+      display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 12px;
+    }
+    .hw-toolbar-btn {
+      padding: 7px 12px; background: white; border: 1px solid var(--border);
+      border-radius: 6px; font-size: 12.5px; color: var(--text-soft);
+      cursor: pointer; font-family: inherit; transition: all .12s;
+    }
+    .hw-toolbar-btn:hover:not([disabled]) { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+    .hw-toolbar-btn[disabled] { opacity: .45; cursor: not-allowed; }
+    .mastery-choices { display: flex; flex-direction: column; gap: 8px; }
+    .mastery-choice {
+      display: grid; grid-template-columns: 32px 1fr; gap: 4px 12px;
+      padding: 12px 14px; background: white; border: 1px solid var(--border);
+      border-radius: 10px; cursor: pointer; font-family: inherit; text-align: left;
+      transition: all .12s;
+    }
+    .mastery-choice:hover { border-color: var(--primary); background: var(--primary-light); }
+    .mastery-choice.selected { border-color: var(--primary); background: var(--primary-light); }
+    .mastery-choice[data-state="mastered"].selected { border-color: #10B981; background: #ECFDF5; }
+    .mastery-choice[data-state="keep_practicing"].selected { border-color: #F59E0B; background: #FFFBEB; }
+    .mastery-choice-icon {
+      grid-row: 1 / 3; align-self: center; font-size: 20px; font-weight: 700;
+      text-align: center; color: var(--text-soft);
+    }
+    .mastery-choice[data-state="mastered"] .mastery-choice-icon { color: #10B981; }
+    .mastery-choice[data-state="keep_practicing"] .mastery-choice-icon { color: #F59E0B; }
+    .mastery-choice-label { font-size: 14px; font-weight: 600; color: var(--text); }
+    .mastery-choice-sub { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+    .copy-prev-item, .template-picker-row {
+      display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px;
+      background: white; border: 1px solid var(--border); border-radius: 8px;
+      cursor: pointer; transition: border-color .12s;
+    }
+    .copy-prev-item:hover, .template-picker-row:hover { border-color: var(--primary); }
+    .copy-prev-item input[type="checkbox"],
+    .template-picker-row input[type="checkbox"] {
+      margin-top: 3px; accent-color: var(--primary); flex-shrink: 0;
+    }
+    .copy-prev-item-body, .template-picker-row-body { flex: 1; min-width: 0; }
+    .copy-prev-item-title, .template-picker-row-title {
+      font-size: 13.5px; font-weight: 600; color: var(--text);
+    }
+    .copy-prev-item-meta, .template-picker-row-meta {
+      font-size: 11.5px; color: var(--muted); margin-top: 3px;
+    }
+    .copy-prev-item-badge {
+      font-size: 10px; font-weight: 600; letter-spacing: .05em;
+      padding: 2px 6px; border-radius: 4px; margin-left: 6px;
+    }
+    .copy-prev-item-badge.mastered { background: #ECFDF5; color: #047857; }
+    .copy-prev-item-badge.keep { background: #FFFBEB; color: #B45309; }
+    .template-mgr-row {
+      display: grid; grid-template-columns: 1fr 32px; gap: 8px;
+      padding: 10px 12px; background: white; border: 1px solid var(--border);
+      border-radius: 8px; align-items: center;
+    }
+    .template-mgr-row input {
+      width: 100%; padding: 6px 8px; border: 1px solid var(--border);
+      border-radius: 5px; font-size: 12.5px; font-family: inherit; background: white;
+    }
+    .template-mgr-row input:focus { outline: none; border-color: var(--primary); }
+    .template-mgr-row .template-fields {
+      display: grid; grid-template-columns: 1fr 1.4fr 90px; gap: 6px;
+    }
+    .template-mgr-del {
+      background: transparent; border: none; color: var(--muted); font-size: 18px;
+      cursor: pointer; padding: 4px 6px; border-radius: 4px;
+    }
+    .template-mgr-del:hover { color: #DC2626; }
   </style>
 </head>
 <body>
@@ -3201,6 +3356,7 @@
         </div>
         <input id="hw-rail-search" class="hw-rail-search" placeholder="搜索学生…" autocomplete="off" oninput="filterStudentRail(this.value)" />
         <div id="teacher-students-list" class="hw-rail-body"></div>
+        <button class="hw-rail-add" onclick="openTemplatesManager()" title="常用条目存这里，布置作业时一键加" style="margin-bottom:6px;">📋 我的作业模板</button>
         <button class="hw-rail-add" onclick="openInviteStudentPickerOrNew()" title="给已有学生发邀请链接">+ 邀请学生</button>
       </aside>
       <div class="home-main">
@@ -3645,6 +3801,87 @@
 </div>
 
 <!-- Create Homework Modal -->
+<div class="modal-backdrop" id="hw-copy-prev-bg" onclick="if(event.target===this) closeCopyPreviousForHw()" style="display:none;z-index:9200;">
+  <div class="modal" style="max-width:560px;padding:24px;max-height:80vh;overflow-y:auto;">
+    <h3 style="margin:0 0 6px;font-size:16px;font-weight:600;color:var(--text);">复制上一组作业</h3>
+    <div id="copy-prev-summary" style="font-size:12.5px;color:var(--muted);margin-bottom:14px;"></div>
+    <div id="copy-prev-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+    <div id="copy-prev-error" style="color:#DC2626;font-size:12px;min-height:16px;margin:6px 0;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeCopyPreviousForHw()">取消</button>
+      <button class="btn btn-primary" id="copy-prev-confirm-btn" onclick="confirmCopyPreviousForHw()">复制勾选的 <span id="copy-prev-count">0</span> 条</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="hw-templates-bg" onclick="if(event.target===this) closeTemplatesPickerForHw()" style="display:none;z-index:9200;">
+  <div class="modal" style="max-width:520px;padding:24px;max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <h3 style="margin:0;font-size:16px;font-weight:600;color:var(--text);">从模板添加</h3>
+      <button onclick="closeTemplatesPickerForHw()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div id="templates-picker-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+    <div style="display:flex;gap:8px;justify-content:space-between;align-items:center;">
+      <button class="hw-toolbar-btn" onclick="openTemplatesManager()">✎ 管理我的模板</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeTemplatesPickerForHw()">取消</button>
+        <button class="btn btn-primary" id="templates-pick-confirm" onclick="confirmTemplatesPickerForHw()">加入 <span id="templates-pick-count">0</span> 条</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="templates-mgr-bg" onclick="if(event.target===this) closeTemplatesManager()" style="display:none;z-index:9300;">
+  <div class="modal" style="max-width:560px;padding:24px;max-height:82vh;overflow-y:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <h3 style="margin:0;font-size:16px;font-weight:600;color:var(--text);">我的作业模板</h3>
+      <button onclick="closeTemplatesManager()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.5;">
+      常用条目（比如「热身开嗓」「打嘟基础」）存在这里，布置作业时一键加进任意学生的新一组。
+    </div>
+    <div id="templates-mgr-list" style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px;"></div>
+    <button type="button" class="hw-add-task-btn" onclick="startNewTemplateInline()">+ 新建模板</button>
+    <div id="templates-mgr-error" style="color:#DC2626;font-size:12px;min-height:16px;margin:10px 0 0;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+      <button class="btn btn-primary" onclick="closeTemplatesManager()">完成</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="hw-mastery-bg" onclick="if(event.target===this) closeMasteryMenu()" style="display:none;z-index:9200;">
+  <div class="modal" style="max-width:440px;padding:24px;">
+    <h3 style="margin:0 0 6px;font-size:16px;font-weight:600;color:var(--text);">这条作业练得怎么样？</h3>
+    <div id="mastery-target-title" style="font-size:13px;color:var(--muted);margin-bottom:16px;"></div>
+    <div class="mastery-choices" id="mastery-choices">
+      <button type="button" class="mastery-choice" data-state="mastered" onclick="pickMasteryChoice('mastered')">
+        <div class="mastery-choice-icon">✓</div>
+        <div class="mastery-choice-label">掌握了</div>
+        <div class="mastery-choice-sub">从「今日打卡」移到「练到位了」，学生也能看到</div>
+      </button>
+      <button type="button" class="mastery-choice" data-state="keep_practicing" onclick="pickMasteryChoice('keep_practicing')">
+        <div class="mastery-choice-icon">↻</div>
+        <div class="mastery-choice-label">继续练</div>
+        <div class="mastery-choice-sub">下次「复制上一组」会默认勾选这条</div>
+      </button>
+      <button type="button" class="mastery-choice" data-state="active" onclick="pickMasteryChoice('active')">
+        <div class="mastery-choice-icon">·</div>
+        <div class="mastery-choice-label">暂不标</div>
+        <div class="mastery-choice-sub">恢复未标记状态</div>
+      </button>
+    </div>
+    <div style="margin-top:14px;">
+      <label style="font-size:12px;color:var(--text-soft);margin-bottom:5px;display:block;">留言给学生（可选）</label>
+      <input class="hw-label-in" id="mastery-note-input" maxlength="140" placeholder="比如：共鸣位置对了" />
+    </div>
+    <div id="mastery-error" style="color:#DC2626;font-size:12px;min-height:16px;margin:10px 0 0;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px;">
+      <button class="btn btn-ghost" onclick="closeMasteryMenu()">取消</button>
+      <button class="btn btn-primary" id="mastery-save-btn" onclick="saveMasteryMenu()">保存</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="hw-create-bg" onclick="if(event.target===this) closeCreateHomework()" style="display:none;z-index:9100;">
   <div class="modal" style="max-width:780px;padding:26px;max-height:90vh;overflow-y:auto;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
@@ -3676,9 +3913,18 @@
       <button type="button" class="hw-date-preset" onclick="setHwDurationPreset(30)">30 天</button>
       <button type="button" class="hw-date-preset" onclick="setHwDurationPreset(60)">60 天</button>
     </div>
+    <div class="hw-form-row" style="margin-top:14px;">
+      <label>组名（保存时自动填日期，也可以自己写）</label>
+      <input class="hw-label-in" id="hw-label-input" maxlength="60" placeholder="留空 = 用日期自动命名" />
+      <div class="hw-label-hint">保存作业后自动归档上一组，本组进「作业」tab。</div>
+    </div>
     <div class="hw-section-label" style="margin-top:18px;">任务清单 <span class="hw-section-hint">（标题、描述、每天分钟都可以每条不同）</span></div>
+    <div class="hw-toolbar">
+      <button type="button" class="hw-toolbar-btn" onclick="addHwTask()">+ 手动加一条</button>
+      <button type="button" class="hw-toolbar-btn" id="hw-btn-templates" onclick="openTemplatesPickerForHw()">📋 从模板添加</button>
+      <button type="button" class="hw-toolbar-btn" id="hw-btn-copy-prev" onclick="openCopyPreviousForHw()">↺ 复制上一组</button>
+    </div>
     <div id="hw-task-list"></div>
-    <button type="button" class="hw-add-task-btn" onclick="addHwTask()">+ 添加任务</button>
 
     <div id="hw-create-error" style="color:#DC2626;font-size:12px;min-height:16px;margin:12px 0 8px;"></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;">
@@ -7193,6 +7439,8 @@
   let homeworkAsTeacher = [];   // array of homework rows where I'm the teacher
   let homeworkAsStudent = [];   // array of homework rows where I'm the student
   let homeworkChecksByHw = {};  // { homework_id: { 'YYYY-MM-DD': checkRow } }
+  let homeworkBatchesById = {}; // { batch_id: batchRow } — source of truth for group label/archived_at
+  let homeworkTemplates  = [];  // { id, title, description, daily_minutes, ... } — teacher's saved templates
   let myStudents = [];          // array of {id, displayName}
   const usernameCache = {};
 
@@ -9525,6 +9773,33 @@
           homeworkChecksByHw[c.homework_id][c.check_date] = c;
         }
       }
+
+      // homework_batches is the source of truth for group label/archived_at.
+      // Wrapped in a try so pre-migration environments still work — reads will
+      // simply return nothing and callers fall back to per-row fields.
+      homeworkBatchesById = {};
+      try {
+        const { data: batches } = await supabaseClient
+          .from('homework_batches')
+          .select('*');
+        for (const b of (batches || [])) homeworkBatchesById[b.id] = b;
+        // Reconcile: mark homework rows as archived if their batch is archived.
+        for (const h of (hw || [])) {
+          const b = h.batch_id ? homeworkBatchesById[h.batch_id] : null;
+          if (b && b.archived_at && !h.archived_at) h.archived_at = b.archived_at;
+        }
+      } catch (_) { /* batches table not migrated yet */ }
+
+      // Load this teacher's saved homework templates (no-op for students).
+      try {
+        const { data: tpl } = await supabaseClient
+          .from('homework_templates')
+          .select('*')
+          .eq('teacher_id', cloudUser.id)
+          .order('sort_order', { ascending: true });
+        homeworkTemplates = tpl || [];
+      } catch (_) { homeworkTemplates = []; }
+
       saveHomeworkCache();
     } catch(e) {
       console.error('loadHomeworkAll failed', e);
@@ -9756,12 +10031,26 @@
     const list = document.getElementById('student-homework-list');
     if (userRole !== 'student') { sec.style.display = 'none'; return; }
     const today = todayDateStr();
+    // Apply the batches-source-of-truth archive check on the fly, so
+    // pre-migration snapshots still work but new batches.archived_at wins.
+    for (const h of homeworkAsStudent) {
+      if (h.batch_id) {
+        const b = homeworkBatchesById[h.batch_id];
+        if (b && b.archived_at && !h.archived_at) h.archived_at = b.archived_at;
+      }
+    }
     const liveHomework = homeworkAsStudent.filter(h => !h.archived_at);
     const archivedHomework = homeworkAsStudent.filter(h => !!h.archived_at);
-    const activeHw = liveHomework.filter(h => h.start_date <= today && h.end_date >= today);
-    const futureHw = liveHomework.filter(h => h.start_date > today);
+    // Master-state carve-out: teacher-marked "掌握了" items drop out of
+    // today's check-in flow and gather in a collapsed "练到位了" section,
+    // pulling from both live and archived batches so past wins are visible.
+    const masteredItems = homeworkAsStudent
+      .filter(h => h.mastery_state === 'mastered')
+      .sort((a, b) => (b.mastery_marked_at || '').localeCompare(a.mastery_marked_at || ''));
+    const activeHw = liveHomework.filter(h => h.mastery_state !== 'mastered' && h.start_date <= today && h.end_date >= today);
+    const futureHw = liveHomework.filter(h => h.mastery_state !== 'mastered' && h.start_date > today);
     const totalShown = activeHw.length + futureHw.length;
-    if (!liveHomework.length && !archivedHomework.length) { sec.style.display = 'none'; return; }
+    if (!liveHomework.length && !archivedHomework.length && !masteredItems.length) { sec.style.display = 'none'; return; }
     sec.style.display = '';
 
     // Replace the default section title with a friendlier "today" header
@@ -9829,8 +10118,27 @@
         </details>`;
     }
 
+    let masteredHtml = '';
+    if (masteredItems.length) {
+      const rows = masteredItems.map(h => {
+        const note = h.mastery_note ? `<div class="hw-mastered-row-note">老师说：${escHtml(h.mastery_note)}</div>` : '';
+        const minutes = h.daily_minutes ? ` · 曾练每天 ${h.daily_minutes} 分钟` : '';
+        return `
+          <div class="hw-mastered-row" onclick="openHomeworkDrawerForStudent('${h.id}','${todayDateStr()}')">
+            <div class="hw-mastered-row-title">✓ ${escHtml(h.title)}</div>
+            <div class="hw-mastered-row-meta">${h.start_date} → ${h.end_date}${minutes}</div>
+            ${note}
+          </div>`;
+      }).join('');
+      masteredHtml = `
+        <details class="hw-mastered-details">
+          <summary>✓ 练到位了（${masteredItems.length} 条）</summary>
+          <div class="hw-mastered-list">${rows}</div>
+        </details>`;
+    }
+
     const shelfHtml = renderStampShelfCard();
-    list.innerHTML = shelfHtml + activeHtml + archivedHtml;
+    list.innerHTML = shelfHtml + activeHtml + masteredHtml + archivedHtml;
     centerTodayInStrips(list);
   }
 
@@ -10006,8 +10314,11 @@
     openCreateHomework(sid, name);
   }
   window.hwTasks = window.hwTasks || [];
+  window.hwCopiedFromBatchId = null;
   function openCreateHomework(studentId, studentName) {
     pendingStudentForHomework = studentId;
+    window.pendingStudentNameForHomework = studentName;
+    window.hwCopiedFromBatchId = null;
     document.getElementById('hw-create-student-label').textContent = '给「' + studentName + '」布置作业';
     window.hwTasks.length = 0;
     window.hwTasks.push({ title: '', desc: '', minutes: 5 });
@@ -10015,6 +10326,16 @@
     setHwTriggerDate('hw-start-trigger', todayDateStr());
     const d = new Date(); d.setDate(d.getDate() + 6);
     setHwTriggerDate('hw-end-trigger', d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'));
+    const labelEl = document.getElementById('hw-label-input');
+    if (labelEl) labelEl.value = '';
+    updateHwLabelPlaceholder();
+    // Only enable "copy previous" if the student has any previous batch.
+    const copyBtn = document.getElementById('hw-btn-copy-prev');
+    if (copyBtn) {
+      const hasPrev = (homeworkAsTeacher || []).some(h => h.student_id === studentId && h.batch_id);
+      copyBtn.disabled = !hasPrev;
+      copyBtn.title = hasPrev ? '复制上一组的条目到新组' : '这个学生还没有上一组作业';
+    }
     document.getElementById('hw-create-error').textContent = '';
     document.getElementById('hw-create-bg').style.display = 'flex';
     setTimeout(() => {
@@ -10022,6 +10343,27 @@
       if (first) first.focus();
     }, 50);
   }
+  function formatHwLabelAuto(startStr, endStr) {
+    if (!startStr || !endStr) return '';
+    const s = new Date(startStr + 'T00:00:00');
+    const e = new Date(endStr + 'T00:00:00');
+    if (isNaN(s) || isNaN(e)) return '';
+    const sm = s.getMonth() + 1, sd = s.getDate();
+    const em = e.getMonth() + 1, ed = e.getDate();
+    if (sm === em && sd === ed) return `${sm}月${sd}日`;
+    return `${sm}月${sd}日 – ${em}月${ed}日`;
+  }
+  function updateHwLabelPlaceholder() {
+    const startEl = document.getElementById('hw-start-trigger');
+    const endEl = document.getElementById('hw-end-trigger');
+    const start = startEl ? startEl.dataset.value : '';
+    const end = endEl ? endEl.dataset.value : '';
+    const auto = formatHwLabelAuto(start, end);
+    const el = document.getElementById('hw-label-input');
+    if (!el) return;
+    el.placeholder = auto ? auto : '留空 = 用日期自动命名';
+  }
+  window.updateHwLabelPlaceholder = updateHwLabelPlaceholder;
   function renderHwTaskList() {
     const container = document.getElementById('hw-task-list');
     if (!container) return;
@@ -10067,6 +10409,9 @@
     const textEl = t.querySelector('.dt-text');
     if (dateStr) { textEl.textContent = dateStr; textEl.classList.remove('dt-placeholder'); }
     else { textEl.textContent = '选择日期'; textEl.classList.add('dt-placeholder'); }
+    if (triggerId === 'hw-start-trigger' || triggerId === 'hw-end-trigger') {
+      updateHwLabelPlaceholder();
+    }
   }
   function setHwDurationPreset(days) {
     let startStr = document.getElementById('hw-start-trigger').dataset.value;
@@ -10088,30 +10433,59 @@
     if (!pendingStudentForHomework) { err.textContent = '没选学生'; return; }
     if (!start || !end) { err.textContent = '请选日期'; return; }
     if (end < start) { err.textContent = '截止日期不能早于开始日期'; return; }
-    const tasks = (window.hwTasks || []).map(t => ({
-      title: (t.title || '').trim(),
-      desc: (t.desc || '').trim(),
-      minutes: (t.minutes && !isNaN(t.minutes)) ? t.minutes : null
-    })).filter(t => t.title);
+    const tasks = (window.hwTasks || []).map(t => {
+      const title = (t.title || '').trim();
+      const desc = (t.desc || '').trim();
+      const minutes = (t.minutes && !isNaN(t.minutes)) ? t.minutes : null;
+      // v2 detection: only rows copied from a previous batch carry parent_* on
+      // hwTasks. If the teacher edited any field the row is treated as a new
+      // version of the parent (parent_id preserved, version = parent + 1).
+      // If the teacher left every field untouched it stays a plain copy
+      // (parent_id dropped, version = 1).
+      let parent_homework_id = null;
+      let version = 1;
+      if (t.parent_homework_id) {
+        const edited = (title !== (t.parent_title || '').trim())
+                    || (desc  !== (t.parent_desc  || '').trim())
+                    || (minutes !== (t.parent_minutes || null));
+        if (edited) {
+          parent_homework_id = t.parent_homework_id;
+          version = (t.parent_version || 1) + 1;
+        }
+      }
+      return { title, desc, minutes, parent_homework_id, version };
+    }).filter(t => t.title);
     if (!tasks.length) { err.textContent = '至少填一个任务标题'; return; }
+    const labelValue = (document.getElementById('hw-label-input')?.value || '').trim();
     btn.disabled = true; btn.innerHTML = '提交中…';
     try {
-      const batchId = (crypto && crypto.randomUUID) ? crypto.randomUUID() :
+      const genUuid = () => (crypto && crypto.randomUUID) ? crypto.randomUUID() :
         ('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
           const r = Math.random()*16|0; return (c==='x'?r:(r&0x3|0x8)).toString(16);
         }));
-      const rows = tasks.map(t => ({
-        teacher_id: cloudUser.id,
+      const batchPayload = {
+        id: genUuid(),
         student_id: pendingStudentForHomework,
-        title: t.title,
-        description: t.desc || null,
+        label: labelValue || null,
         start_date: start,
         end_date: end,
+        copied_from_batch_id: window.hwCopiedFromBatchId || null
+      };
+      const rowsPayload = tasks.map(t => ({
+        title: t.title,
+        description: t.desc || null,
         daily_minutes: t.minutes,
-        batch_id: batchId
+        parent_homework_id: t.parent_homework_id,
+        version: t.version
       }));
-      const { error } = await supabaseClient.from('homework').insert(rows);
+      // Atomic: auto-archive this student's previous unarchived batches, then
+      // create the new batch and its homework rows.
+      const { error } = await supabaseClient.rpc('create_batch_and_archive_prev', {
+        p_batch: batchPayload,
+        p_rows: rowsPayload
+      });
       if (error) throw error;
+      window.hwCopiedFromBatchId = null;
       closeCreateHomework();
       await refreshHomeworkUI();
     } catch(e) {
@@ -10461,6 +10835,17 @@
     const view = document.getElementById('student-main-view');
     view.style.display = 'block';
     renderStudentMainView();
+    // Fire-and-forget: pull the student's stamps so the "成就" tab has data
+    // ready. Renders again once the fetch resolves.
+    const s = myStudents.find(x => x.displayName.toLowerCase() === label.toLowerCase());
+    if (s && s.id && !studentStampsCache[s.id] && supabaseClient) {
+      supabaseClient.from('stamps').select('*').eq('user_id', s.id)
+        .then(({ data }) => {
+          studentStampsCache[s.id] = data || [];
+          if (currentStudentViewLabel === label) renderStudentMainView();
+        })
+        .catch(() => { studentStampsCache[s.id] = []; });
+    }
   }
   function closeStudentMainView() {
     currentStudentViewLabel = null;
@@ -10503,13 +10888,13 @@
     const subText = subParts.join(' · ');
     const linkIdJs = s.linkId ? String(s.linkId) : '';
     const studentIdJs = s.id ? String(s.id) : '';
-    const stampBookBtn = linked
-      ? `<button class="sv-unlink-btn" onclick="openStudentStampBook('${studentIdJs}','${nameJs}')" title="看 ${nameJs} 的印谱" style="border-color:#C4924A;color:#B98A2D;">📜 看印谱</button>`
-      : '';
+    // The old header "📜 看印谱" button is retired — student achievements now
+    // live as their own tab. openStudentStampBook is still available and used
+    // by the tab-body CTA to open the full stamp book modal.
     const unlinkOrInviteBtn = linked
       ? `<button class="sv-unlink-btn" onclick="unlinkStudentByTeacher('${linkIdJs}','${nameJs}')" title="取消和这个学生的关联">取消关联</button>`
       : `<button class="btn btn-primary" onclick="openStudentInviteModal('${nameJs}')">+ 邀请加入</button>`;
-    const headerActionBtn = stampBookBtn + unlinkOrInviteBtn;
+    const headerActionBtn = unlinkOrInviteBtn;
     const headerHtml = `
       <button class="sv-back" onclick="closeStudentMainView()">← 全部学生</button>
       <div class="sv-header">
@@ -10533,11 +10918,19 @@
     const archiveTabHtml = archivedGroupCount
       ? `<div class="sv-tab ${currentStudentViewTab==='archive'?'active':''}" onclick="setStudentViewTab('archive')">归档 <span class="num">${archivedGroupCount}</span></div>`
       : '';
+    const cachedStamps = linked ? studentStampsCache[s.id] : null;
+    const achEarnedCount = cachedStamps
+      ? new Set(cachedStamps.map(r => r.stamp_code.split(':')[0])).size
+      : 0;
+    const achTabHtml = linked
+      ? `<div class="sv-tab ${currentStudentViewTab==='achievements'?'active':''}" onclick="setStudentViewTab('achievements')">成就 <span class="num">${achEarnedCount}</span></div>`
+      : '';
     const tabsHtml = `
       <div class="sv-tabbar">
         <div class="sv-tabs">
           <div class="sv-tab ${currentStudentViewTab==='homework'?'active':''}" onclick="setStudentViewTab('homework')">作业 <span class="num">${linked ? activeStudentHw.length : 0}</span></div>
           <div class="sv-tab ${currentStudentViewTab==='songs'?'active':''}" onclick="setStudentViewTab('songs')">歌词 <span class="num">${songs.length}</span></div>
+          ${achTabHtml}
           ${archiveTabHtml}
         </div>
         ${tabActionBtn}
@@ -10595,6 +10988,44 @@
             </div>`;
         }).join('') + '</div>';
       }
+    } else if (currentStudentViewTab === 'achievements') {
+      const stampRows = cachedStamps;
+      if (stampRows == null) {
+        bodyHtml = `<div class="sv-empty"><div class="sv-empty-icon">⏳</div><div>加载中…</div></div>`;
+      } else if (!stampRows.length) {
+        bodyHtml = `<div class="sv-empty">
+          <div class="sv-empty-icon">🌱</div>
+          <div><b>${escHtml(s.displayName)}</b> 还没获得印章 —— 多打卡就有啦</div>
+        </div>`;
+      } else {
+        const catalog = (typeof catalogForRole === 'function') ? catalogForRole('student') : STAMP_CATALOG;
+        const totalDefs = catalog.length;
+        const uniqueEarned = new Set(stampRows.map(r => r.stamp_code.split(':')[0])).size;
+        const recent = [...stampRows]
+          .sort((a, b) => (b.awarded_at || '').localeCompare(a.awarded_at || ''))
+          .slice(0, 8);
+        const chips = recent.map(r => {
+          const codeBase = r.stamp_code.split(':')[0];
+          const def = catalog.find(x => x.code === codeBase);
+          if (!def || typeof def.svg !== 'function') return '';
+          const dateStr = (r.awarded_at || '').slice(0, 10);
+          return `<div class="sv-ach-chip">
+            <div class="sv-ach-chip-svg">${def.svg(64, r.tier || 1, r.meta || {})}</div>
+            <div class="sv-ach-chip-name">${escHtml(def.name)}</div>
+            <div class="sv-ach-chip-date">${escHtml(dateStr)}</div>
+          </div>`;
+        }).join('');
+        bodyHtml = `
+          <div class="sv-ach-summary">
+            <div class="sv-ach-count"><b>${uniqueEarned}</b> / ${totalDefs} 枚</div>
+            <div class="sv-ach-hint">最近获得</div>
+          </div>
+          <div class="sv-ach-recent">${chips}</div>
+          <div class="sv-ach-cta">
+            <button class="sv-ach-open" onclick="openStudentStampBook('${studentIdJs}','${nameJs}')">翻开完整印谱 →</button>
+          </div>
+        `;
+      }
     }
 
     view.innerHTML = headerHtml + tabsHtml + bodyHtml;
@@ -10611,14 +11042,20 @@
     const groups = Array.from(byBatch.entries()).map(([key, rows]) => {
       rows.sort((a, b) => (a.created_at || '').localeCompare(b.created_at || ''));
       const first = rows[0];
-      const archived = !!first.archived_at;
+      const batch = first.batch_id ? homeworkBatchesById[first.batch_id] : null;
+      // batches.archived_at is the source of truth once migration 018+ is in.
+      // Fall back to the legacy per-row field so pre-migration snapshots still work.
+      const archivedAt = (batch && batch.archived_at) || first.archived_at || '';
+      const startDate = batch ? batch.start_date : rows.reduce((m, r) => r.start_date < m ? r.start_date : m, first.start_date);
+      const endDate   = batch ? batch.end_date   : rows.reduce((m, r) => r.end_date > m ? r.end_date : m, first.end_date);
       return {
-        key, rows, archived,
+        key, rows,
+        archived: !!archivedAt,
         batchId: first.batch_id || null,
-        startDate: rows.reduce((m, r) => r.start_date < m ? r.start_date : m, first.start_date),
-        endDate: rows.reduce((m, r) => r.end_date > m ? r.end_date : m, first.end_date),
-        createdAt: first.created_at || '',
-        archivedAt: first.archived_at || ''
+        batchLabel: batch ? (batch.label || null) : null,
+        startDate, endDate,
+        createdAt: (batch && batch.created_at) || first.created_at || '',
+        archivedAt
       };
     });
     return groups;
@@ -10649,21 +11086,32 @@
         else if (h.start_date > today) { statusLabel = '未开始'; statusCls = 'future'; }
         else { statusLabel = '进行中'; statusCls = 'active'; }
         const minutesLabel = h.daily_minutes ? ` · 每天 ${h.daily_minutes} 分钟` : '';
+        const mastery = h.mastery_state || 'active';
+        const masteryBadge = mastery === 'mastered'
+          ? `<span class="sv-hw-mastery-badge mastered" onclick="event.stopPropagation();openMasteryMenu('${h.id}')" title="老师已标：掌握了${h.mastery_note ? ' — ' + escHtml(h.mastery_note) : ''}">✓ 掌握</span>`
+          : mastery === 'keep_practicing'
+          ? `<span class="sv-hw-mastery-badge keep" onclick="event.stopPropagation();openMasteryMenu('${h.id}')" title="老师已标：继续练">↻ 继续</span>`
+          : `<span class="sv-hw-mastery-badge unset" onclick="event.stopPropagation();openMasteryMenu('${h.id}')" title="标记完成情况">· 标</span>`;
+        const versionBadge = (h.version && h.version > 1)
+          ? `<span class="sv-hw-version-badge" title="从上一版改过来">v${h.version}</span>`
+          : '';
         return `
-          <div class="sv-hw-card" onclick="openHomeworkDrawerForTeacher('${h.id}')">
+          <div class="sv-hw-card mastery-${mastery}" onclick="openHomeworkDrawerForTeacher('${h.id}')">
             <div class="sv-hw-card-head">
               <div style="flex:1;min-width:0;">
-                <div class="sv-hw-card-title">${escHtml(h.title)}</div>
+                <div class="sv-hw-card-title">${escHtml(h.title)}${versionBadge}</div>
                 <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date}${minutesLabel}<br>完成 ${doneDays}/${days.length} 天</div>
               </div>
-              <span class="sv-hw-card-status ${statusCls}">${statusLabel}</span>
+              <div class="sv-hw-card-badges">
+                ${masteryBadge}
+                <span class="sv-hw-card-status ${statusCls}">${statusLabel}</span>
+              </div>
             </div>
             <div class="sv-hw-card-prog"><div style="width:${pct}%"></div></div>
           </div>`;
       }).join('');
-      const groupTitleParts = g.rows.slice(0, 3).map(r => r.title);
-      const titleSuffix = g.rows.length > 3 ? ' 等' : '';
-      const groupTitle = groupTitleParts.join(' + ') + titleSuffix;
+      const autoTitle = formatHwLabelAuto(g.startDate, g.endDate);
+      const groupTitle = g.batchLabel || autoTitle || (g.rows.slice(0, 3).map(r => r.title).join(' + ') + (g.rows.length > 3 ? ' 等' : ''));
       const btn = g.batchId
         ? (g.archived
             ? `<button class="sv-group-action" onclick="unarchiveHwBatch('${g.batchId}')">取消归档</button>`
@@ -10709,6 +11157,345 @@
   }
   window.archiveHwBatch = archiveHwBatch;
   window.unarchiveHwBatch = unarchiveHwBatch;
+
+  // ── Mastery menu (teacher marks a homework item as mastered / keep-practicing / active) ──
+  let masteryTargetHomeworkId = null;
+  let masteryPickedState = null;
+  function openMasteryMenu(homeworkId) {
+    const hw = homeworkAsTeacher.find(h => h.id === homeworkId);
+    if (!hw) return;
+    masteryTargetHomeworkId = homeworkId;
+    masteryPickedState = hw.mastery_state || 'active';
+    document.getElementById('mastery-target-title').textContent = hw.title;
+    document.getElementById('mastery-note-input').value = hw.mastery_note || '';
+    document.getElementById('mastery-error').textContent = '';
+    document.querySelectorAll('.mastery-choice').forEach(el => {
+      el.classList.toggle('selected', el.dataset.state === masteryPickedState);
+    });
+    document.getElementById('hw-mastery-bg').style.display = 'flex';
+  }
+  function closeMasteryMenu() {
+    document.getElementById('hw-mastery-bg').style.display = 'none';
+    masteryTargetHomeworkId = null;
+    masteryPickedState = null;
+  }
+  function pickMasteryChoice(state) {
+    masteryPickedState = state;
+    document.querySelectorAll('.mastery-choice').forEach(el => {
+      el.classList.toggle('selected', el.dataset.state === state);
+    });
+  }
+  async function saveMasteryMenu() {
+    if (!masteryTargetHomeworkId || !masteryPickedState) return;
+    const btn = document.getElementById('mastery-save-btn');
+    const err = document.getElementById('mastery-error');
+    const note = document.getElementById('mastery-note-input').value.trim();
+    const originalLabel = btn.textContent;
+    btn.disabled = true; btn.textContent = '保存中…'; err.textContent = '';
+    try {
+      const { error } = await supabaseClient.rpc('mark_homework_mastery', {
+        p_homework_id: masteryTargetHomeworkId,
+        p_state: masteryPickedState,
+        p_note: note || null
+      });
+      if (error) throw error;
+      // Update local mirror so re-render reflects immediately without a round-trip.
+      const hw = homeworkAsTeacher.find(h => h.id === masteryTargetHomeworkId);
+      if (hw) {
+        hw.mastery_state = masteryPickedState;
+        hw.mastery_note = note || null;
+        hw.mastery_marked_at = masteryPickedState === 'active' ? null : new Date().toISOString();
+      }
+      closeMasteryMenu();
+      if (currentStudentViewLabel) renderStudentMainView();
+    } catch(e) {
+      err.textContent = '失败：' + (e.message || '未知');
+    } finally {
+      btn.disabled = false; btn.textContent = originalLabel;
+    }
+  }
+  window.openMasteryMenu = openMasteryMenu;
+  window.closeMasteryMenu = closeMasteryMenu;
+  window.pickMasteryChoice = pickMasteryChoice;
+  window.saveMasteryMenu = saveMasteryMenu;
+
+  // ── Copy previous batch into the create-homework modal ──
+  let copyPrevRows = [];  // homework rows of the most-recent batch for this student
+  let copyPrevSelection = {};  // { homework_id: bool }
+  function findLatestBatchForStudent(studentId) {
+    const rows = homeworkAsTeacher.filter(h => h.student_id === studentId && h.batch_id);
+    if (!rows.length) return null;
+    // Prefer the most recently created batch; if batches have created_at, use that;
+    // else use the max created_at across the rows.
+    const groups = new Map();
+    for (const r of rows) {
+      if (!groups.has(r.batch_id)) groups.set(r.batch_id, []);
+      groups.get(r.batch_id).push(r);
+    }
+    let bestId = null, bestKey = '';
+    for (const [id, list] of groups.entries()) {
+      const batch = homeworkBatchesById[id];
+      const key = (batch && batch.created_at) || list.reduce((m, r) => (r.created_at || '') > m ? r.created_at : m, '');
+      if (key > bestKey) { bestKey = key; bestId = id; }
+    }
+    if (!bestId) return null;
+    return { batchId: bestId, rows: groups.get(bestId) };
+  }
+  function openCopyPreviousForHw() {
+    const sid = pendingStudentForHomework;
+    if (!sid) return;
+    const prev = findLatestBatchForStudent(sid);
+    if (!prev) { alert('这个学生还没有上一组作业'); return; }
+    const batch = homeworkBatchesById[prev.batchId] || {};
+    copyPrevRows = prev.rows;
+    copyPrevSelection = {};
+    for (const r of prev.rows) {
+      // Default: unselect only if teacher already marked it mastered.
+      copyPrevSelection[r.id] = (r.mastery_state !== 'mastered');
+    }
+    const labelText = batch.label || formatHwLabelAuto(batch.start_date, batch.end_date) || '上一组';
+    document.getElementById('copy-prev-summary').innerHTML = `复制自「${escHtml(labelText)}」 · ${prev.rows.length} 条`;
+    renderCopyPreviousList();
+    document.getElementById('copy-prev-error').textContent = '';
+    document.getElementById('hw-copy-prev-bg').style.display = 'flex';
+  }
+  function renderCopyPreviousList() {
+    const container = document.getElementById('copy-prev-list');
+    container.innerHTML = copyPrevRows.map(r => {
+      const badge = r.mastery_state === 'mastered'
+        ? `<span class="copy-prev-item-badge mastered">已掌握</span>`
+        : r.mastery_state === 'keep_practicing'
+        ? `<span class="copy-prev-item-badge keep">继续练</span>`
+        : '';
+      const minutes = r.daily_minutes ? ` · 每天 ${r.daily_minutes} 分钟` : '';
+      const desc = r.description ? `<div class="copy-prev-item-meta">${escHtml(r.description)}</div>` : '';
+      return `
+        <label class="copy-prev-item">
+          <input type="checkbox" ${copyPrevSelection[r.id] ? 'checked' : ''} onchange="toggleCopyPrev('${r.id}',this.checked)" />
+          <div class="copy-prev-item-body">
+            <div class="copy-prev-item-title">${escHtml(r.title)}${badge}</div>
+            ${desc}
+            <div class="copy-prev-item-meta">${r.start_date} → ${r.end_date}${minutes}</div>
+          </div>
+        </label>`;
+    }).join('');
+    const cnt = Object.values(copyPrevSelection).filter(Boolean).length;
+    document.getElementById('copy-prev-count').textContent = cnt;
+    document.getElementById('copy-prev-confirm-btn').disabled = cnt === 0;
+  }
+  function toggleCopyPrev(id, checked) {
+    copyPrevSelection[id] = !!checked;
+    const cnt = Object.values(copyPrevSelection).filter(Boolean).length;
+    document.getElementById('copy-prev-count').textContent = cnt;
+    document.getElementById('copy-prev-confirm-btn').disabled = cnt === 0;
+  }
+  function closeCopyPreviousForHw() {
+    document.getElementById('hw-copy-prev-bg').style.display = 'none';
+    copyPrevRows = [];
+    copyPrevSelection = {};
+  }
+  function confirmCopyPreviousForHw() {
+    const picked = copyPrevRows.filter(r => copyPrevSelection[r.id]);
+    if (!picked.length) return;
+    // Drop the empty placeholder task if the create-homework modal is fresh.
+    if (window.hwTasks.length === 1 && !window.hwTasks[0].title.trim()) window.hwTasks.length = 0;
+    for (const r of picked) {
+      window.hwTasks.push({
+        title: r.title,
+        desc: r.description || '',
+        minutes: r.daily_minutes || null,
+        parent_homework_id: r.id,
+        parent_title: r.title,
+        parent_desc: r.description || '',
+        parent_minutes: r.daily_minutes || null,
+        parent_version: r.version || 1
+      });
+    }
+    window.hwCopiedFromBatchId = picked[0].batch_id || null;
+    renderHwTaskList();
+    closeCopyPreviousForHw();
+  }
+  window.openCopyPreviousForHw = openCopyPreviousForHw;
+  window.closeCopyPreviousForHw = closeCopyPreviousForHw;
+  window.toggleCopyPrev = toggleCopyPrev;
+  window.confirmCopyPreviousForHw = confirmCopyPreviousForHw;
+
+  // ── Homework templates ──
+  let templatesPickerSelection = {};   // { template_id: bool }
+  function openTemplatesPickerForHw() {
+    templatesPickerSelection = {};
+    renderTemplatesPickerList();
+    document.getElementById('hw-templates-bg').style.display = 'flex';
+  }
+  function renderTemplatesPickerList() {
+    const container = document.getElementById('templates-picker-list');
+    if (!homeworkTemplates.length) {
+      container.innerHTML = `<div class="sv-empty" style="padding:24px 12px;">
+        <div class="sv-empty-icon">📋</div>
+        <div>还没有模板 —— 点下方「管理我的模板」建一个</div>
+      </div>`;
+      document.getElementById('templates-pick-count').textContent = '0';
+      document.getElementById('templates-pick-confirm').disabled = true;
+      return;
+    }
+    container.innerHTML = homeworkTemplates.map(t => {
+      const minutes = t.daily_minutes ? ` · 每天 ${t.daily_minutes} 分钟` : '';
+      const desc = t.description ? `<div class="template-picker-row-meta">${escHtml(t.description)}</div>` : '';
+      return `
+        <label class="template-picker-row">
+          <input type="checkbox" ${templatesPickerSelection[t.id] ? 'checked' : ''} onchange="toggleTemplatePick('${t.id}',this.checked)" />
+          <div class="template-picker-row-body">
+            <div class="template-picker-row-title">${escHtml(t.title)}</div>
+            ${desc}
+            <div class="template-picker-row-meta">${escHtml(t.category || '')}${minutes}</div>
+          </div>
+        </label>`;
+    }).join('');
+    const cnt = Object.values(templatesPickerSelection).filter(Boolean).length;
+    document.getElementById('templates-pick-count').textContent = cnt;
+    document.getElementById('templates-pick-confirm').disabled = cnt === 0;
+  }
+  function toggleTemplatePick(id, checked) {
+    templatesPickerSelection[id] = !!checked;
+    const cnt = Object.values(templatesPickerSelection).filter(Boolean).length;
+    document.getElementById('templates-pick-count').textContent = cnt;
+    document.getElementById('templates-pick-confirm').disabled = cnt === 0;
+  }
+  function closeTemplatesPickerForHw() {
+    document.getElementById('hw-templates-bg').style.display = 'none';
+  }
+  function confirmTemplatesPickerForHw() {
+    const picked = homeworkTemplates.filter(t => templatesPickerSelection[t.id]);
+    if (!picked.length) return;
+    if (window.hwTasks.length === 1 && !window.hwTasks[0].title.trim()) window.hwTasks.length = 0;
+    for (const t of picked) {
+      window.hwTasks.push({
+        title: t.title,
+        desc: t.description || '',
+        minutes: t.daily_minutes || null
+      });
+    }
+    renderHwTaskList();
+    closeTemplatesPickerForHw();
+  }
+  window.openTemplatesPickerForHw = openTemplatesPickerForHw;
+  window.closeTemplatesPickerForHw = closeTemplatesPickerForHw;
+  window.toggleTemplatePick = toggleTemplatePick;
+  window.confirmTemplatesPickerForHw = confirmTemplatesPickerForHw;
+
+  // ── Templates manager (create / edit / delete) ──
+  let templatesDraftRows = [];   // in-progress edits + new drafts before save
+  function openTemplatesManager() {
+    templatesDraftRows = homeworkTemplates.map(t => ({ ...t, _dirty: false, _isNew: false }));
+    renderTemplatesManagerList();
+    document.getElementById('templates-mgr-error').textContent = '';
+    document.getElementById('templates-mgr-bg').style.display = 'flex';
+  }
+  function renderTemplatesManagerList() {
+    const container = document.getElementById('templates-mgr-list');
+    if (!templatesDraftRows.length) {
+      container.innerHTML = `<div class="sv-empty" style="padding:20px 12px;">
+        <div class="sv-empty-icon">📋</div>
+        <div>还没建过模板，从下面 + 新建一个开始</div>
+      </div>`;
+      return;
+    }
+    container.innerHTML = templatesDraftRows.map((t, i) => `
+      <div class="template-mgr-row">
+        <div class="template-fields">
+          <input placeholder="标题（如：热身开嗓）" value="${escHtml(t.title || '')}" maxlength="60" oninput="onTemplateDraftEdit(${i},'title',this.value)" />
+          <input placeholder="描述（可选）" value="${escHtml(t.description || '')}" maxlength="300" oninput="onTemplateDraftEdit(${i},'description',this.value)" />
+          <input type="number" placeholder="分钟/天" min="1" max="600" value="${t.daily_minutes || ''}" oninput="onTemplateDraftEdit(${i},'daily_minutes',this.value ? parseInt(this.value,10) : null)" />
+        </div>
+        <button class="template-mgr-del" onclick="deleteTemplateDraft(${i})" title="删除">×</button>
+      </div>`).join('');
+  }
+  function onTemplateDraftEdit(idx, field, value) {
+    const t = templatesDraftRows[idx];
+    if (!t) return;
+    t[field] = value;
+    t._dirty = true;
+    // Fire-and-forget save (debounced by simple visibility check).
+    scheduleTemplateSave(idx);
+  }
+  let templateSaveTimer = null;
+  function scheduleTemplateSave(idx) {
+    if (templateSaveTimer) clearTimeout(templateSaveTimer);
+    templateSaveTimer = setTimeout(() => saveTemplateDraft(idx), 700);
+  }
+  async function saveTemplateDraft(idx) {
+    const t = templatesDraftRows[idx];
+    if (!t || !t._dirty) return;
+    if (!(t.title || '').trim()) return; // don't save empty rows
+    try {
+      if (t._isNew) {
+        const { data, error } = await supabaseClient.from('homework_templates')
+          .insert({
+            teacher_id: cloudUser.id,
+            title: t.title.trim(),
+            description: (t.description || '').trim() || null,
+            daily_minutes: t.daily_minutes || null,
+            sort_order: idx
+          })
+          .select()
+          .single();
+        if (error) throw error;
+        Object.assign(t, data, { _dirty: false, _isNew: false });
+        homeworkTemplates.push(data);
+      } else {
+        const { error } = await supabaseClient.from('homework_templates')
+          .update({
+            title: t.title.trim(),
+            description: (t.description || '').trim() || null,
+            daily_minutes: t.daily_minutes || null
+          })
+          .eq('id', t.id);
+        if (error) throw error;
+        t._dirty = false;
+        const existing = homeworkTemplates.find(x => x.id === t.id);
+        if (existing) Object.assign(existing, { title: t.title.trim(), description: t.description || null, daily_minutes: t.daily_minutes || null });
+      }
+    } catch(e) {
+      document.getElementById('templates-mgr-error').textContent = '保存失败：' + (e.message || '');
+    }
+  }
+  async function deleteTemplateDraft(idx) {
+    const t = templatesDraftRows[idx];
+    if (!t) return;
+    if (!t._isNew && !confirm(`删除模板「${t.title || ''}」？`)) return;
+    if (!t._isNew) {
+      try {
+        const { error } = await supabaseClient.from('homework_templates').delete().eq('id', t.id);
+        if (error) throw error;
+        homeworkTemplates = homeworkTemplates.filter(x => x.id !== t.id);
+      } catch(e) {
+        document.getElementById('templates-mgr-error').textContent = '删除失败：' + (e.message || '');
+        return;
+      }
+    }
+    templatesDraftRows.splice(idx, 1);
+    renderTemplatesManagerList();
+  }
+  function startNewTemplateInline() {
+    templatesDraftRows.push({ title: '', description: '', daily_minutes: null, _dirty: false, _isNew: true });
+    renderTemplatesManagerList();
+    setTimeout(() => {
+      const inputs = document.querySelectorAll('#templates-mgr-list .template-mgr-row input');
+      if (inputs.length) inputs[inputs.length - 3].focus();
+    }, 30);
+  }
+  function closeTemplatesManager() {
+    document.getElementById('templates-mgr-bg').style.display = 'none';
+    // Refresh picker if it was open behind
+    if (document.getElementById('hw-templates-bg').style.display === 'flex') {
+      renderTemplatesPickerList();
+    }
+  }
+  window.openTemplatesManager = openTemplatesManager;
+  window.closeTemplatesManager = closeTemplatesManager;
+  window.onTemplateDraftEdit = onTemplateDraftEdit;
+  window.deleteTemplateDraft = deleteTemplateDraft;
+  window.startNewTemplateInline = startNewTemplateInline;
 
   function openModalForStudent(studentName) {
     openModal(false);
