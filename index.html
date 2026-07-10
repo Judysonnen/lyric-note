@@ -9806,11 +9806,13 @@
     if (!cloudUser) return;
     try {
       const payload = {
-        v: 1,
+        v: 2,
         savedAt: new Date().toISOString(),
         homeworkAsTeacher,
         homeworkAsStudent,
         homeworkChecksByHw,
+        homeworkBatchesById,
+        myStudents,
       };
       localStorage.setItem(homeworkCacheKey(cloudUser.id), JSON.stringify(payload));
     } catch(_) {}
@@ -9820,10 +9822,15 @@
       const raw = localStorage.getItem(homeworkCacheKey(uid));
       if (!raw) return false;
       const payload = JSON.parse(raw);
-      if (!payload || payload.v !== 1) return false;
+      if (!payload) return false;
+      if (payload.v !== 1 && payload.v !== 2) return false;
       homeworkAsTeacher = payload.homeworkAsTeacher || [];
       homeworkAsStudent = payload.homeworkAsStudent || [];
       homeworkChecksByHw = payload.homeworkChecksByHw || {};
+      if (payload.v === 2) {
+        homeworkBatchesById = payload.homeworkBatchesById || {};
+        myStudents = payload.myStudents || [];
+      }
       return true;
     } catch(_) { return false; }
   }
@@ -9885,10 +9892,13 @@
       if (stSec) stSec.style.display = 'none';
       return;
     }
-    // Render synchronously from the cached snapshot first so the section
-    // doesn't pop in after the network round-trip and shove the songs down.
+    // Sync-render from the hydrated cache first so the sidebar / today's
+    // homework strip lands immediately instead of after the network round
+    // trip. When the fresh data comes back we re-render on top.
     if (userRole === 'student') renderStudentHomeworkSection();
+    else if (userRole === 'teacher') renderTeacherStudentsSection();
     await Promise.all([loadHomeworkAll(), loadMyStudents(), loadStamps()]);
+    saveHomeworkCache();
     evaluateStamps();
     if (userRole === 'teacher') {
       renderTeacherStudentsSection();
@@ -11866,10 +11876,10 @@
       if (subtitle) subtitle.textContent = '练习、打卡、复习老师的批注';
       if (assignBtn) assignBtn.style.display = 'none';
       if (teacherSec) teacherSec.style.display = 'none';
-      if (teacherStampShelf) teacherStampShelf.style.display = 'none';
+      /* teacher-stamp-shelf removed */
     } else {
       badge.style.display = 'none';
-      if (teacherStampShelf) teacherStampShelf.style.display = 'none';
+      /* teacher-stamp-shelf removed */
     }
   }
 
