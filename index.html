@@ -2053,16 +2053,20 @@
     .sv-hw-card-prog { margin-top: 10px; height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; }
     .sv-hw-card-prog > div { height: 100%; background: var(--primary); transition: width .3s; }
     .sv-hw-card { position: relative; transition: background .18s, border-color .18s; overflow: hidden; }
-    /* Mastered: no background wash. Instead a large 掌握 楷体 watermark sits
-       behind the content in the app's signature vermilion at very low opacity,
-       and a one-time light sweep runs when the card first appears. */
-    .sv-hw-card.mastery-mastered { border-color: rgba(185,41,35,0.22); }
+    /* Mastered: solid warm-blush paper tint (no gradient) that reads like an
+       old stamped page. Large 掌握 楷体 imprint sits behind the content in
+       the app's signature vermilion; a one-time light sweep runs on render. */
+    .sv-hw-card.mastery-mastered {
+      background: #FBEDE4;
+      border-color: rgba(185,41,35,0.28);
+    }
+    .sv-hw-card.mastery-mastered:hover { background: #F8E1D3; }
     .sv-hw-card.mastery-mastered::before {
       content: "掌握"; position: absolute; right: -8px; top: 50%;
       transform: translateY(-50%) rotate(-14deg);
       font-family: "Kaiti SC", "STKaiti", "Songti SC", serif;
       font-size: 78px; font-weight: 700; color: #B92923;
-      opacity: 0.09; letter-spacing: 0.02em;
+      opacity: 0.10; letter-spacing: 0.02em;
       pointer-events: none; white-space: nowrap; line-height: 0.9;
     }
     .sv-hw-card.mastery-mastered::after {
@@ -2129,7 +2133,7 @@
 
     .sv-mastered-wall { display: flex; flex-direction: column; gap: 10px; }
     .sv-mastered-row {
-      background: #FEFBF3; border: 1px solid rgba(185,41,35,0.22);
+      background: #FBEDE4; border: 1px solid rgba(185,41,35,0.28);
       border-radius: 10px; padding: 12px 14px;
       cursor: pointer; transition: all .15s; position: relative; overflow: hidden;
     }
@@ -2263,7 +2267,7 @@
     .hw-mastered-details[open] > summary { margin-bottom: 6px; }
     .hw-mastered-list { display: flex; flex-direction: column; gap: 8px; }
     .hw-mastered-row {
-      background: #FEFBF3; border: 1px solid rgba(185,41,35,0.20);
+      background: #FBEDE4; border: 1px solid rgba(185,41,35,0.28);
       border-radius: 8px; padding: 10px 12px; cursor: pointer;
       transition: all .12s; position: relative;
     }
