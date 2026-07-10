@@ -2037,16 +2037,45 @@
     .sv-hw-card-status.active { background: var(--primary-light); color: var(--primary); }
     .sv-hw-card-status.done { background: #ECFDF5; color: #047857; }
     .sv-hw-card-status.future { background: #F3F4F6; color: var(--muted); }
+    .sv-hw-card-status.mastered {
+      background: rgba(185,41,35,0.10); color: #B92923;
+      font-family: "Kaiti SC", "STKaiti", serif; font-weight: 700;
+      letter-spacing: 0.15em;
+    }
+    .sv-hw-stamped {
+      display: inline-block;
+      font-family: "Kaiti SC", "STKaiti", serif;
+      color: #B92923; letter-spacing: 0.08em;
+      font-weight: 600; font-size: 12px;
+    }
     .sv-hw-card-prog { margin-top: 10px; height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; }
     .sv-hw-card-prog > div { height: 100%; background: var(--primary); transition: width .3s; }
-    .sv-hw-card { position: relative; transition: background .18s, border-color .18s; }
-    .sv-hw-card.mastery-mastered {
-      background: linear-gradient(180deg, #F0FDF4 0%, var(--card) 85%);
-      border-color: #C6F0D5;
+    .sv-hw-card { position: relative; transition: background .18s, border-color .18s; overflow: hidden; }
+    /* Mastered: no background wash. Instead a large 已成 楷体 watermark sits
+       behind the content in the app's signature vermilion at very low opacity,
+       and a one-time light sweep runs when the card first appears. */
+    .sv-hw-card.mastery-mastered { border-color: rgba(185,41,35,0.22); }
+    .sv-hw-card.mastery-mastered::before {
+      content: "已成"; position: absolute; right: -8px; top: 50%;
+      transform: translateY(-50%) rotate(-14deg);
+      font-family: "Kaiti SC", "STKaiti", "Songti SC", serif;
+      font-size: 78px; font-weight: 700; color: #B92923;
+      opacity: 0.09; letter-spacing: 0.02em;
+      pointer-events: none; white-space: nowrap; line-height: 0.9;
+    }
+    .sv-hw-card.mastery-mastered::after {
+      content: ""; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
+      transform: translateX(-140%);
+      animation: sv-mastered-sheen 1.6s cubic-bezier(.4,0,.2,1) 0.15s 1;
+    }
+    @keyframes sv-mastered-sheen {
+      0%   { transform: translateX(-140%); }
+      100% { transform: translateX(140%); }
     }
     .sv-hw-card.mastery-keep_practicing {
-      background: linear-gradient(180deg, #FFFBEB 0%, var(--card) 85%);
-      border-color: #FBE7B8;
+      background: rgba(245,158,11,0.05);
+      border-color: rgba(245,158,11,0.28);
     }
     .sv-hw-card-badges {
       display: flex; align-items: center; gap: 6px; flex-shrink: 0;
@@ -2096,23 +2125,96 @@
     }
     .sv-ach-open:hover { background: var(--primary); color: white; }
 
+    /* Mastery-hero: shared shape for teacher's 练成 tab and student's 练到位了 pane */
+    .mastery-hero {
+      position: relative; overflow: hidden;
+      background: #FEFBF3; border: 1px solid rgba(185,41,35,0.22);
+      border-radius: 14px; padding: 22px 22px 18px;
+      margin-bottom: 16px;
+    }
+    .mastery-hero::before {
+      content: "已成"; position: absolute; right: -14px; bottom: -32px;
+      transform: rotate(-14deg);
+      font-family: "Kaiti SC", "STKaiti", "Songti SC", serif;
+      font-size: 128px; font-weight: 700; color: #B92923;
+      opacity: 0.06; letter-spacing: 0.02em;
+      pointer-events: none; line-height: 0.9;
+    }
+    .mastery-hero-lead {
+      font-family: "Kaiti SC", "STKaiti", serif;
+      font-size: 12.5px; color: #7A5A2A; letter-spacing: 0.14em;
+      margin-bottom: 4px;
+    }
+    .mastery-hero-count {
+      display: flex; align-items: baseline; gap: 8px;
+    }
+    .mastery-hero-num {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 52px; font-weight: 700; line-height: 1;
+      color: #B92923; font-variant-numeric: tabular-nums;
+      transition: transform .28s cubic-bezier(.34,1.56,.64,1);
+    }
+    .mastery-hero-unit {
+      font-size: 15px; color: var(--text-soft); font-weight: 500;
+      align-self: flex-end; margin-bottom: 4px;
+    }
+    .mastery-hero-title {
+      font-family: "Kaiti SC", "STKaiti", serif;
+      font-size: 15px; color: #7A2019; letter-spacing: 0.08em;
+      font-weight: 600; margin-top: 10px;
+    }
+    .mastery-hero-title-sub {
+      font-family: -apple-system, "PingFang SC", sans-serif;
+      font-size: 12px; color: var(--muted); letter-spacing: 0.05em;
+      margin-top: 3px; font-weight: 400;
+    }
+    .mastery-hero-next {
+      margin-top: 12px; padding-top: 10px;
+      border-top: 1px dashed rgba(185,41,35,0.18);
+      font-size: 12px; color: var(--muted); letter-spacing: 0.03em;
+    }
+    .mastery-hero-next b {
+      color: #B92923; font-weight: 600;
+      font-family: "Kaiti SC", "STKaiti", serif;
+      letter-spacing: 0.08em;
+    }
+    .mastery-hero-bar {
+      margin-top: 8px; height: 6px; background: rgba(139,115,85,0.15);
+      border-radius: 999px; overflow: hidden;
+    }
+    .mastery-hero-bar > div {
+      height: 100%; background: linear-gradient(90deg, #E29742, #B92923);
+      border-radius: 999px; transition: width .8s cubic-bezier(.4,0,.2,1);
+    }
     .sv-mastered-wall { display: flex; flex-direction: column; gap: 10px; }
     .sv-mastered-row {
-      background: linear-gradient(180deg, #F0FDF4 0%, #FDFDFB 90%);
-      border: 1px solid #C6F0D5; border-radius: 10px;
-      padding: 12px 14px; cursor: pointer; transition: all .15s;
+      background: #FEFBF3; border: 1px solid rgba(185,41,35,0.22);
+      border-radius: 10px; padding: 12px 14px;
+      cursor: pointer; transition: all .15s; position: relative; overflow: hidden;
+    }
+    .sv-mastered-row::before {
+      content: "已成"; position: absolute; right: -4px; top: 50%;
+      transform: translateY(-50%) rotate(-14deg);
+      font-family: "Kaiti SC", "STKaiti", "Songti SC", serif;
+      font-size: 56px; font-weight: 700; color: #B92923;
+      opacity: 0.07; letter-spacing: 0.02em;
+      pointer-events: none; white-space: nowrap; line-height: 0.9;
     }
     .sv-mastered-row:hover {
-      border-color: #10B981; transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(16,185,129,0.08);
+      border-color: #B92923; transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(185,41,35,0.08);
     }
-    .sv-mastered-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-    .sv-mastered-row-title { font-size: 14px; font-weight: 600; color: #065F46; }
-    .sv-mastered-row-date { font-size: 11px; color: #047857; opacity: .75; letter-spacing: .05em; flex-shrink: 0; }
-    .sv-mastered-row-meta { font-size: 12px; color: #047857; margin-top: 4px; opacity: .8; }
+    .sv-mastered-row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; position: relative; z-index: 1; }
+    .sv-mastered-row-title {
+      font-size: 14px; font-weight: 600; color: #7A2019;
+      font-family: "Kaiti SC", "STKaiti", serif; letter-spacing: 0.05em;
+    }
+    .sv-mastered-row-date { font-size: 11px; color: #A0522D; opacity: .75; letter-spacing: .05em; flex-shrink: 0; }
+    .sv-mastered-row-meta { font-size: 12px; color: #A0522D; margin-top: 4px; opacity: .85; position: relative; z-index: 1; }
     .sv-mastered-row-note {
-      font-size: 12px; color: #065F46; margin-top: 6px; font-style: italic;
-      padding-top: 6px; border-top: 1px dashed #C6F0D5;
+      font-size: 12px; color: #7A2019; margin-top: 6px; font-style: italic;
+      padding-top: 6px; border-top: 1px dashed rgba(185,41,35,0.18);
+      position: relative; z-index: 1;
     }
 
     .sv-song-list { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
@@ -2202,23 +2304,37 @@
       margin-top: 18px; padding-top: 12px; border-top: 1px dashed var(--border);
     }
     .hw-mastered-details > summary {
-      cursor: pointer; font-size: 13px; color: #047857; padding: 6px 0;
+      cursor: pointer; font-size: 13.5px; color: #B92923; padding: 8px 2px;
       user-select: none; list-style: none; font-weight: 600;
+      font-family: "Kaiti SC", "STKaiti", serif; letter-spacing: 0.05em;
     }
     .hw-mastered-details > summary::-webkit-details-marker { display: none; }
-    .hw-mastered-details > summary:hover { color: #065F46; }
-    .hw-mastered-details[open] > summary { margin-bottom: 10px; }
+    .hw-mastered-details > summary::before {
+      content: "▸"; display: inline-block; margin-right: 8px;
+      transition: transform .18s; color: rgba(185,41,35,0.6);
+    }
+    .hw-mastered-details[open] > summary::before { transform: rotate(90deg); }
+    .hw-mastered-details > summary:hover { color: #7A2019; }
+    .hw-mastered-details > summary b {
+      font-family: "Noto Serif SC", "Songti SC", serif;
+      font-size: 17px; font-weight: 700; margin: 0 2px; color: #B92923;
+    }
+    .hw-mastered-details[open] > summary { margin-bottom: 6px; }
     .hw-mastered-list { display: flex; flex-direction: column; gap: 8px; }
     .hw-mastered-row {
-      background: #ECFDF5; border: 1px solid #A7F3D0; border-radius: 8px;
-      padding: 10px 12px; cursor: pointer; transition: all .12s;
+      background: #FEFBF3; border: 1px solid rgba(185,41,35,0.20);
+      border-radius: 8px; padding: 10px 12px; cursor: pointer;
+      transition: all .12s; position: relative;
     }
-    .hw-mastered-row:hover { border-color: #10B981; transform: translateY(-1px); }
-    .hw-mastered-row-title { font-size: 13.5px; color: #065F46; font-weight: 600; }
-    .hw-mastered-row-meta { font-size: 11px; color: #047857; margin-top: 3px; opacity: .8; }
+    .hw-mastered-row:hover { border-color: #B92923; transform: translateY(-1px); }
+    .hw-mastered-row-title {
+      font-size: 13.5px; color: #7A2019; font-weight: 600;
+      font-family: "Kaiti SC", "STKaiti", serif; letter-spacing: 0.05em;
+    }
+    .hw-mastered-row-meta { font-size: 11px; color: #A0522D; margin-top: 3px; opacity: .85; }
     .hw-mastered-row-note {
-      font-size: 12px; color: #047857; margin-top: 6px; font-style: italic;
-      padding-top: 6px; border-top: 1px dashed #A7F3D0;
+      font-size: 12px; color: #7A2019; margin-top: 6px; font-style: italic;
+      padding-top: 6px; border-top: 1px dashed rgba(185,41,35,0.18);
     }
     .hw-today-card-head {
       display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
@@ -10159,17 +10275,19 @@
     if (masteredItems.length) {
       const rows = masteredItems.map(h => {
         const note = h.mastery_note ? `<div class="hw-mastered-row-note">老师说：${escHtml(h.mastery_note)}</div>` : '';
+        const stampedDate = (h.mastery_marked_at || '').slice(0, 10);
         const minutes = h.daily_minutes ? ` · 曾练每天 ${h.daily_minutes} 分钟` : '';
         return `
           <div class="hw-mastered-row" onclick="openHomeworkDrawerForStudent('${h.id}','${todayDateStr()}')">
             <div class="hw-mastered-row-title">✓ ${escHtml(h.title)}</div>
-            <div class="hw-mastered-row-meta">${h.start_date} → ${h.end_date}${minutes}</div>
+            <div class="hw-mastered-row-meta">${stampedDate ? stampedDate + ' 老师亲手盖章 · ' : ''}${h.start_date} → ${h.end_date}${minutes}</div>
             ${note}
           </div>`;
       }).join('');
       masteredHtml = `
         <details class="hw-mastered-details">
-          <summary>✓ 练到位了（${masteredItems.length} 条）</summary>
+          <summary>✓ 练到位了 · <b>${masteredItems.length}</b> 条</summary>
+          ${renderMasteryHero(masteredItems.length, 'student')}
           <div class="hw-mastered-list">${rows}</div>
         </details>`;
     }
@@ -11170,7 +11288,7 @@
       } else {
         const sorted = [...masteredStudentHw].sort((a, b) =>
           (b.mastery_marked_at || '').localeCompare(a.mastery_marked_at || ''));
-        bodyHtml = `<div class="sv-mastered-wall">` + sorted.map(h => {
+        bodyHtml = renderMasteryHero(masteredStudentHw.length, 'teacher') + `<div class="sv-mastered-wall">` + sorted.map(h => {
           const batch = h.batch_id ? homeworkBatchesById[h.batch_id] : null;
           const groupLabel = (batch && (batch.label || formatHwLabelAuto(batch.start_date, batch.end_date))) || `${h.start_date} → ${h.end_date}`;
           const markedDate = (h.mastery_marked_at || '').slice(0, 10);
@@ -11229,6 +11347,44 @@
     }
 
     view.innerHTML = headerHtml + tabsHtml + bodyHtml;
+  }
+
+  // Mastery milestone ladder. Same rungs for teacher and student; the
+  // difference is the framing copy (are you the one accumulating wins, or
+  // the one accumulating polished students). Keeps the reward cadence
+  // dense at the start (1, 3, 5, 10) so the first weeks always have a
+  // near-term goal, then widens.
+  const MASTERY_MILESTONES = [
+    { at: 1,   name: '头一件', sub: '从零到一' },
+    { at: 3,   name: '三件',   sub: '有形了' },
+    { at: 5,   name: '五件',   sub: '走进门' },
+    { at: 10,  name: '十件',   sub: '见了成色' },
+    { at: 25,  name: '廿五件', sub: '有底子' },
+    { at: 50,  name: '五十件', sub: '得心应手' },
+    { at: 100, name: '百件',   sub: '一家之言' },
+  ];
+  function renderMasteryHero(count, role) {
+    let cur = null, next = null;
+    for (const m of MASTERY_MILESTONES) {
+      if (count >= m.at) cur = m;
+      else { next = m; break; }
+    }
+    const lead = role === 'teacher' ? '你亲手盖章的作业' : '你练到位了的练习';
+    const curBlock = cur
+      ? `<div class="mastery-hero-title">「${cur.name}」<span class="mastery-hero-title-sub">${cur.sub}</span></div>`
+      : '';
+    const nextBlock = next
+      ? `<div class="mastery-hero-next">再练稳 <b>${next.at - count}</b> 件 → 「${next.name}」<div class="mastery-hero-bar"><div style="width:${Math.round((count / next.at) * 100)}%"></div></div></div>`
+      : `<div class="mastery-hero-next">全部登顶 · 一家之言</div>`;
+    return `<div class="mastery-hero">
+      <div class="mastery-hero-lead">${escHtml(lead)}</div>
+      <div class="mastery-hero-count">
+        <span class="mastery-hero-num">${count}</span>
+        <span class="mastery-hero-unit">件</span>
+      </div>
+      ${curBlock}
+      ${nextBlock}
+    </div>`;
   }
 
   function computeHwGroups(studentHw) {
@@ -11303,13 +11459,14 @@
         const doneDays = days.filter(d => checks[d] && checks[d].completed).length;
         groupDoneDays += doneDays; groupTotalDays += days.length;
         const pct = days.length ? Math.round((doneDays / days.length) * 100) : 0;
+        const mastery = h.mastery_state || 'active';
         let statusLabel, statusCls;
-        if (g.archived) { statusLabel = '已归档'; statusCls = 'done'; }
+        if (mastery === 'mastered') { statusLabel = '已成'; statusCls = 'mastered'; }
+        else if (g.archived) { statusLabel = '已归档'; statusCls = 'done'; }
         else if (h.end_date < today) { statusLabel = '已结束'; statusCls = 'done'; }
         else if (h.start_date > today) { statusLabel = '未开始'; statusCls = 'future'; }
         else { statusLabel = '进行中'; statusCls = 'active'; }
         const minutesLabel = h.daily_minutes ? ` · 每天 ${h.daily_minutes} 分钟` : '';
-        const mastery = h.mastery_state || 'active';
         const masteryBadge = mastery === 'mastered'
           ? `<span class="sv-hw-mastery-badge mastered" onclick="event.stopPropagation();openMasteryMenu('${h.id}')" title="老师已标：掌握了${h.mastery_note ? ' — ' + escHtml(h.mastery_note) : ''}">✓ 掌握</span>`
           : mastery === 'keep_practicing'
@@ -11318,19 +11475,27 @@
         const versionBadge = (h.version && h.version > 1)
           ? `<span class="sv-hw-version-badge" title="从上一版改过来">v${h.version}</span>`
           : '';
+        // Mastered rows swap the running-day meta for the moment they were
+        // marked, which is the actual milestone to celebrate.
+        const stampedLine = (mastery === 'mastered' && h.mastery_marked_at)
+          ? `<span class="sv-hw-stamped">${escHtml(h.mastery_marked_at.slice(0, 10))} 老师亲手盖章</span>`
+          : '';
+        const metaBottom = (mastery === 'mastered')
+          ? stampedLine
+          : `完成 ${doneDays}/${days.length} 天`;
         return `
           <div class="sv-hw-card mastery-${mastery}" onclick="openHomeworkDrawerForTeacher('${h.id}')">
             <div class="sv-hw-card-head">
               <div style="flex:1;min-width:0;">
                 <div class="sv-hw-card-title">${escHtml(h.title)}${versionBadge}</div>
-                <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date}${minutesLabel}<br>完成 ${doneDays}/${days.length} 天</div>
+                <div class="sv-hw-card-meta">${h.start_date} → ${h.end_date}${minutesLabel}<br>${metaBottom}</div>
               </div>
               <div class="sv-hw-card-badges">
                 ${masteryBadge}
                 <span class="sv-hw-card-status ${statusCls}">${statusLabel}</span>
               </div>
             </div>
-            <div class="sv-hw-card-prog"><div style="width:${pct}%"></div></div>
+            ${mastery === 'mastered' ? '' : `<div class="sv-hw-card-prog"><div style="width:${pct}%"></div></div>`}
           </div>`;
       }).join('');
       const autoTitle = formatHwLabelAuto(g.startDate, g.endDate);
