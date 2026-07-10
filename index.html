@@ -2053,12 +2053,12 @@
     .sv-hw-card-prog { margin-top: 10px; height: 4px; background: #F0E5D3; border-radius: 2px; overflow: hidden; }
     .sv-hw-card-prog > div { height: 100%; background: var(--primary); transition: width .3s; }
     .sv-hw-card { position: relative; transition: background .18s, border-color .18s; overflow: hidden; }
-    /* Mastered: no background wash. Instead a large 已成 楷体 watermark sits
+    /* Mastered: no background wash. Instead a large 掌握 楷体 watermark sits
        behind the content in the app's signature vermilion at very low opacity,
        and a one-time light sweep runs when the card first appears. */
     .sv-hw-card.mastery-mastered { border-color: rgba(185,41,35,0.22); }
     .sv-hw-card.mastery-mastered::before {
-      content: "已成"; position: absolute; right: -8px; top: 50%;
+      content: "掌握"; position: absolute; right: -8px; top: 50%;
       transform: translateY(-50%) rotate(-14deg);
       font-family: "Kaiti SC", "STKaiti", "Songti SC", serif;
       font-size: 78px; font-weight: 700; color: #B92923;
@@ -2134,7 +2134,7 @@
       cursor: pointer; transition: all .15s; position: relative; overflow: hidden;
     }
     .sv-mastered-row::before {
-      content: "已成"; position: absolute; right: -4px; top: 50%;
+      content: "掌握"; position: absolute; right: -4px; top: 50%;
       transform: translateY(-50%) rotate(-14deg);
       font-family: "Kaiti SC", "STKaiti", "Songti SC", serif;
       font-size: 56px; font-weight: 700; color: #B92923;
@@ -11363,7 +11363,7 @@
         const pct = days.length ? Math.round((doneDays / days.length) * 100) : 0;
         const mastery = h.mastery_state || 'active';
         let statusLabel, statusCls, statusIsMastery = false;
-        if (mastery === 'mastered') { statusLabel = '已成'; statusCls = 'mastered'; statusIsMastery = true; }
+        if (mastery === 'mastered') { statusLabel = '掌握'; statusCls = 'mastered'; statusIsMastery = true; }
         else if (g.archived) { statusLabel = '已归档'; statusCls = 'done'; }
         else if (h.end_date < today) { statusLabel = '已结束'; statusCls = 'done'; }
         else if (h.start_date > today) { statusLabel = '未开始'; statusCls = 'future'; }
