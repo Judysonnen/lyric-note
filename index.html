@@ -4053,6 +4053,47 @@
   </div>
 </div>
 
+<div class="modal-backdrop" id="hw-edit-bg" onclick="if(event.target===this) closeEditHomework()" style="display:none;z-index:9250;">
+  <div class="modal" style="max-width:520px;padding:24px;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
+      <h3 style="margin:0;font-size:16px;font-weight:600;color:var(--text);">编辑作业</h3>
+      <button onclick="closeEditHomework()" style="background:none;border:none;font-size:22px;color:var(--muted);cursor:pointer;line-height:1;">×</button>
+    </div>
+    <div class="hw-form-row">
+      <label>标题</label>
+      <input class="hw-label-in" id="hwedit-title" maxlength="80" />
+    </div>
+    <div class="hw-form-row">
+      <label>描述（可选）</label>
+      <input class="hw-label-in" id="hwedit-desc" maxlength="600" />
+    </div>
+    <div class="hw-form-row two-col">
+      <div>
+        <label>开始日期</label>
+        <input class="hw-label-in" id="hwedit-start" type="date" style="font-family:inherit;" />
+      </div>
+      <div>
+        <label>截止日期</label>
+        <input class="hw-label-in" id="hwedit-end" type="date" style="font-family:inherit;" />
+      </div>
+    </div>
+    <div class="hw-form-row" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:-8px;">
+      <button type="button" class="hw-date-preset" onclick="extendHwEditEnd(7)">+ 7 天</button>
+      <button type="button" class="hw-date-preset" onclick="extendHwEditEnd(14)">+ 14 天</button>
+      <button type="button" class="hw-date-preset" onclick="extendHwEditEnd(30)">+ 30 天</button>
+    </div>
+    <div class="hw-form-row">
+      <label>每天分钟（可留空）</label>
+      <input class="hw-label-in" id="hwedit-minutes" type="number" min="1" max="600" />
+    </div>
+    <div id="hwedit-error" style="color:#DC2626;font-size:12px;min-height:16px;margin:8px 0;"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;">
+      <button class="btn btn-ghost" onclick="closeEditHomework()">取消</button>
+      <button class="btn btn-primary" id="hwedit-save-btn" onclick="submitEditHomework()">保存</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="hw-mastery-bg" onclick="if(event.target===this) closeMasteryMenu()" style="display:none;z-index:9200;">
   <div class="modal" style="max-width:440px;padding:24px;">
     <h3 style="margin:0 0 6px;font-size:16px;font-weight:600;color:var(--text);">这条作业练得怎么样？</h3>
@@ -10709,6 +10750,94 @@
     }
   }
 
+  // ── Edit a single homework row ──────────────────────────────────
+  let editingHomeworkId = null;
+  function openEditHomework(hwId) {
+    const hw = homeworkAsTeacher.find(h => h.id === hwId);
+    if (!hw) return;
+    editingHomeworkId = hwId;
+    document.getElementById('hwedit-title').value = hw.title || '';
+    document.getElementById('hwedit-desc').value = hw.description || '';
+    document.getElementById('hwedit-start').value = hw.start_date || '';
+    document.getElementById('hwedit-end').value = hw.end_date || '';
+    document.getElementById('hwedit-minutes').value = hw.daily_minutes || '';
+    document.getElementById('hwedit-error').textContent = '';
+    document.getElementById('hw-edit-bg').style.display = 'flex';
+  }
+  function closeEditHomework() {
+    document.getElementById('hw-edit-bg').style.display = 'none';
+    editingHomeworkId = null;
+  }
+  function extendHwEditEnd(days) {
+    // Extend from the latest of (current end) or (today) so an already-expired
+    // task jumps back to a live window rather than staying past.
+    const endEl = document.getElementById('hwedit-end');
+    const today = todayDateStr();
+    const base = (endEl.value && endEl.value >= today) ? endEl.value : today;
+    const d = new Date(base + 'T00:00:00');
+    d.setDate(d.getDate() + days);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    endEl.value = `${yyyy}-${mm}-${dd}`;
+  }
+  async function submitEditHomework() {
+    if (!editingHomeworkId) return;
+    const title = (document.getElementById('hwedit-title').value || '').trim();
+    const desc = (document.getElementById('hwedit-desc').value || '').trim();
+    const start = document.getElementById('hwedit-start').value || '';
+    const end = document.getElementById('hwedit-end').value || '';
+    const minutesRaw = document.getElementById('hwedit-minutes').value;
+    const err = document.getElementById('hwedit-error');
+    const btn = document.getElementById('hwedit-save-btn');
+    err.textContent = '';
+    if (!title) { err.textContent = '标题不能为空'; return; }
+    if (!start || !end) { err.textContent = '请填开始和截止日期'; return; }
+    if (end < start) { err.textContent = '截止日期不能早于开始日期'; return; }
+    const minutes = minutesRaw ? parseInt(minutesRaw, 10) : null;
+    if (minutesRaw && (isNaN(minutes) || minutes < 1)) { err.textContent = '分钟数不合法'; return; }
+    const originalLabel = btn.textContent;
+    btn.disabled = true; btn.textContent = '保存中…';
+    try {
+      const hw = homeworkAsTeacher.find(h => h.id === editingHomeworkId);
+      const { error } = await supabaseClient.from('homework')
+        .update({
+          title,
+          description: desc || null,
+          start_date: start,
+          end_date: end,
+          daily_minutes: minutes,
+        })
+        .eq('id', editingHomeworkId);
+      if (error) throw error;
+      // Widen the batch envelope if this row now falls outside it, so the
+      // group header + check-in strip stay consistent.
+      if (hw && hw.batch_id) {
+        const batch = homeworkBatchesById[hw.batch_id];
+        if (batch) {
+          const patch = {};
+          if (start < batch.start_date) patch.start_date = start;
+          if (end > batch.end_date) patch.end_date = end;
+          if (Object.keys(patch).length) {
+            await supabaseClient.from('homework_batches').update(patch).eq('id', batch.id);
+          }
+        }
+      }
+      await refreshHomeworkUI();
+      // Refresh drawer view if it's still open on the same homework
+      if (drawerHomeworkId === editingHomeworkId) openHomeworkDrawerForTeacher(editingHomeworkId);
+      closeEditHomework();
+    } catch(e) {
+      err.textContent = '失败：' + (e.message || '未知');
+    } finally {
+      btn.disabled = false; btn.textContent = originalLabel;
+    }
+  }
+  window.openEditHomework = openEditHomework;
+  window.closeEditHomework = closeEditHomework;
+  window.extendHwEditEnd = extendHwEditEnd;
+  window.submitEditHomework = submitEditHomework;
+
   // ── Homework drawer ──────────────────────────────────────────────
   let drawerHomeworkId = null;
   let drawerStudentId = null;
@@ -10758,6 +10887,7 @@
     renderDrawerDayList(hw, 'teacher');
     document.getElementById('hw-drawer-footer').innerHTML = `
       <button class="btn btn-ghost" onclick="confirmDeleteHomework('${hw.id}')" style="color:#DC2626;">删除作业</button>
+      <button class="btn btn-ghost" onclick="openEditHomework('${hw.id}')">编辑</button>
       <button class="btn btn-ghost" style="margin-left:auto;" onclick="renderDrawerTeacherView()">← 学生作业列表</button>
       <button class="btn btn-ghost" onclick="closeHomeworkDrawer()">关闭</button>
     `;
